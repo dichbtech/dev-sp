@@ -67,7 +67,6 @@ window.renderizarResultadosRevisao = async function() {
         return;
     }
 
-    // Agrupando por Data
     let grupos = {};
     docs.forEach(d => {
         let dia = d.dataPostagem.split(' ')[0]; // Extrai só DD/MM/YYYY
@@ -75,7 +74,6 @@ window.renderizarResultadosRevisao = async function() {
         grupos[dia].push(d);
     });
 
-    // Função de formatação de Dia da Semana
     let getDiaSemana = (dataString) => {
         let p = dataString.split('/');
         let d = new Date(p[2], p[1]-1, p[0]);
@@ -83,12 +81,15 @@ window.renderizarResultadosRevisao = async function() {
         return nomes[d.getDay()];
     };
 
-    // Renderizar os grupos
     for (let dia in grupos) {
         let headerHtml = `<div style="background: linear-gradient(90deg, rgba(251,191,36,0.15) 0%, transparent 100%); border-left: 4px solid var(--sup-neon); padding: 12px 20px; margin-top: 25px; margin-bottom: 15px; border-radius: 4px; color: #fff; font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display:flex; align-items:center; gap:10px;"><i class="far fa-calendar-alt"></i> ${getDiaSemana(dia)} - ${dia} <span style="background:rgba(0,0,0,0.5); padding:2px 8px; border-radius:12px; font-size:12px;">${grupos[dia].length} Ativ.</span></div>`;
         
         let cardsHtml = '';
         grupos[dia].forEach(d => {
+            
+            // Definição correta das nomenclaturas baseadas no tipo de atividade
+            let labelPostador = d.tipo === 'Relatórios' ? 'Auxiliar:' : 'Supervisor:';
+            let labelAvaliador = 'Responsável:';
             
             let btnLink = '';
             if (d.link.startsWith('http')) {
@@ -98,20 +99,42 @@ window.renderizarResultadosRevisao = async function() {
                     btnLink = `<button class="btn-tech" style="padding: 4px 10px; font-size: 11px;" data-url="${d.link}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
                 }
             }
-
-            let justHtml = d.justificativa && d.justificativa !== "" ? `<div style="margin-top:10px; font-size:13px; color:var(--text-sub); border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><strong><i class="fas fa-comment-dots"></i> Justificativa:</strong> <span style="color:#fff;">${d.justificativa}</span></div>` : '';
             
-            let corNota = d.notaInfo.includes('Inválido') || d.notaInfo.includes('Descontos: ') && !d.notaInfo.includes('Descontos: 0') ? '#ff2a2a' : '#4caf50';
+            // Botão Relatório Anterior (Apenas para Grupos e Soldados)
+            let btnRelatorioAnterior = '';
+            if ((d.tipo === 'Grupos' || d.tipo === 'Soldados') && d.linkAnterior) {
+                btnRelatorioAnterior = `<button onclick="window.open('${d.linkAnterior}', '_blank')" style="background: rgba(251,191,36,0.1); border: 1px solid var(--sup-neon); color: var(--sup-neon); padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; text-transform: uppercase; font-weight: bold; margin-left: 8px; transition: 0.3s; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';"><i class="fas fa-history"></i> Relatório Anterior</button>`;
+            }
+
+            // Exibir dados extras se for relatório
+            let extraRelatorios = '';
+            if (d.tipo === 'Relatórios') {
+                extraRelatorios = `<div style="font-size:13px; margin-top:8px; display:flex; gap:15px; flex-wrap:wrap; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);"><div style="color:var(--text-sub);">Grupo: <span style="color:#fff; font-weight:bold;">${d.grupo || '-'}</span></div><div style="color:var(--text-sub);">Data Ref: <span style="color:#fff; font-weight:bold;">${d.dataReferencia || '-'}</span></div></div>`;
+            }
+
+            let justHtml = d.justificativa && d.justificativa !== "" ? `<div style="margin-top:10px; font-size:13px; color:var(--text-sub); border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><strong><i class="fas fa-comment-dots"></i> Justificativa(s) na Planilha:</strong> <span style="color:#fff;">${d.justificativa}</span></div>` : '';
+            
+            // Regra Visual rigorosa: Se Válido E sem desconto E nota 100, Fica verde. Do contrário, Vermelho.
+            let corNota = '#4caf50'; // Default verde
+            let nInfo = d.notaInfo.toLowerCase();
+            
+            if (nInfo.includes('inválido') || 
+                (nInfo.includes('descontos:') && !nInfo.includes('descontos: 0')) || 
+                (nInfo.includes('incorreções:') && !nInfo.includes('incorreções: 0')) || 
+                (nInfo.includes('nota final:') && !nInfo.includes('nota final: 100'))) {
+                corNota = '#ff2a2a'; // Vermelho (Houve desconto, erro ou invalidação)
+            }
 
             cardsHtml += `
             <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(251,191,36,0.1); border-radius:8px; padding:15px; margin-bottom:10px; display:flex; flex-direction:column;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
                     <div>
                         <div style="color:var(--sup-neon); font-size:12px; font-weight:bold; text-transform:uppercase; margin-bottom:5px;">${d.tipo} <span style="color:#666; margin:0 5px;">|</span> <span style="color:var(--text-sub);"><i class="far fa-clock"></i> ${d.dataPostagem}</span></div>
-                        <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
-                            <div style="font-size:14px;"><span style="color:var(--text-sub);">Postador:</span> ${window.gerarAvatarNick(d.nick)}</div>
-                            <div style="font-size:14px;"><span style="color:var(--text-sub);">Avaliado por:</span> ${window.gerarAvatarNick(d.avaliador)}</div>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:10px;">
+                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:var(--text-sub); width:85px;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)} ${btnRelatorioAnterior}</div>
+                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:var(--text-sub); width:85px;">${labelAvaliador}</span> ${window.gerarAvatarNick(d.avaliador)}</div>
                         </div>
+                        ${extraRelatorios}
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
                         <span style="background:rgba(0,0,0,0.6); padding:6px 12px; border-radius:6px; font-weight:bold; font-size:13px; color:${corNota}; border: 1px solid ${corNota}33;">${d.notaInfo}</span>
@@ -134,15 +157,12 @@ window.concluirRevisao = async function() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Apagando dados...';
     btn.disabled = true;
 
-    // Apaga toda a coleção temp de revisão
     let snap = await window.db.collection("revisao_correcoes").get();
     
-    // Deleta os documentos um a um (seguro para o lado do cliente)
     for (let doc of snap.docs) {
         await window.db.collection("revisao_correcoes").doc(doc.id).delete();
     }
     
-    // Reseta o comando
     await window.db.collection("sistema").doc("comando_revisao").set({ status: "FINALIZADO" }, { merge: true });
 
     document.getElementById('rev-results-area').style.display = 'none';
