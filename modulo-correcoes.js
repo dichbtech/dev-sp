@@ -73,10 +73,16 @@ window.criarCardAtividade = function(d) {
     div.style.position = "relative";
 
     let labelPostador = (d.tipo === 'Relatórios') ? 'Auxiliar:' : 'Supervisor:';
+    
+    // Lógica para adicionar o botão de Relatório Anterior (apenas para Grupos e Soldados)
+    let btnRelatorioAnterior = '';
+    if ((d.tipo === 'Grupos' || d.tipo === 'Soldados') && d.linkAnterior) {
+        btnRelatorioAnterior = `<button onclick="window.open('${d.linkAnterior}', '_blank')" style="background: rgba(251,191,36,0.1); border: 1px solid var(--sup-neon); color: var(--sup-neon); padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; text-transform: uppercase; font-weight: bold; margin-left: 10px; transition: 0.3s; display:inline-flex; align-items:center; gap:5px;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';"><i class="fas fa-history"></i> Relatório Anterior</button>`;
+    }
 
     let infoHtml = ``;
     infoHtml += `<div style="font-size:12px; color:var(--text-sub); margin-bottom:10px; font-weight:600;"><i class="far fa-clock"></i> Postado em: ${d.dataPostagem || '-'}</div>`;
-    infoHtml += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><span style="color:#fff; font-size:14px; font-weight:600;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)}</div>`;
+    infoHtml += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;"><span style="color:#fff; font-size:14px; font-weight:600;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)} ${btnRelatorioAnterior}</div>`;
 
     if (d.tipo === 'Relatórios') {
         infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
