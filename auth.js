@@ -100,6 +100,7 @@ window.verificarAcessoBD = async function(email) {
             let menuFeedbacks = document.getElementById('menu-feedbacks');
             let menuEstrelas = document.getElementById('menu-estrelas');
             let menuGrupos = document.getElementById('menu-grupos');
+            let menuCorrecoes = document.getElementById('menu-correcoes'); // Menu de Correções
             let menuAdmin = document.getElementById('admin-only-menus');
             
             let dragControls = document.getElementById('admin-drag-controls');
@@ -111,20 +112,24 @@ window.verificarAcessoBD = async function(email) {
                 if(menuAvais) menuAvais.style.display = 'none';
                 if(menuFeedbacks) menuFeedbacks.style.display = 'none';
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
+                if(menuCorrecoes) menuCorrecoes.style.display = 'none';
             } 
             else if (lvl === 'AUXILIAR') {
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
+                if(menuCorrecoes) menuCorrecoes.style.display = 'none';
             } 
             else if (lvl === 'SUB-LIDER') {
                 if(dragControls) dragControls.style.display = 'flex';
                 if(btnEditPos) btnEditPos.style.display = 'none';
                 if(btnSavePos) btnSavePos.style.display = 'none';
                 if(dicaResize) dicaResize.style.display = 'none';
+                if(menuCorrecoes && window.carregarAtividadesPendentes) window.carregarAtividadesPendentes();
             } 
             // Libera Menu Admin e Edições para Líder, Vice-Líder e ADMIN
             else if (lvl === 'VICE-LIDER' || lvl === 'LIDER' || lvl === 'ADMIN') {
                 if(menuAdmin) menuAdmin.style.display = 'flex';
                 if(dragControls) dragControls.style.display = 'flex';
+                if(menuCorrecoes && window.carregarAtividadesPendentes) window.carregarAtividadesPendentes();
                 window.renderTabelaAcessos();
                 let boxPrivacidade = document.getElementById('box-editor-privacidade');
                 if (boxPrivacidade) { boxPrivacidade.innerHTML = window.buildEditorHTML('editor-privacidade', 'Carregando...'); }
