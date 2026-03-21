@@ -48,10 +48,10 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
             container.innerHTML = '';
             if (docsAtuais.length === 0) {
                 container.innerHTML = `
-                    <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(76, 175, 80, 0.4); padding: 50px 20px; border-radius: 12px; text-align:center;">
+                    <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(76, 175, 80, 0.4); padding: 50px 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%;">
                         <i class="fas fa-check-circle" style="color: #4caf50; font-size: 50px; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(76,175,80,0.3));"></i>
                         <h3 style="color: #4caf50; font-size: 22px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Tudo Limpo!</h3>
-                        <p style="color: var(--text-sub); font-size: 15px;">Nenhuma atividade aguardando correção na aba <b>${tipo}</b>.<br>Excelente trabalho da Liderança!</p>
+                        <p style="color: var(--text-sub); font-size: 15px; margin: 0;">Nenhuma atividade aguardando correção na aba <b>${tipo}</b>.<br>Excelente trabalho da Liderança!</p>
                     </div>`;
                 return;
             }
@@ -121,12 +121,12 @@ window.criarCardAtividade = function(d) {
     } else if (d.tipo === 'Grupos' || d.tipo === 'Soldados') {
         inputsHtml = `
             <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Incorreções</label><div class="input-block" style="margin:0;"><input type="number" id="inc-${d.id}" placeholder="" min="0"></div></div>
-            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}"><option value="Válido">Válido</option><option value="Inválido">Inválido</option></select></div></div>
+            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}"><option value="Válido" style="color:#fff;">Válido</option><option value="Inválido" style="color:#fff;">Inválido</option></select></div></div>
         `;
     } else if (d.tipo === 'Convites' || d.tipo === 'PPP') {
         inputsHtml = `
             <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Descontos</label><div class="input-block" style="margin:0;"><input type="number" id="desc-${d.id}" placeholder="" step="0.1" min="0"></div></div>
-            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}"><option value="Válido">Válido</option><option value="Inválido">Inválido</option></select></div></div>
+            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}"><option value="Válido" style="color:#fff;">Válido</option><option value="Inválido" style="color:#fff;">Inválido</option></select></div></div>
         `;
     }
 
