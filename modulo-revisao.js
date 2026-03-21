@@ -4,6 +4,8 @@
 */
 
 window.listenerRevisao = null;
+window.dadosRevisaoGlobais = [];
+window.tipoRevisaoAtual = 'Relatórios';
 
 window.solicitarLevantamento = function() {
     let dInicio = document.getElementById('rev-data-inicio').value;
@@ -18,7 +20,6 @@ window.solicitarLevantamento = function() {
     resultsArea.style.display = 'none';
     statusArea.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x" style="color:var(--sup-neon)"></i><br><br><span style="color:var(--text-main); font-size:15px;">Enviando comando para a planilha... Aguarde a sincronização (pode levar até 5 minutos).</span>';
 
-    // Grava o comando na Fila para o Google Apps Script rodar
     window.db.collection("sistema").doc("comando_revisao").set({
         status: "PENDENTE",
         dataInicio: dInicio,
@@ -30,45 +31,61 @@ window.solicitarLevantamento = function() {
 }
 
 window.iniciarEscutaComandoRevisao = function() {
-    if (window.listenerRevisao) window.listenerRevisao(); // Cancela o anterior se existir
+    if (window.listenerRevisao) window.listenerRevisao();
 
     window.listenerRevisao = window.db.collection("sistema").doc("comando_revisao").onSnapshot(doc => {
         if (doc.exists && doc.data().status === "CONCLUIDO") {
-            window.listenerRevisao(); // Parar de escutar
-            window.renderizarResultadosRevisao();
+            window.listenerRevisao(); 
+            window.carregarDadosDoBanco();
         }
     });
 }
 
-window.renderizarResultadosRevisao = async function() {
+window.carregarDadosDoBanco = async function() {
     let statusArea = document.getElementById('rev-status-area');
-    let resultsArea = document.getElementById('rev-results-area');
-    let lista = document.getElementById('rev-lista');
-    
     statusArea.innerHTML = '<i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--sup-neon)"></i><br><br><span style="color:var(--text-main); font-size:15px;">Baixando os dados agrupados...</span>';
 
-    let docs = [];
+    window.dadosRevisaoGlobais = [];
     let snap = await window.db.collection("revisao_correcoes").orderBy("dataTimeStamp", "asc").get();
     
     snap.forEach(doc => {
-        docs.push({ id: doc.id, ...doc.data() });
+        window.dadosRevisaoGlobais.push({ id: doc.id, ...doc.data() });
     });
 
     statusArea.style.display = 'none';
-    resultsArea.style.display = 'flex';
+    document.getElementById('rev-results-area').style.display = 'flex';
+    
+    // Reseta o menu de abas para o padrão
+    window.filtrarRevisao('Relatórios', document.querySelector('#tabs-revisao .btn-tab:nth-child(1)'));
+}
+
+window.filtrarRevisao = function(tipo, btnElement) {
+    window.tipoRevisaoAtual = tipo;
+    
+    document.querySelectorAll('#tabs-revisao .btn-tab').forEach(el => el.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+
+    window.renderizarListaRevisao();
+}
+
+window.renderizarListaRevisao = function() {
+    let lista = document.getElementById('rev-lista');
     lista.innerHTML = '';
 
-    if (docs.length === 0) {
+    // Filtra os dados em memória com base na aba atual clicada
+    let dadosFiltrados = window.dadosRevisaoGlobais.filter(d => d.tipo === window.tipoRevisaoAtual);
+
+    if (dadosFiltrados.length === 0) {
         lista.innerHTML = `<div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(251,191,36, 0.4); padding: 40px 20px; border-radius: 12px; text-align:center;">
             <i class="fas fa-folder-open" style="color: var(--sup-neon); font-size: 40px; margin-bottom: 15px;"></i>
             <h3 style="color: var(--sup-neon); font-size: 18px;">Nenhuma correção encontrada.</h3>
-            <p style="color: var(--text-sub); font-size: 14px;">Não localizamos atividades avaliadas neste intervalo de datas específico na planilha.</p>
+            <p style="color: var(--text-sub); font-size: 14px;">Não localizamos atividades avaliadas de <b>${window.tipoRevisaoAtual}</b> neste intervalo.</p>
         </div>`;
         return;
     }
 
     let grupos = {};
-    docs.forEach(d => {
+    dadosFiltrados.forEach(d => {
         let dia = d.dataPostagem.split(' ')[0]; // Extrai só DD/MM/YYYY
         if (!grupos[dia]) grupos[dia] = [];
         grupos[dia].push(d);
@@ -87,10 +104,10 @@ window.renderizarResultadosRevisao = async function() {
         let cardsHtml = '';
         grupos[dia].forEach(d => {
             
-            // Definição correta das nomenclaturas baseadas no tipo de atividade
             let labelPostador = d.tipo === 'Relatórios' ? 'Auxiliar:' : 'Supervisor:';
             let labelAvaliador = 'Responsável:';
             
+            // Botão Principal de Link
             let btnLink = '';
             if (d.link.startsWith('http')) {
                 if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
@@ -106,35 +123,44 @@ window.renderizarResultadosRevisao = async function() {
                 btnRelatorioAnterior = `<button onclick="window.open('${d.linkAnterior}', '_blank')" style="background: rgba(251,191,36,0.1); border: 1px solid var(--sup-neon); color: var(--sup-neon); padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; text-transform: uppercase; font-weight: bold; margin-left: 8px; transition: 0.3s; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';"><i class="fas fa-history"></i> Relatório Anterior</button>`;
             }
 
-            // Exibir dados extras se for relatório
-            let extraRelatorios = '';
+            // Exibir Detalhes Extras como na Correção Real
+            let detalhesExtras = '';
             if (d.tipo === 'Relatórios') {
-                extraRelatorios = `<div style="font-size:13px; margin-top:8px; display:flex; gap:15px; flex-wrap:wrap; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);"><div style="color:var(--text-sub);">Grupo: <span style="color:#fff; font-weight:bold;">${d.grupo || '-'}</span></div><div style="color:var(--text-sub);">Data Ref: <span style="color:#fff; font-weight:bold;">${d.dataReferencia || '-'}</span></div></div>`;
+                detalhesExtras = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Ref.</strong><span style="color:#fff; font-size:13px;">${d.dataReferencia || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Grupo Associado</strong><span style="color:#fff; font-size:13px;">${d.grupo || '-'}</span></div>
+                </div>`;
+            } else if (d.tipo === 'Convites') {
+                detalhesExtras = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Aplicação</strong><span style="color:#fff; font-size:13px;">${d.dataAplicacao || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Convidado</strong><span style="color:#fff; font-size:13px;">${d.nickConvidado || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Hora (Início ~ Fim)</strong><span style="color:#fff; font-size:13px;">${d.horaInicioFim || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Resposta</strong><span style="color:#fff; font-size:13px;">${d.resposta || '-'}</span></div>
+                </div>`;
+            } else if (d.tipo === 'PPP') {
+                let idLnk = d.idPromocao ? `<a href="https://dic.systemhb.net/promocao/ver/${d.idPromocao}" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-weight:600;">${d.idPromocao} <i class="fas fa-external-link-alt"></i></a>` : '-';
+                detalhesExtras = `<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">ID Promoção</strong><span style="color:#fff; font-size:13px;">${idLnk}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Promotor</strong><span style="color:#fff; font-size:13px;">${d.nickPromotor || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Promovido</strong><span style="color:#fff; font-size:13px;">${d.nickPromovido || '-'}</span></div>
+                </div>`;
             }
 
-            let justHtml = d.justificativa && d.justificativa !== "" ? `<div style="margin-top:10px; font-size:13px; color:var(--text-sub); border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><strong><i class="fas fa-comment-dots"></i> Justificativa(s) na Planilha:</strong> <span style="color:#fff;">${d.justificativa}</span></div>` : '';
+            let justHtml = d.justificativa && d.justificativa.trim() !== "" ? `<div style="margin-top:10px; font-size:13px; color:var(--text-sub); border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;"><strong><i class="fas fa-comment-dots"></i> Justificativa(s) na Planilha:</strong> <span style="color:#fff;">${d.justificativa}</span></div>` : '';
             
-            // Regra Visual rigorosa: Se Válido E sem desconto E nota 100, Fica verde. Do contrário, Vermelho.
-            let corNota = '#4caf50'; // Default verde
-            let nInfo = d.notaInfo.toLowerCase();
-            
-            if (nInfo.includes('inválido') || 
-                (nInfo.includes('descontos:') && !nInfo.includes('descontos: 0')) || 
-                (nInfo.includes('incorreções:') && !nInfo.includes('incorreções: 0')) || 
-                (nInfo.includes('nota final:') && !nInfo.includes('nota final: 100'))) {
-                corNota = '#ff2a2a'; // Vermelho (Houve desconto, erro ou invalidação)
-            }
+            // Regra Visual exigida: Se houver qualquer justificativa (Nota inserida na planilha), fica VERMELHO. Se não houver, VERDE.
+            let corNota = (d.justificativa && d.justificativa.trim() !== "") ? '#ff2a2a' : '#4caf50';
 
             cardsHtml += `
             <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(251,191,36,0.1); border-radius:8px; padding:15px; margin-bottom:10px; display:flex; flex-direction:column;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
-                    <div>
-                        <div style="color:var(--sup-neon); font-size:12px; font-weight:bold; text-transform:uppercase; margin-bottom:5px;">${d.tipo} <span style="color:#666; margin:0 5px;">|</span> <span style="color:var(--text-sub);"><i class="far fa-clock"></i> ${d.dataPostagem}</span></div>
-                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:10px;">
-                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:var(--text-sub); width:85px;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)} ${btnRelatorioAnterior}</div>
-                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:var(--text-sub); width:85px;">${labelAvaliador}</span> ${window.gerarAvatarNick(d.avaliador)}</div>
+                    <div style="flex: 1;">
+                        <div style="color:var(--text-sub); font-size:12px; font-weight:bold; margin-bottom:10px;"><i class="far fa-clock"></i> Postado em: ${d.dataPostagem}</div>
+                        <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:#fff; font-weight:600; width:85px;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)} ${btnRelatorioAnterior}</div>
+                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:#fff; font-weight:600; width:85px;">${labelAvaliador}</span> ${window.gerarAvatarNick(d.avaliador)}</div>
                         </div>
-                        ${extraRelatorios}
+                        ${detalhesExtras}
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
                         <span style="background:rgba(0,0,0,0.6); padding:6px 12px; border-radius:6px; font-weight:bold; font-size:13px; color:${corNota}; border: 1px solid ${corNota}33;">${d.notaInfo}</span>

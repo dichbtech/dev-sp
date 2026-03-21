@@ -150,6 +150,17 @@
       </div>
   </div>
 
+  <div id="custom-prompt-modal" class="modal" style="z-index: 9999999;">
+      <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-link"></i> Inserir Link</h3>
+          <div class="input-block"><input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com"></div>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+              <button class="btn-tech" onclick="window.fecharCustomPrompt()">Cancelar</button>
+              <button class="btn-tech btn-save" onclick="window.confirmarCustomPrompt()">Inserir</button>
+          </div>
+      </div>
+  </div>
+
   <div id="modal-dashboard" class="modal">
      <div class="modal-content">
         <div class="close-btn" onclick="window.fecharDashboard()"><i class="fas fa-times"></i></div>
@@ -199,6 +210,26 @@
           <div style="margin-top:10px; text-align:center;">
               <a id="link-externo-fallback" href="" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-size:14px;"><i class="fas fa-link"></i> Abrir em nova guia caso não carregue ou fique em branco</a>
           </div>
+      </div>
+  </div>
+
+  <div id="modal-correcao-lote" class="modal">
+      <div class="modal-content" style="max-width: 600px;">
+          <div class="close-btn" onclick="document.getElementById('modal-correcao-lote').style.display='none'"><i class="fas fa-times"></i></div>
+          <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-tools"></i> Corrigir Ciclo Validado</h3>
+          <p class="subtext" style="margin-bottom:20px;">Ao corrigir, o sistema apagará os pontos dados na data selecionada e calculará novamente com os novos IDs excluídos.</p>
+          <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
+              <div style="flex:1; min-width:200px;">
+                  <label class="tech-label">Data Original do Ciclo</label>
+                  <div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="correcao-data"></div>
+              </div>
+              <div style="flex:1; min-width:200px;">
+                  <label class="tech-label">Novos IDs Excluídos / Incorretos</label>
+                  <div class="input-block"><i class="fas fa-ban"></i><input type="text" id="correcao-excluidos" placeholder="Ex: 502, 508 (Opcional)"></div>
+              </div>
+          </div>
+          <button class="btn-tech" onclick="window.buscarCorrecaoLote()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Buscar e Simular Correção</button>
+          <div id="resultado-correcao" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);"></div>
       </div>
   </div>
 
@@ -278,7 +309,10 @@
         </div>
 
         <div id="modulo-estrelas" class="admin-section">
-            <h3><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; flex-wrap:wrap; gap:15px;">
+                <h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
+                <button id="btn-admin-correcao-lote" class="btn-tech btn-add" style="display:none; font-size:13px; padding:8px 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'"><i class="fas fa-tools"></i> Corrigir Ciclo (Líder/Admin)</button>
+            </div>
             <p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p>
             <div class="row" style="gap: 20px; align-items: flex-start;">
                 <div style="flex: 2; min-width: 300px;">
@@ -334,6 +368,14 @@
             <div id="rev-status-area" style="text-align:center; padding:20px; display:none;"></div>
             
             <div id="rev-results-area" style="display:none; flex-direction:column; gap:20px;">
+                <div class="tabs-container" id="tabs-revisao" style="justify-content:center; margin-bottom:10px;">
+                    <button class="btn-tab active" onclick="window.filtrarRevisao('Relatórios', this)">Relatórios</button>
+                    <button class="btn-tab" onclick="window.filtrarRevisao('Grupos', this)">Grupos</button>
+                    <button class="btn-tab" onclick="window.filtrarRevisao('Soldados', this)">Soldados</button>
+                    <button class="btn-tab" onclick="window.filtrarRevisao('Convites', this)">Convites</button>
+                    <button class="btn-tab" onclick="window.filtrarRevisao('PPP', this)">PPP</button>
+                </div>
+
                 <div id="rev-lista"></div>
                 <button class="btn-tech btn-save" onclick="window.concluirRevisao()" style="padding:15px; width:100%; background:#ef4444; color:#fff; border:none; box-shadow:0 0 15px rgba(239,68,68,0.3);"><i class="fas fa-trash-alt"></i> Concluir Revisão (Apagar Dados)</button>
             </div>
