@@ -95,13 +95,33 @@ window.criarCardAtividade = function(d) {
             try {
                 let histArr = JSON.parse(d.historico);
                 if (histArr.length > 0) {
+                    // Função para extrair apenas a data de uma string e criar um objeto Date para o cálculo matemático
+                    let parseDateStr = function(str) {
+                        if (!str) return null;
+                        let p = str.split(' ')[0].split('/'); // Extrai DD/MM/YYYY
+                        if (p.length === 3) return new Date(p[2], p[1] - 1, p[0]);
+                        return null;
+                    };
+                    
+                    let dtAtual = parseDateStr(d.dataAplicacao);
+
                     histArr.forEach(h => {
                         let corResp = h.resposta.toLowerCase().includes('aceitou') ? '#4caf50' : '#ff2a2a';
-                        let dataFormatada = h.data.split(' ')[0]; // Pega apenas a data, ignorando a hora
+                        
+                        let dtHist = parseDateStr(h.data);
+                        let diffDias = 0;
+                        
+                        // O sistema interpreta como data e calcula a diferença apenas neste momento
+                        if (dtAtual && dtHist) {
+                            let diffTime = Math.abs(dtAtual.getTime() - dtHist.getTime());
+                            diffDias = Math.round(diffTime / (1000 * 3600 * 24));
+                        }
+                        
+                        let dataFormatada = h.data.split(' ')[0]; // Pega apenas a data para visualização
                         historicoHtml += `<div style="font-size:11px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
                             <span><i class="far fa-calendar-alt"></i> ${dataFormatada}</span>
                             <span style="color:${corResp}; font-weight:bold; text-transform:uppercase;">${h.resposta}</span>
-                            <span style="color:var(--text-sub);">(${h.dias} dias atrás)</span>
+                            <span style="color:var(--text-sub);">(${diffDias} dias atrás)</span>
                         </div>`;
                     });
                 } else {
