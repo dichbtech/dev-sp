@@ -100,13 +100,23 @@ window.verificarAcessoBD = async function(email) {
             let menuFeedbacks = document.getElementById('menu-feedbacks');
             let menuEstrelas = document.getElementById('menu-estrelas');
             let menuGrupos = document.getElementById('menu-grupos');
-            let menuCorrecoes = document.getElementById('menu-correcoes'); // Menu de Correções
+            let menuCorrecoes = document.getElementById('menu-correcoes'); 
             let menuAdmin = document.getElementById('admin-only-menus');
             
             let dragControls = document.getElementById('admin-drag-controls');
             let btnEditPos = document.getElementById('btn-edit-pos');
             let btnSavePos = document.querySelector('button[onclick="window.savePositions()"]');
             let dicaResize = document.getElementById('dica-resize');
+            
+            // Botão de Correção do Lote (Apenas Líder e Admin)
+            let btnAdminCorrecaoLote = document.getElementById('btn-admin-correcao-lote');
+            if (btnAdminCorrecaoLote) {
+                if (lvl === 'LIDER' || lvl === 'ADMIN') {
+                    btnAdminCorrecaoLote.style.display = 'inline-flex';
+                } else {
+                    btnAdminCorrecaoLote.style.display = 'none';
+                }
+            }
 
             if (lvl === 'SUPERVISOR') {
                 if(menuAvais) menuAvais.style.display = 'none';
@@ -125,7 +135,6 @@ window.verificarAcessoBD = async function(email) {
                 if(dicaResize) dicaResize.style.display = 'none';
                 if(menuCorrecoes && window.carregarAtividadesPendentes) window.carregarAtividadesPendentes();
             } 
-            // Libera Menu Admin e Edições para Líder, Vice-Líder e ADMIN
             else if (lvl === 'VICE-LIDER' || lvl === 'LIDER' || lvl === 'ADMIN') {
                 if(menuAdmin) menuAdmin.style.display = 'flex';
                 if(dragControls) dragControls.style.display = 'flex';
