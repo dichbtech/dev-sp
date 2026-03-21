@@ -64,8 +64,20 @@ window.criarCardAtividade = function(d) {
         </div>`;
     }
 
-    let linkUrl = d.link || '';
-    let btnLink = linkUrl.includes('http') ? `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" onclick="window.abrirLinkIframe('${linkUrl}')"><i class="fas fa-eye"></i> Visualizar Anexo do Relatório</button>` : `<span style="color:#ff2a2a; font-size:13px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Link do relatório inválido ou vazio (${linkUrl})</span>`;
+    let linkUrl = d.link ? d.link.trim() : '';
+    let btnLink = '';
+    
+    if (linkUrl.startsWith('http')) {
+        if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
+            // Abre no Iframe nativo (Ideal para Docs) - Utilizando data-url para evitar quebra de strings
+            btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
+        } else {
+            // Abre em Nova Guia (Ideal para Imgur/Prints)
+            btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
+        }
+    } else {
+        btnLink = `<span style="color:#ff2a2a; font-size:13px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Link inválido ou vazio (${linkUrl})</span>`;
+    }
 
     let inputsHtml = '';
     
@@ -109,7 +121,15 @@ window.criarCardAtividade = function(d) {
 }
 
 window.abrirLinkIframe = function(url) {
-    document.getElementById('iframe-viewer').src = url;
+    let iframe = document.getElementById('iframe-viewer');
+    
+    // Força a limpeza do iframe primeiro para evitar que o navegador trave na URL anterior
+    iframe.src = 'about:blank'; 
+    
+    setTimeout(() => {
+        iframe.src = url;
+    }, 50);
+    
     document.getElementById('link-externo-fallback').href = url;
     document.getElementById('modal-iframe-link').style.display = 'flex';
 }
