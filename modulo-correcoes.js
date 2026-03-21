@@ -74,7 +74,6 @@ window.criarCardAtividade = function(d) {
 
     let labelPostador = (d.tipo === 'Relatórios') ? 'Auxiliar:' : 'Supervisor:';
     
-    // Lógica para adicionar o botão de Relatório Anterior (apenas para Grupos e Soldados)
     let btnRelatorioAnterior = '';
     if ((d.tipo === 'Grupos' || d.tipo === 'Soldados') && d.linkAnterior) {
         btnRelatorioAnterior = `<button onclick="window.open('${d.linkAnterior}', '_blank')" style="background: rgba(251,191,36,0.1); border: 1px solid var(--sup-neon); color: var(--sup-neon); padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; text-transform: uppercase; font-weight: bold; margin-left: 10px; transition: 0.3s; display:inline-flex; align-items:center; gap:5px;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';"><i class="fas fa-history"></i> Relatório Anterior</button>`;
@@ -90,11 +89,38 @@ window.criarCardAtividade = function(d) {
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Grupo Associado</strong><span style="color:#fff;">${d.grupo || '-'}</span></div>
         </div>`;
     } else if (d.tipo === 'Convites') {
+        let historicoHtml = '<div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.5); border-left:3px solid var(--sup-neon); border-radius:4px;"><strong style="color:var(--sup-neon); font-size:12px; display:block; margin-bottom:8px;"><i class="fas fa-history"></i> HISTÓRICO DE CONVITES</strong>';
+        
+        if (d.historico) {
+            try {
+                let histArr = JSON.parse(d.historico);
+                if (histArr.length > 0) {
+                    histArr.forEach(h => {
+                        let corResp = h.resposta.toLowerCase().includes('aceitou') ? '#4caf50' : '#ff2a2a';
+                        let dataFormatada = h.data.split(' ')[0]; // Pega apenas a data, ignorando a hora
+                        historicoHtml += `<div style="font-size:11px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
+                            <span><i class="far fa-calendar-alt"></i> ${dataFormatada}</span>
+                            <span style="color:${corResp}; font-weight:bold; text-transform:uppercase;">${h.resposta}</span>
+                            <span style="color:var(--text-sub);">(${h.dias} dias atrás)</span>
+                        </div>`;
+                    });
+                } else {
+                    historicoHtml += '<span style="color:var(--text-sub); font-size:11px;">Nenhum convite anterior registrado para este policial.</span>';
+                }
+            } catch(e) {
+                historicoHtml += '<span style="color:var(--text-sub); font-size:11px;">Erro ao ler histórico.</span>';
+            }
+        } else {
+            historicoHtml += '<span style="color:var(--text-sub); font-size:11px;">Nenhum convite anterior registrado para este policial.</span>';
+        }
+        historicoHtml += '</div>';
+
         infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Aplicação</strong><span style="color:#fff;">${d.dataAplicacao || '-'}</span></div>
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Convidado</strong>${window.gerarAvatarNick(d.nickConvidado)}</div>
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Hora (Início ~ Fim)</strong><span style="color:#fff;">${d.horaInicioFim || '-'}</span></div>
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Resposta</strong><span style="color:#fff;">${d.resposta || '-'}</span></div>
+            <div style="grid-column: 1 / -1;">${historicoHtml}</div>
         </div>`;
     } else if (d.tipo === 'PPP') {
         let idLink = d.idPromocao ? `<a href="https://dic.systemhb.net/promocao/ver/${d.idPromocao}" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-weight:600;">${d.idPromocao} <i class="fas fa-external-link-alt"></i></a>` : '-';
@@ -127,20 +153,20 @@ window.criarCardAtividade = function(d) {
     } else if (d.tipo === 'Grupos' || d.tipo === 'Soldados') {
         inputsHtml = `
             <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Incorreções</label><div class="input-block" style="margin:0;"><input type="number" id="inc-${d.id}" placeholder="" min="0"></div></div>
-            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}"><option value="Válido" style="color:#fff;">Válido</option><option value="Inválido" style="color:#fff;">Inválido</option></select></div></div>
+            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}" onchange="this.style.color = this.value==='Válido'?'#4caf50':'#ff2a2a';"><option value="Válido" style="color:#fff;">Válido</option><option value="Inválido" style="color:#fff;">Inválido</option></select></div></div>
         `;
     } else if (d.tipo === 'Convites' || d.tipo === 'PPP') {
         inputsHtml = `
             <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Descontos</label><div class="input-block" style="margin:0;"><input type="number" id="desc-${d.id}" placeholder="" step="0.1" min="0"></div></div>
-            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}"><option value="Válido" style="color:#fff;">Válido</option><option value="Inválido" style="color:#fff;">Inválido</option></select></div></div>
+            <div style="flex:1; min-width: 150px;"><label class="tech-label" style="font-size:11px;">Status</label><div class="input-block" style="margin:0;"><select id="status-${d.id}" onchange="this.style.color = this.value==='Válido'?'#4caf50':'#ff2a2a';"><option value="Válido" style="color:#fff;">Válido</option><option value="Inválido" style="color:#fff;">Inválido</option></select></div></div>
         `;
     }
 
     inputsHtml += `
         <div style="flex: 100%; margin-top: 5px;">
-            <label class="tech-label" style="font-size:11px;">Justificativa (Obrigatória se inválido ou com descontos)</label>
+            <label class="tech-label" style="font-size:11px;">Justificativa (Opcional)</label>
             <div class="input-block" style="margin:0; height:auto; padding:0;">
-                <textarea id="just-${d.id}" class="admin-input" style="width:100%; min-height:60px; resize:vertical; background:transparent; border:none; padding:12px; color:#fff; font-family:var(--font-ui);" placeholder="Descreva o motivo dos descontos ou da invalidação..."></textarea>
+                <textarea id="just-${d.id}" class="admin-input" style="width:100%; min-height:60px; resize:vertical; background:transparent; border:none; padding:12px; color:#fff; font-family:var(--font-ui);" placeholder="Descreva o motivo dos descontos ou da invalidação (caso houver)..."></textarea>
             </div>
         </div>
     `;
@@ -183,30 +209,18 @@ window.salvarAvaliacaoAtividade = function(id, tipo) {
         
         payload.nota = parseFloat(nota);
         payload.status = 'Válido'; 
-        
-        if (payload.nota < 100 && justificativa === '') {
-            return window.mostrarToast("Insira a justificativa para a perda de pontos.", "error");
-        }
     } else if (tipo === 'Grupos' || tipo === 'Soldados') {
         let inc = document.getElementById(`inc-${id}`).value;
         let status = document.getElementById(`status-${id}`).value;
         
         payload.incorrecoes = inc === '' ? 0 : parseInt(inc);
         payload.status = status;
-        
-        if ((payload.incorrecoes > 0 || status === 'Inválido') && justificativa === '') {
-            return window.mostrarToast("A justificativa é obrigatória para incorreções ou invalidação.", "error");
-        }
     } else if (tipo === 'Convites' || tipo === 'PPP') {
         let desc = document.getElementById(`desc-${id}`).value;
         let status = document.getElementById(`status-${id}`).value;
         
         payload.descontos = desc === '' ? 0 : parseFloat(desc.replace(',', '.'));
         payload.status = status;
-        
-        if ((payload.descontos > 0 || status === 'Inválido') && justificativa === '') {
-            return window.mostrarToast("A justificativa é obrigatória para descontos ou invalidação.", "error");
-        }
     }
     
     payload.justificativa = justificativa;
