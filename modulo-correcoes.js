@@ -3,29 +3,64 @@
 * Responsável por puxar atividades da coleção 'atividades_pendentes' no Firebase, exibir e injetar a nota/correção nela mesma.
 */
 
-window.carregarAtividadesPendentes = function() {
-    let tipo = document.getElementById('sel-tipo-atividade').value;
-    let container = document.getElementById('lista-atividades-pendentes');
+window.tipoAtividadeAtual = 'Relatórios';
+
+window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, btnElement = null) {
+    window.tipoAtividadeAtual = tipo;
     
-    container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:20px;"><i class="fas fa-circle-notch fa-spin"></i> Buscando atividades pendentes...</div>';
+    if (btnElement) {
+        document.querySelectorAll('.btn-tab').forEach(el => el.classList.remove('active'));
+        btnElement.classList.add('active');
+    } else {
+        document.querySelectorAll('.btn-tab').forEach(el => {
+            el.classList.remove('active');
+            if (el.id === 'tab-' + tipo) el.classList.add('active');
+        });
+    }
+
+    let container = document.getElementById('lista-atividades-pendentes');
+    container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:40px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Buscando atividades pendentes...</div>';
 
     window.db.collection("atividades_pendentes")
-        .where("tipo", "==", tipo)
         .where("avaliado", "==", false)
         .get().then(snap => {
-            container.innerHTML = '';
-            if (snap.empty) {
-                container.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; text-align:center; color: var(--text-sub);">Nenhuma atividade pendente aguardando correção em ${tipo}. Parabéns à Liderança!</div>`;
-                return;
-            }
+            let contagens = { 'Relatórios': 0, 'Grupos': 0, 'Soldados': 0, 'Convites': 0, 'PPP': 0 };
+            let docsAtuais = [];
 
             snap.forEach(doc => {
                 let d = doc.data();
-                d.id = doc.id;
+                if (contagens[d.tipo] !== undefined) {
+                    contagens[d.tipo]++;
+                }
+                if (d.tipo === tipo) {
+                    d.id = doc.id;
+                    docsAtuais.push(d);
+                }
+            });
+
+            for (let cat in contagens) {
+                let tab = document.getElementById('tab-' + cat);
+                if (tab) {
+                    tab.innerHTML = `${cat} ${contagens[cat] > 0 ? `<span class="badge-tab">${contagens[cat]}</span>` : ''}`;
+                }
+            }
+
+            container.innerHTML = '';
+            if (docsAtuais.length === 0) {
+                container.innerHTML = `
+                    <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(76, 175, 80, 0.4); padding: 50px 20px; border-radius: 12px; text-align:center;">
+                        <i class="fas fa-check-circle" style="color: #4caf50; font-size: 50px; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(76,175,80,0.3));"></i>
+                        <h3 style="color: #4caf50; font-size: 22px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Tudo Limpo!</h3>
+                        <p style="color: var(--text-sub); font-size: 15px;">Nenhuma atividade aguardando correção na aba <b>${tipo}</b>.<br>Excelente trabalho da Liderança!</p>
+                    </div>`;
+                return;
+            }
+
+            docsAtuais.forEach(d => {
                 container.appendChild(window.criarCardAtividade(d));
             });
         }).catch(err => {
-            container.innerHTML = `<div style="color:#ff2a2a; text-align:center;">Erro ao carregar as atividades: ${err.message}</div>`;
+            container.innerHTML = `<div style="color:#ff2a2a; text-align:center; padding:20px;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar as atividades: ${err.message}</div>`;
         });
 }
 
@@ -41,7 +76,7 @@ window.criarCardAtividade = function(d) {
 
     let infoHtml = ``;
     infoHtml += `<div style="font-size:12px; color:var(--text-sub); margin-bottom:10px; font-weight:600;"><i class="far fa-clock"></i> Postado em: ${d.dataPostagem || '-'}</div>`;
-    infoHtml += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><span style="color:#fff; font-size:14px;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)}</div>`;
+    infoHtml += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><span style="color:#fff; font-size:14px; font-weight:600;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)}</div>`;
 
     if (d.tipo === 'Relatórios') {
         infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
@@ -69,10 +104,8 @@ window.criarCardAtividade = function(d) {
     
     if (linkUrl.startsWith('http')) {
         if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
-            // Abre no Iframe nativo (Ideal para Docs) - Utilizando data-url para evitar quebra de strings
             btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
         } else {
-            // Abre em Nova Guia (Ideal para Imgur/Prints)
             btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
         }
     } else {
@@ -117,19 +150,14 @@ window.criarCardAtividade = function(d) {
             </div>
         </div>
     `;
+
     return div;
 }
 
 window.abrirLinkIframe = function(url) {
     let iframe = document.getElementById('iframe-viewer');
-    
-    // Força a limpeza do iframe primeiro para evitar que o navegador trave na URL anterior
     iframe.src = 'about:blank'; 
-    
-    setTimeout(() => {
-        iframe.src = url;
-    }, 50);
-    
+    setTimeout(() => { iframe.src = url; }, 50);
     document.getElementById('link-externo-fallback').href = url;
     document.getElementById('modal-iframe-link').style.display = 'flex';
 }
@@ -178,7 +206,7 @@ window.salvarAvaliacaoAtividade = function(id, tipo) {
     payload.justificativa = justificativa;
 
     window.db.collection("atividades_pendentes").doc(id).update(payload).then(() => {
-        window.mostrarToast("Avaliação concluída! A alteração foi enviada e a planilha sincronizará em breve.", "success");
+        window.mostrarToast("Correção finalizada!", "success");
         window.registrarLogAtividade("Avaliação de Atividade", `Avaliou uma atividade de [${tipo}] ID do doc: ${id}. Status Atribuído: ${payload.status}`);
         window.carregarAtividadesPendentes();
     }).catch(e => {

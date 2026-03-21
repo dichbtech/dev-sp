@@ -118,6 +118,12 @@
         @keyframes slide-in-right { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes smoke-fade-out { to { opacity: 0; transform: translateY(-20px) scale(0.9); } }
         footer { width: 100%; display: block; box-sizing: border-box; text-align: center; padding: 30px 20px; font-size: 14px; color: #888; font-weight: 500; margin-top: auto; letter-spacing: 1px; border-top: 1px solid rgba(255,255,255,0.02); }
+
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; border-bottom: 1px solid rgba(251, 191, 36, 0.2); padding-bottom: 15px; }
+        .btn-tab { background: rgba(0,0,0,0.4); border: 1px solid rgba(251, 191, 36, 0.2); color: var(--text-sub); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .btn-tab:hover { background: rgba(251, 191, 36, 0.1); border-color: var(--dynamic-neon); color: var(--text-main); }
+        .btn-tab.active { background: rgba(251, 191, 36, 0.15); border-color: var(--dynamic-neon); color: var(--dynamic-neon); box-shadow: 0 0 10px var(--dynamic-glow); }
+        .badge-tab { background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px; font-weight: 700; box-shadow: 0 0 5px rgba(239,68,68,0.5); }
     </style>
 </head>
 <body>
@@ -311,18 +317,15 @@
         <div id="modulo-correcoes" class="admin-section">
           <h3><i class="fas fa-check-double"></i> Correção de Atividades</h3>
           <p class="subtext">Avalie e corrija as atividades enviadas. As notas, descontos e validações serão salvas no banco e consumidas pela Planilha de Registros.</p>
-          <div style="display:flex; gap:15px; margin-bottom:20px;">
-              <div class="input-block" style="max-width:300px; margin:0;">
-                  <i class="fas fa-filter"></i>
-                  <select id="sel-tipo-atividade" onchange="window.carregarAtividadesPendentes()">
-                      <option value="Relatórios">Relatórios</option>
-                      <option value="Grupos">Grupos</option>
-                      <option value="Soldados">Soldados</option>
-                      <option value="Convites">Convites</option>
-                      <option value="PPP">PPP</option>
-                  </select>
-              </div>
+          
+          <div class="tabs-container" id="tabs-correcoes">
+              <button class="btn-tab active" id="tab-Relatórios" onclick="window.carregarAtividadesPendentes('Relatórios', this)">Relatórios</button>
+              <button class="btn-tab" id="tab-Grupos" onclick="window.carregarAtividadesPendentes('Grupos', this)">Grupos</button>
+              <button class="btn-tab" id="tab-Soldados" onclick="window.carregarAtividadesPendentes('Soldados', this)">Soldados</button>
+              <button class="btn-tab" id="tab-Convites" onclick="window.carregarAtividadesPendentes('Convites', this)">Convites</button>
+              <button class="btn-tab" id="tab-PPP" onclick="window.carregarAtividadesPendentes('PPP', this)">PPP</button>
           </div>
+
           <div id="lista-atividades-pendentes" style="display:flex; flex-direction:column; gap:15px;"></div>
         </div>
 
