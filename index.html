@@ -150,17 +150,6 @@
       </div>
   </div>
 
-  <div id="custom-prompt-modal" class="modal" style="z-index: 9999999;">
-      <div class="modal-content" style="max-width: 400px; text-align: center;">
-          <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-link"></i> Inserir Link</h3>
-          <div class="input-block"><input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com"></div>
-          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-              <button class="btn-tech" onclick="window.fecharCustomPrompt()">Cancelar</button>
-              <button class="btn-tech btn-save" onclick="window.confirmarCustomPrompt()">Inserir</button>
-          </div>
-      </div>
-  </div>
-
   <div id="modal-dashboard" class="modal">
      <div class="modal-content">
         <div class="close-btn" onclick="window.fecharDashboard()"><i class="fas fa-times"></i></div>
@@ -213,26 +202,6 @@
       </div>
   </div>
 
-  <div id="modal-correcao-lote" class="modal">
-      <div class="modal-content" style="max-width: 600px;">
-          <div class="close-btn" onclick="document.getElementById('modal-correcao-lote').style.display='none'"><i class="fas fa-times"></i></div>
-          <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-tools"></i> Corrigir Ciclo Validado</h3>
-          <p class="subtext" style="margin-bottom:20px;">Ao corrigir, o sistema apagará os pontos dados na data selecionada e calculará novamente com os novos IDs excluídos.</p>
-          <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
-              <div style="flex:1; min-width:200px;">
-                  <label class="tech-label">Data Original do Ciclo</label>
-                  <div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="correcao-data"></div>
-              </div>
-              <div style="flex:1; min-width:200px;">
-                  <label class="tech-label">Novos IDs Excluídos / Incorretos</label>
-                  <div class="input-block"><i class="fas fa-ban"></i><input type="text" id="correcao-excluidos" placeholder="Ex: 502, 508 (Opcional)"></div>
-              </div>
-          </div>
-          <button class="btn-tech" onclick="window.buscarCorrecaoLote()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Buscar e Simular Correção</button>
-          <div id="resultado-correcao" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);"></div>
-      </div>
-  </div>
-
   <div id="appWrapper">
     <div class="top-controls"><button id="btnLogout" class="btn-top" onclick="window.fazerLogout()" title="Sair da Conta"><i class="fas fa-sign-out-alt"></i></button></div>
     <header><div class="header-frame"><img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo"><div class="title-area"><h1>Central de Sistemas</h1><h2>Supervisores</h2></div></div></header>
@@ -250,6 +219,7 @@
         
         <div id="admin-only-menus" style="display: none; flex-direction: column; gap: 10px;">
             <div class="admin-sidebar-header" style="margin-top:15px; color:#f59e0b;">Gestão Liderança</div>
+            <button class="btn-sidebar" id="menu-revisao" onclick="window.switchSection('modulo-revisao', this)"><i class="fas fa-search"></i> Revisão de Correções</button>
             <button class="btn-sidebar" onclick="window.switchSection('modulo-logs-atividades', this)"><i class="fas fa-eye"></i> Auditoria Global</button>
             <button class="btn-sidebar" onclick="window.switchSection('modulo-logs', this)"><i class="fas fa-history"></i> Logs de Estrelas</button>
             <button class="btn-sidebar" onclick="window.switchSection('modulo-acessos', this)"><i class="fas fa-users-cog"></i> Gerenciar Acessos</button>
@@ -308,10 +278,7 @@
         </div>
 
         <div id="modulo-estrelas" class="admin-section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; flex-wrap:wrap; gap:15px;">
-                <h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
-                <button id="btn-admin-correcao-lote" class="btn-tech btn-add" style="display:none; font-size:13px; padding:8px 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'"><i class="fas fa-tools"></i> Corrigir Ciclo (Líder/Admin)</button>
-            </div>
+            <h3><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
             <p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p>
             <div class="row" style="gap: 20px; align-items: flex-start;">
                 <div style="flex: 2; min-width: 300px;">
@@ -350,6 +317,26 @@
           </div>
 
           <div id="lista-atividades-pendentes" style="display:flex; flex-direction:column; gap:15px;"></div>
+        </div>
+
+        <div id="modulo-revisao" class="admin-section">
+            <h3><i class="fas fa-search"></i> Revisão de Correções</h3>
+            <p class="subtext">Fiscalize as correções realizadas pela Liderança em um período específico.</p>
+            
+            <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
+                <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+                    <div style="flex:1; min-width:180px;"><label class="tech-label">Data de Início</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-inicio"></div></div>
+                    <div style="flex:1; min-width:180px;"><label class="tech-label">Data de Fim</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-fim"></div></div>
+                    <button class="btn-tech" onclick="window.solicitarLevantamento()" style="padding:15px;"><i class="fas fa-cloud-download-alt"></i> Buscar na Planilha</button>
+                </div>
+            </div>
+
+            <div id="rev-status-area" style="text-align:center; padding:20px; display:none;"></div>
+            
+            <div id="rev-results-area" style="display:none; flex-direction:column; gap:20px;">
+                <div id="rev-lista"></div>
+                <button class="btn-tech btn-save" onclick="window.concluirRevisao()" style="padding:15px; width:100%; background:#ef4444; color:#fff; border:none; box-shadow:0 0 15px rgba(239,68,68,0.3);"><i class="fas fa-trash-alt"></i> Concluir Revisão (Apagar Dados)</button>
+            </div>
         </div>
 
         <div id="modulo-logs-atividades" class="admin-section">
@@ -429,6 +416,7 @@
   <script src="modulo-estrelas.js"></script>
   <script src="modulo-admin.js"></script>
   <script src="modulo-correcoes.js"></script>
+  <script src="modulo-revisao.js"></script>
   <script src="auth.js"></script>
 </body>
 </html>

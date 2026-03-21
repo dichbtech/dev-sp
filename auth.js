@@ -20,12 +20,10 @@ window.liberarPainel = function() {
     
     let lvl = window.nivelUsuarioGlobal;
     
-    // Libera Estrelas para Sub-Liderança, Vice, Líder e ADMIN
     if (['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
         window.escutarMilitaresEstrelas();
     }
     
-    // Libera Ferramentas de Gestão e Logs para Vice, Líder e ADMIN
     if (['VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
         window.carregarPrivacidade();
         window.escutarLogsEstrelas();
@@ -102,31 +100,24 @@ window.verificarAcessoBD = async function(email) {
             let menuGrupos = document.getElementById('menu-grupos');
             let menuCorrecoes = document.getElementById('menu-correcoes'); 
             let menuAdmin = document.getElementById('admin-only-menus');
+            let menuRevisao = document.getElementById('menu-revisao');
             
             let dragControls = document.getElementById('admin-drag-controls');
             let btnEditPos = document.getElementById('btn-edit-pos');
             let btnSavePos = document.querySelector('button[onclick="window.savePositions()"]');
             let dicaResize = document.getElementById('dica-resize');
-            
-            // Botão de Correção do Lote (Apenas Líder e Admin)
-            let btnAdminCorrecaoLote = document.getElementById('btn-admin-correcao-lote');
-            if (btnAdminCorrecaoLote) {
-                if (lvl === 'LIDER' || lvl === 'ADMIN') {
-                    btnAdminCorrecaoLote.style.display = 'inline-flex';
-                } else {
-                    btnAdminCorrecaoLote.style.display = 'none';
-                }
-            }
 
             if (lvl === 'SUPERVISOR') {
                 if(menuAvais) menuAvais.style.display = 'none';
                 if(menuFeedbacks) menuFeedbacks.style.display = 'none';
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
                 if(menuCorrecoes) menuCorrecoes.style.display = 'none';
+                if(menuRevisao) menuRevisao.style.display = 'none';
             } 
             else if (lvl === 'AUXILIAR') {
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
                 if(menuCorrecoes) menuCorrecoes.style.display = 'none';
+                if(menuRevisao) menuRevisao.style.display = 'none';
             } 
             else if (lvl === 'SUB-LIDER') {
                 if(dragControls) dragControls.style.display = 'flex';
@@ -134,6 +125,7 @@ window.verificarAcessoBD = async function(email) {
                 if(btnSavePos) btnSavePos.style.display = 'none';
                 if(dicaResize) dicaResize.style.display = 'none';
                 if(menuCorrecoes && window.carregarAtividadesPendentes) window.carregarAtividadesPendentes();
+                if(menuRevisao) menuRevisao.style.display = 'none';
             } 
             else if (lvl === 'VICE-LIDER' || lvl === 'LIDER' || lvl === 'ADMIN') {
                 if(menuAdmin) menuAdmin.style.display = 'flex';
