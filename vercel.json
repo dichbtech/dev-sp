@@ -1,16 +1,8 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/metas", "destination": "/index.html" },
-    { "source": "/avais", "destination": "/index.html" },
-    { "source": "/feedbacks", "destination": "/index.html" },
-    { "source": "/estrelas", "destination": "/index.html" },
-    { "source": "/grupos", "destination": "/index.html" },
-    { "source": "/correcoes", "destination": "/index.html" },
-    { "source": "/revisao", "destination": "/index.html" },
-    { "source": "/logs-atividades", "destination": "/index.html" },
-    { "source": "/logs", "destination": "/index.html" },
-    { "source": "/acessos", "destination": "/index.html" },
-    { "source": "/privacidade", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
