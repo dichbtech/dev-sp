@@ -111,7 +111,68 @@ const modaisGlobaisHTML = `
 document.body.insertAdjacentHTML('afterbegin', modaisGlobaisHTML);
 /* ========================================================================= */
 
-// (Aqui para baixo continuam os seus códigos que já estavam no ui-tools.js)
+
+/* =========================================================================
+   SISTEMA DE ROTEAMENTO (SPA URL CLEAN)
+   ========================================================================= */
+
+// Função mestre de troca de telas
+window.switchSection = function(sectionId, btnElement) {
+    // 1. Apaga a luz de todos os módulos
+    document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active'));
+
+    // 2. Acende a luz do módulo correto
+    let targetSection = document.getElementById(sectionId);
+    if (targetSection) targetSection.classList.add('active');
+
+    // 3. Destaca o botão correto no menu lateral
+    if (btnElement) {
+        btnElement.classList.add('active');
+    } else {
+        // Se a função foi chamada automaticamente pela URL, busca o botão
+        let pathName = sectionId.replace('modulo-', '');
+        let btnId = 'menu-' + pathName;
+        let btn = document.getElementById(btnId);
+        if (btn) btn.classList.add('active');
+    }
+
+    // 4. Mágica do Roteamento: Altera a URL do navegador sem recarregar a página!
+    let newPath = sectionId.replace('modulo-', '');
+    window.history.pushState({ section: sectionId }, '', '/' + newPath);
+};
+
+// Quando a página termina de carregar, lê a URL para saber onde o usuário estava
+document.addEventListener("DOMContentLoaded", () => {
+    let path = window.location.pathname.replace('/', '').trim();
+    
+    // Ignora se for a página inicial pura ou o index.html
+    if (path && path !== 'index.html' && path !== '') {
+        let sectionId = 'modulo-' + path;
+        let targetSection = document.getElementById(sectionId);
+        
+        // Se a seção existir no HTML, vai direto para ela
+        if (targetSection) {
+            window.switchSection(sectionId, null);
+        }
+    }
+});
+
+// Faz os botões "Voltar" e "Avançar" do navegador funcionarem perfeitamente
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.section) {
+        window.switchSection(event.state.section, null);
+    } else {
+        // Fallback: se voltar tudo, vai para as metas
+        let path = window.location.pathname.replace('/', '').trim();
+        let sectionId = path ? 'modulo-' + path : 'modulo-metas';
+        if (document.getElementById(sectionId)) {
+            window.switchSection(sectionId, null);
+        }
+    }
+});
+/* ========================================================================= */
+
 
 window.registrarLogAtividade = function(acao, detalhes) {
     if (!window.usuarioLogadoNick) return;
