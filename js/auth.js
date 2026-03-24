@@ -164,17 +164,6 @@ window.fazerLogout = function() {
     auth.signOut(); 
 }
 
-window.switchSection = function(idModulo, btnElement) {
-    document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active'));
-    document.getElementById(idModulo).classList.add('active');
-    btnElement.classList.add('active');
-    
-    if(window.registrarLogAtividade) {
-        window.registrarLogAtividade("Navegação de Módulo", `Acessou a aba: ${btnElement.innerText.trim()}`);
-    }
-}
-
 window.abrirSystemDIC = function() {
     window.open('https://dic.systemhb.net/divisao/supervisores', '_blank');
     if(window.registrarLogAtividade) {
