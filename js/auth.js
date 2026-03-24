@@ -136,7 +136,20 @@ window.verificarAcessoBD = async function(email) {
                 if (boxPrivacidade) { boxPrivacidade.innerHTML = window.buildEditorHTML('editor-privacidade', 'Carregando...'); }
             }
             
-            window.switchSection('modulo-metas', document.getElementById('menu-metas'));
+            // NOVO: Lógica inteligente de Roteamento pós-login
+            let path = window.location.pathname.replace('/', '').trim();
+            if (path && path !== 'index.html') {
+                let sectionId = 'modulo-' + path;
+                let btnId = 'menu-' + path;
+                if (document.getElementById(sectionId)) {
+                    window.switchSection(sectionId, document.getElementById(btnId));
+                } else {
+                    window.switchSection('modulo-metas', document.getElementById('menu-metas'));
+                }
+            } else {
+                window.switchSection('modulo-metas', document.getElementById('menu-metas'));
+            }
+            
             window.liberarPainel();
         } else {
             window.customAlert(`ACESSO NEGADO.<br><br>O e-mail <b>${authEmail}</b> não foi encontrado com permissões ativas.`, "Falha de Permissão");
