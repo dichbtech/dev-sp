@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const htmlPadrao = `
     <h1>Política de Privacidade</h1>
-    <span class="date">Última atualização: 09 de março de 2026</span>
+    <span class="date">Última atualização: 24 de março de 2026</span>
     
-    <p>Esta Política de Privacidade descreve como as informações são tratadas ao utilizar o site: <br><a href="https://dicsp.vercel.app/">https://dicsp.vercel.app//</a></p>
+    <p>Esta Política de Privacidade descreve como as informações são tratadas ao utilizar o site: <br><a href="https://dicsp.vercel.app/">https://dicsp.vercel.app/</a></p>
     <p>O objetivo deste site é fornecer uma plataforma simples de feedback para usuários. A privacidade dos visitantes é respeitada e nenhum dado pessoal é coletado além do estritamente necessário para funcionamento da autenticação.</p>
     
     <h2>1. Coleta de Dados</h2>
@@ -35,14 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
     <p>As informações utilizadas durante a autenticação são processadas pela infraestrutura do Google por meio do Firebase.</p>
 
     <h2>4. Hospedagem do Site</h2>
-    <p>Este site é hospedado na plataforma GitHub Pages, que pode coletar dados técnicos básicos automaticamente, como:</p>
+    <p>Este site é hospedado na plataforma GitHub Pages (e agora Vercel), que pode coletar dados técnicos básicos automaticamente, como:</p>
     <ul>
       <li>endereço IP</li>
       <li>informações de navegador</li>
       <li>logs de acesso</li>
     </ul>
     <p>Essas informações são utilizadas apenas para funcionamento e segurança da infraestrutura da plataforma.</p>
-    <p>Para mais informações, consulte a política de privacidade do GitHub: <br><a href="https://docs.github.com/pt/site-policy/privacy-policies/github-privacy-statement" target="_blank">https://docs.github.com/pt/site-policy/privacy-policies/github-privacy-statement</a></p>
 
     <h2>5. Cookies e Tecnologias de Sessão</h2>
     <p>Este site não utiliza cookies próprios para rastreamento de usuários.</p>
@@ -64,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     // Utiliza a variável window.db que já foi criada pelo firebase-init.js
-    window.db.collection("sistema").doc("config_metas").get().then((doc) => {
+    window.db.collection("sistema").doc("config_geral").get().then((doc) => {
         let box = document.getElementById('privacy-content');
         if (doc.exists && doc.data().textoPrivacidade) {
             box.innerHTML = doc.data().textoPrivacidade;
