@@ -55,8 +55,9 @@ window.carregarDadosDoBanco = async function() {
     statusArea.style.display = 'none';
     document.getElementById('rev-results-area').style.display = 'flex';
     
-    // Reseta o menu de abas para o padrão
-    window.filtrarRevisao('Relatórios', document.querySelector('#tabs-revisao .btn-tab:nth-child(1)'));
+    // Reseta o menu de abas para o padrão verificando se existe primeiro
+    let tabRelatorios = document.querySelector('#tabs-revisao .btn-tab:nth-child(1)');
+    window.filtrarRevisao('Relatórios', tabRelatorios);
 }
 
 window.filtrarRevisao = function(tipo, btnElement) {
@@ -72,14 +73,37 @@ window.renderizarListaRevisao = function() {
     let lista = document.getElementById('rev-lista');
     lista.innerHTML = '';
 
-    // Filtra os dados em memória com base na aba atual clicada
-    let dadosFiltrados = window.dadosRevisaoGlobais.filter(d => d.tipo === window.tipoRevisaoAtual);
+    // NOVO: Captura as datas dos inputs de filtro originais para blindar localmente
+    let dataInicioStr = document.getElementById('rev-data-inicio').value;
+    let dataFimStr = document.getElementById('rev-data-fim').value;
+    
+    // Converte os inputs YYYY-MM-DD para objetos Date do JavaScript (com limite de horas para cobrir o dia todo)
+    let dtInicio = dataInicioStr ? new Date(dataInicioStr + 'T00:00:00') : new Date('2000-01-01');
+    let dtFim = dataFimStr ? new Date(dataFimStr + 'T23:59:59') : new Date('2100-01-01');
+
+    // Filtra matematicamente: Só exibe se for da aba atual E se a data da postagem cair estritamente no intervalo selecionado
+    let dadosFiltrados = window.dadosRevisaoGlobais.filter(d => {
+        if (d.tipo !== window.tipoRevisaoAtual) return false;
+        
+        if (d.dataPostagem) {
+            let partesData = d.dataPostagem.split(' ')[0].split('/'); // Pega só o DD/MM/YYYY
+            if (partesData.length === 3) {
+                // Monta a data no padrão JS: Ano, Mês (0 a 11), Dia
+                let dtPostagem = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+                // O Firewall local atua aqui:
+                if (dtPostagem < dtInicio || dtPostagem > dtFim) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    });
 
     if (dadosFiltrados.length === 0) {
         lista.innerHTML = `<div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(251,191,36, 0.4); padding: 40px 20px; border-radius: 12px; text-align:center;">
             <i class="fas fa-folder-open" style="color: var(--sup-neon); font-size: 40px; margin-bottom: 15px;"></i>
             <h3 style="color: var(--sup-neon); font-size: 18px;">Nenhuma correção encontrada.</h3>
-            <p style="color: var(--text-sub); font-size: 14px;">Não localizamos atividades avaliadas de <b>${window.tipoRevisaoAtual}</b> neste intervalo.</p>
+            <p style="color: var(--text-sub); font-size: 14px;">Não localizamos atividades avaliadas de <b>${window.tipoRevisaoAtual}</b> neste intervalo exato.</p>
         </div>`;
         return;
     }
@@ -107,9 +131,9 @@ window.renderizarListaRevisao = function() {
             let labelPostador = d.tipo === 'Relatórios' ? 'Auxiliar:' : 'Supervisor:';
             let labelAvaliador = 'Responsável:';
             
-            // Botão Principal de Link
+            // Botão Principal de Link com validação extra de segurança
             let btnLink = '';
-            if (d.link.startsWith('http')) {
+            if (d.link && d.link.startsWith('http')) {
                 if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
                     btnLink = `<button class="btn-tech" style="padding: 4px 10px; font-size: 11px;" data-url="${d.link}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
                 } else {

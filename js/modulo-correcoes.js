@@ -4,6 +4,7 @@
 */
 
 window.tipoAtividadeAtual = 'Relatórios';
+window.unsubPendentes = null; // Variável para controlar a escuta em tempo real
 
 window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, btnElement = null) {
     window.tipoAtividadeAtual = tipo;
@@ -21,9 +22,15 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
     let container = document.getElementById('lista-atividades-pendentes');
     container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:40px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Buscando atividades pendentes...</div>';
 
-    window.db.collection("atividades_pendentes")
+    // Se já houver uma escuta ativa, nós a desligamos antes de abrir uma nova
+    if (window.unsubPendentes) {
+        window.unsubPendentes();
+    }
+
+    // Usando onSnapshot para espelhamento 100% em tempo real do banco de dados
+    window.unsubPendentes = window.db.collection("atividades_pendentes")
         .where("avaliado", "==", false)
-        .get().then(snap => {
+        .onSnapshot(snap => {
             let contagens = { 'Relatórios': 0, 'Grupos': 0, 'Soldados': 0, 'Convites': 0, 'PPP': 0 };
             let docsAtuais = [];
 
@@ -41,11 +48,12 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
             for (let cat in contagens) {
                 let tab = document.getElementById('tab-' + cat);
                 if (tab) {
-                    tab.innerHTML = `${cat} ${contagens[cat] > 0 ? `<span class="badge-tab">${contagens[cat]}</span>` : ''}`;
+                    tab.innerHTML = `${cat} ${contagens[cat] > 0 ? \`<span class="badge-tab">\${contagens[cat]}</span>\` : ''}`;
                 }
             }
 
             container.innerHTML = '';
+            
             if (docsAtuais.length === 0) {
                 container.innerHTML = `
                     <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(76, 175, 80, 0.4); padding: 50px 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%;">
@@ -59,8 +67,8 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
             docsAtuais.forEach(d => {
                 container.appendChild(window.criarCardAtividade(d));
             });
-        }).catch(err => {
-            container.innerHTML = `<div style="color:#ff2a2a; text-align:center; padding:20px;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar as atividades: ${err.message}</div>`;
+        }, err => {
+            container.innerHTML = `<div style="color:#ff2a2a; text-align:center; padding:20px;"><i class="fas fa-exclamation-triangle"></i> Erro ao espelhar as atividades em tempo real: ${err.message}</div>`;
         });
 }
 
@@ -95,10 +103,9 @@ window.criarCardAtividade = function(d) {
             try {
                 let histArr = JSON.parse(d.historico);
                 if (histArr.length > 0) {
-                    // Função para extrair apenas a data de uma string e criar um objeto Date para o cálculo matemático
                     let parseDateStr = function(str) {
                         if (!str) return null;
-                        let p = str.split(' ')[0].split('/'); // Extrai DD/MM/YYYY
+                        let p = str.split(' ')[0].split('/'); 
                         if (p.length === 3) return new Date(p[2], p[1] - 1, p[0]);
                         return null;
                     };
@@ -111,13 +118,12 @@ window.criarCardAtividade = function(d) {
                         let dtHist = parseDateStr(h.data);
                         let diffDias = 0;
                         
-                        // O sistema interpreta como data e calcula a diferença apenas neste momento
                         if (dtAtual && dtHist) {
                             let diffTime = Math.abs(dtAtual.getTime() - dtHist.getTime());
                             diffDias = Math.round(diffTime / (1000 * 3600 * 24));
                         }
                         
-                        let dataFormatada = h.data.split(' ')[0]; // Pega apenas a data para visualização
+                        let dataFormatada = h.data.split(' ')[0]; 
                         historicoHtml += `<div style="font-size:11px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
                             <span><i class="far fa-calendar-alt"></i> ${dataFormatada}</span>
                             <span style="color:${corResp}; font-weight:bold; text-transform:uppercase;">${h.resposta}</span>
@@ -154,14 +160,14 @@ window.criarCardAtividade = function(d) {
     let linkUrl = d.link ? d.link.trim() : '';
     let btnLink = '';
     
-    if (linkUrl.startsWith('http')) {
+    if (linkUrl && linkUrl.startsWith('http')) {
         if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
             btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
         } else {
             btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
         }
     } else {
-        btnLink = `<span style="color:#ff2a2a; font-size:13px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Link inválido ou vazio (${linkUrl})</span>`;
+        btnLink = `<span style="color:#ff2a2a; font-size:13px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Link ausente ou inválido</span>`;
     }
 
     let inputsHtml = '';
@@ -248,7 +254,8 @@ window.salvarAvaliacaoAtividade = function(id, tipo) {
     window.db.collection("atividades_pendentes").doc(id).update(payload).then(() => {
         window.mostrarToast("Correção finalizada!", "success");
         window.registrarLogAtividade("Avaliação de Atividade", `Avaliou uma atividade de [${tipo}] ID do doc: ${id}. Status Atribuído: ${payload.status}`);
-        window.carregarAtividadesPendentes();
+        // Não é mais necessário chamar window.carregarAtividadesPendentes() manualmente aqui,
+        // pois o .onSnapshot fará a tela atualizar sozinha assim que o banco mudar!
     }).catch(e => {
         window.mostrarToast("Ocorreu um erro ao tentar salvar a avaliação: " + e.message, "error");
     });
