@@ -22,12 +22,10 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
     let container = document.getElementById('lista-atividades-pendentes');
     container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:40px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Buscando atividades pendentes...</div>';
 
-    // Se já houver uma escuta ativa, nós a desligamos antes de abrir uma nova
     if (window.unsubPendentes) {
         window.unsubPendentes();
     }
 
-    // Usando onSnapshot para espelhamento 100% em tempo real do banco de dados
     window.unsubPendentes = window.db.collection("atividades_pendentes")
         .where("avaliado", "==", false)
         .onSnapshot(snap => {
@@ -48,7 +46,7 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
             for (let cat in contagens) {
                 let tab = document.getElementById('tab-' + cat);
                 if (tab) {
-                    tab.innerHTML = `${cat} ${contagens[cat] > 0 ? \`<span class="badge-tab">\${contagens[cat]}</span>\` : ''}`;
+                    tab.innerHTML = cat + (contagens[cat] > 0 ? ' <span class="badge-tab">' + contagens[cat] + '</span>' : '');
                 }
             }
 
@@ -254,8 +252,6 @@ window.salvarAvaliacaoAtividade = function(id, tipo) {
     window.db.collection("atividades_pendentes").doc(id).update(payload).then(() => {
         window.mostrarToast("Correção finalizada!", "success");
         window.registrarLogAtividade("Avaliação de Atividade", `Avaliou uma atividade de [${tipo}] ID do doc: ${id}. Status Atribuído: ${payload.status}`);
-        // Não é mais necessário chamar window.carregarAtividadesPendentes() manualmente aqui,
-        // pois o .onSnapshot fará a tela atualizar sozinha assim que o banco mudar!
     }).catch(e => {
         window.mostrarToast("Ocorreu um erro ao tentar salvar a avaliação: " + e.message, "error");
     });
