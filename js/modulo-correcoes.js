@@ -5,7 +5,7 @@
 
 window.tipoAtividadeAtual = 'Relatórios';
 window.unsubPendentes = null; 
-window.listenerControlePendenciasAtivo = false;
+window.listenerLixoAtivo = false;
 
 window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, btnElement = null) {
     window.tipoAtividadeAtual = tipo;
@@ -23,25 +23,17 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
     let container = document.getElementById('lista-atividades-pendentes');
     container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:40px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Buscando atividades pendentes...</div>';
 
-    // A MÁGICA DA SUA IDEIA: O site escuta a lista oficial enviada pela planilha e atua como "Vassoura"
-    if (!window.listenerControlePendenciasAtivo) {
-        window.listenerControlePendenciasAtivo = true;
-        window.db.collection("sistema").doc("controle_pendencias").onSnapshot(doc => {
-            if (doc.exists && doc.data().listaOficial) {
-                try {
-                    let listaOficial = JSON.parse(doc.data().listaOficial);
-                    // Pega tudo que está no banco de dados
-                    window.db.collection("atividades_pendentes").get().then(snap => {
-                        snap.forEach(docPendente => {
-                            // Se o ID do banco de dados NÃO ESTIVER na lista oficial da planilha, o site apaga!
-                            if (!listaOficial.includes(docPendente.id)) {
-                                window.db.collection("atividades_pendentes").doc(docPendente.id).delete();
-                            }
-                        });
-                    });
-                } catch(e) { console.error("Erro na varredura", e); }
-            }
-        });
+    // A SOLUÇÃO FINAL: O Site atua como Lixeiro. Tudo que a planilha marcar como "lixo", o site apaga do banco.
+    if (!window.listenerLixoAtivo) {
+        window.listenerLixoAtivo = true;
+        window.db.collection("atividades_pendentes")
+            .where("lixo", "==", true)
+            .onSnapshot(snap => {
+                snap.forEach(doc => {
+                    window.db.collection("atividades_pendentes").doc(doc.id).delete()
+                    .catch(e => console.error("Erro ao apagar fantasma do banco:", e));
+                });
+            });
     }
 
     if (window.unsubPendentes) {
