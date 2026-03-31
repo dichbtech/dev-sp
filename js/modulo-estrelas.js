@@ -14,10 +14,21 @@ window.escutarCargos = function() {
 }
 
 window.escutarMilitaresEstrelas = function() {
+    // A TÁTICA DO LIXEIRO: O painel escuta se alguém foi marcado como 'lixo' pelo Apps Script e apaga de vez
+    window.db.collection("militares").where("lixo", "==", true).onSnapshot((snapLixo) => {
+        snapLixo.forEach(docLixo => {
+            window.db.collection("militares").doc(docLixo.id).delete()
+            .catch(e => console.error("Erro ao limpar demitido:", e));
+        });
+    });
+
     window.db.collection("militares").onSnapshot((snapshot) => {
         militaresEstrelasData = [];
         snapshot.forEach((docSnap) => {
-            militaresEstrelasData.push({ id: docSnap.id, ...docSnap.data() });
+            // Ignora na exibição quem está no processo de ser deletado
+            if (docSnap.data().lixo !== true) {
+                militaresEstrelasData.push({ id: docSnap.id, ...docSnap.data() });
+            }
         });
         window.renderTabelaEstrelas();
     });
