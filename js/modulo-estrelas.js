@@ -1,6 +1,28 @@
 let militaresEstrelasData = [];
 window.listenerDemitidosAtivo = false;
 
+// NOVO: Gerenciador de Tela de Carregamento (Loader)
+window.mostrarLoader = function(mostrar, texto = "Processando...") {
+    let loader = document.getElementById('hub-global-loader');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'hub-global-loader';
+        loader.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; backdrop-filter: blur(4px);';
+        loader.innerHTML = `
+            <i class="fas fa-circle-notch fa-spin" style="font-size:50px; color:var(--sup-neon); margin-bottom:20px; filter: drop-shadow(0 0 10px var(--sup-neon));"></i>
+            <h2 id="hub-loader-texto" style="color:#fff; font-family:Rajdhani, sans-serif; font-weight:600; letter-spacing:1px; margin:0;"></h2>
+        `;
+        document.body.appendChild(loader);
+    }
+    
+    if (mostrar) {
+        document.getElementById('hub-loader-texto').innerText = texto;
+        loader.style.display = 'flex';
+    } else {
+        loader.style.display = 'none';
+    }
+}
+
 window.verificarPermissaoCorrecao = async function() {
     try {
         let user = window.firebase.auth().currentUser;
@@ -113,7 +135,8 @@ window.renderTabelaEstrelas = function() {
         let str = '★'.repeat(dados.estrelas || 0);
         let eHtml = `<span style="color:var(--sup-neon); font-size:14px; letter-spacing:2px; filter: drop-shadow(0 0 5px var(--sup-glow));">${str}</span> <span style="font-weight:bold; color:#fff; margin-left:5px;">(${dados.estrelas || 0})</span>`;
         let sHtml = dados.status === 'Suspenso' ? '<span style="color:#ff2a2a; font-weight:bold; background:rgba(255,42,42,0.1); padding:4px 8px; border-radius:4px; font-size:12px;">SUSPENSO</span>' : '<span style="color:#4caf50; background:rgba(76,175,80,0.1); padding:4px 8px; border-radius:4px; font-size:12px;">ATIVO</span>';
-        let avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${dados.nome}&action=std&direction=2&head_direction=2&gesture=sml&size=m&time=${new Date().getTime()}`;
+        let ts = new Date().getTime();
+        let avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${dados.nome}&action=std&direction=2&head_direction=2&gesture=sml&size=m&time=${ts}`;
         let premiosHtml = dados.premios_acumulados > 0 ? `<span title="${dados.premios_acumulados} Prêmio(s)">🎖️ x${dados.premios_acumulados}</span>` : '';
         
         let tr = document.createElement('tr');
@@ -139,138 +162,192 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if (!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
-    let [y, m, d] = dateVal.split('-');
-    let dataBr = `${d}/${m}/${y}`;
     
-    let logCheckSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
-    let validated = false;
-    logCheckSnap.forEach(doc => { if (doc.data().acao.includes("Lote")) validated = true; });
-    if (validated) return window.customAlert(`O ciclo do dia ${dataBr} já foi validado! Use a aba Correção para alterações.`, "Ciclo Já Validado");
+    window.mostrarLoader(true, "Analisando sistema. Aguarde...");
+    
+    try {
+        let [y, m, d] = dateVal.split('-');
+        let dataBr = `${d}/${m}/${y}`;
+        
+        let logCheckSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
+        let validated = false;
+        logCheckSnap.forEach(doc => { if (doc.data().acao.includes("Lote")) validated = true; });
+        if (validated) {
+            return window.customAlert(`O ciclo do dia ${dataBr} já foi validado! Use a aba Correção para alterações.`, "Ciclo Já Validado");
+        }
 
-    let docSnap = await window.db.collection("sistema").doc("promocoes").get();
-    if (!docSnap.exists) return window.customAlert("Dados não sincronizados.", "Erro");
+        let docSnap = await window.db.collection("sistema").doc("promocoes").get();
+        if (!docSnap.exists) {
+            return window.customAlert("Dados não sincronizados.", "Erro");
+        }
 
-    let promocoes = JSON.parse(docSnap.data().dados);
-    let excluidosArr = document.getElementById('lote-excluidos').value.split(',').map(s => s.trim()).filter(s => s !== "");
-    let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
+        let promocoes = JSON.parse(docSnap.data().dados);
+        let excluidosArr = document.getElementById('lote-excluidos').value.split(',').map(s => s.trim()).filter(s => s !== "");
+        let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
 
-    if (filtradas.length === 0) return window.customAlert(`Nada encontrado para ${dataBr}.`, "Busca Vazia");
+        if (filtradas.length === 0) {
+            return window.customAlert(`Nada encontrado para ${dataBr}.`, "Busca Vazia");
+        }
 
-    let promotorData = {};
-    let idsColetados = [];
-    filtradas.forEach(p => {
-        if (!promotorData[p.promotor]) promotorData[p.promotor] = [];
-        promotorData[p.promotor].push(p.id);
-        idsColetados.push(p.id);
-    });
+        let promotorData = {};
+        let idsColetados = [];
+        filtradas.forEach(p => {
+            if (!promotorData[p.promotor]) promotorData[p.promotor] = [];
+            promotorData[p.promotor].push(p.id);
+            idsColetados.push(p.id);
+        });
 
-    let html = `<div style="background:rgba(76,175,80,0.1); padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #4caf50;">${filtradas.length} promoções válidas encontradas.</div><ul style="list-style:none; padding:0;">`;
-    let contagem = {};
-    for (let nick in promotorData) {
-        let ids = promotorData[nick];
-        contagem[nick] = ids.length;
-        html += `<li style="margin-bottom:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:5px;"><strong style="color:var(--sup-neon);">${nick}</strong> efetuou ${ids.length} promoção(ões).</li>`;
+        let html = `<div style="background:rgba(76,175,80,0.1); padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #4caf50;">${filtradas.length} promoções válidas encontradas.</div><ul style="list-style:none; padding:0;">`;
+        let contagem = {};
+        for (let nick in promotorData) {
+            let ids = promotorData[nick];
+            contagem[nick] = ids.length;
+            html += `<li style="margin-bottom:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:5px;"><strong style="color:var(--sup-neon);">${nick}</strong> efetuou ${ids.length} promoção(ões).</li>`;
+        }
+        html += `</ul><button class="btn-tech btn-save" style="width:100%;" onclick='window.confirmarLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'>Atribuir Ciclos</button>`;
+        
+        document.getElementById('resultado-lote').innerHTML = html;
+        document.getElementById('resultado-lote').style.display = 'block';
+    } catch (error) {
+        console.error(error);
+        window.mostrarToast("Ocorreu um erro ao buscar as promoções.", "error");
+    } finally {
+        window.mostrarLoader(false);
     }
-    html += `</ul><button class="btn-tech btn-save" style="width:100%;" onclick='window.confirmarLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'>Atribuir Ciclos</button>`;
-    
-    document.getElementById('resultado-lote').innerHTML = html;
-    document.getElementById('resultado-lote').style.display = 'block';
 }
 
-window.confirmarLote = async function(contagem, idsColetados, dataBr) {
-    // ALTERAÇÃO: Removido o .substring(0, 50) para garantir que TODOS os IDs sejam salvos
-    let idLoteStr = idsColetados.join(', '); 
+window.confirmarLote = async function(contagem, idsColetados, dataBr, skipLoader = false) {
+    if (!skipLoader) window.mostrarLoader(true, "Atribuindo estrelas e registrando logs...");
     
-    for (let nick in contagem) {
-        let qtd = contagem[nick];
-        let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase()) || nick;
-        let ref = window.db.collection("militares").doc(officialNick);
-        let docM = await ref.get();
-        let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
-        if (docM.exists) {
-            let d = docM.data(); if (d.status === 'Suspenso') continue;
-            p = d.promocoes_realizadas || 0; e = d.estrelas || 0; pr = d.premios_acumulados || 0; status = d.status;
+    try {
+        let idLoteStr = idsColetados.join(', '); 
+        
+        for (let nick in contagem) {
+            let qtd = contagem[nick];
+            let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase()) || nick;
+            let ref = window.db.collection("militares").doc(officialNick);
+            let docM = await ref.get();
+            let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
+            if (docM.exists) {
+                let d = docM.data(); if (d.status === 'Suspenso') continue;
+                p = d.promocoes_realizadas || 0; e = d.estrelas || 0; pr = d.premios_acumulados || 0; status = d.status;
+            }
+            let estrelasAntes = e; p += qtd; e += Math.floor(p / 3); p = p % 3;
+            if (Math.floor(estrelasAntes / 10) < Math.floor(e / 10)) window.customAlert(`🏅 ${officialNick} atingiu ${e} estrelas!`, "Pagamento!");
+            await ref.set({ nome: officialNick, status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, { merge: true });
+            window.registrarLogEstrela(officialNick, "Validação em Lote", idLoteStr, `Validou ${qtd} promo.`, dataBr);
         }
-        let estrelasAntes = e; p += qtd; e += Math.floor(p / 3); p = p % 3;
-        if (Math.floor(estrelasAntes / 10) < Math.floor(e / 10)) window.customAlert(`🏅 ${officialNick} atingiu ${e} estrelas!`, "Pagamento!");
-        await ref.set({ nome: officialNick, status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, { merge: true });
-        window.registrarLogEstrela(officialNick, "Validação em Lote", idLoteStr, `Validou ${qtd} promo.`, dataBr);
+        window.mostrarToast("Lote processado!", "success");
+        document.getElementById('resultado-lote').style.display = 'none';
+    } catch (error) {
+        console.error(error);
+        window.mostrarToast("Erro ao salvar lote.", "error");
+    } finally {
+        if (!skipLoader) window.mostrarLoader(false);
     }
-    window.mostrarToast("Lote processado!", "success");
-    document.getElementById('resultado-lote').style.display = 'none';
 }
 
 window.buscarCorrecaoLote = async function() {
     let dateVal = document.getElementById('correcao-data').value;
     if (!dateVal) return window.mostrarToast("Selecione uma data.", "error");
-    let [y, m, d] = dateVal.split('-');
-    let dataBr = `${d}/${m}/${y}`;
     
-    let oldLogsSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
-    let hasLog = false;
-    oldLogsSnap.forEach(doc => { if (doc.data().acao.includes("Lote")) hasLog = true; });
-    if (!hasLog) return window.customAlert(`Sem registros para ${dataBr}.`, "Erro");
+    window.mostrarLoader(true, "Preparando matemática do ciclo. Aguarde...");
 
-    let docSnap = await window.db.collection("sistema").doc("promocoes").get();
-    let promocoes = JSON.parse(docSnap.data().dados);
-    let excluidosArr = document.getElementById('correcao-excluidos').value.split(',').map(s => s.trim()).filter(s => s !== "");
-    let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
+    try {
+        let [y, m, d] = dateVal.split('-');
+        let dataBr = `${d}/${m}/${y}`;
+        
+        let oldLogsSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
+        let hasLog = false;
+        oldLogsSnap.forEach(doc => { if (doc.data().acao.includes("Lote")) hasLog = true; });
+        if (!hasLog) {
+            return window.customAlert(`Sem registos para ${dataBr}.`, "Erro");
+        }
 
-    let promotorData = {};
-    let idsColetados = [];
-    filtradas.forEach(p => {
-        if (!promotorData[p.promotor]) promotorData[p.promotor] = [];
-        promotorData[p.promotor].push(p.id);
-        idsColetados.push(p.id);
-    });
+        let docSnap = await window.db.collection("sistema").doc("promocoes").get();
+        let promocoes = JSON.parse(docSnap.data().dados);
+        let excluidosArr = document.getElementById('correcao-excluidos').value.split(',').map(s => s.trim()).filter(s => s !== "");
+        let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
 
-    let html = `<div style="background:rgba(245,158,11,0.1); padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #f59e0b;">O sistema reverterá o ciclo de ${dataBr} e aplicará este novo.</div><ul style="list-style:none; padding:0;">`;
-    let contagem = {};
-    for (let nick in promotorData) {
-        contagem[nick] = promotorData[nick].length;
-        html += `<li style="margin-bottom:5px;"><strong style="color:var(--admin-neon);">${nick}</strong> ficará com ${contagem[nick]} promo.</li>`;
+        let promotorData = {};
+        let idsColetados = [];
+        filtradas.forEach(p => {
+            if (!promotorData[p.promotor]) promotorData[p.promotor] = [];
+            promotorData[p.promotor].push(p.id);
+            idsColetados.push(p.id);
+        });
+
+        let html = `<div style="background:rgba(245,158,11,0.1); padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #f59e0b;">O sistema reverterá o ciclo de ${dataBr} e aplicará este novo.</div><ul style="list-style:none; padding:0;">`;
+        let contagem = {};
+        for (let nick in promotorData) {
+            contagem[nick] = promotorData[nick].length;
+            html += `<li style="margin-bottom:5px;"><strong style="color:var(--admin-neon);">${nick}</strong> ficará com ${contagem[nick]} promo.</li>`;
+        }
+        html += `</ul><div style="display:flex; gap:10px;"><button class="btn-tech" style="flex:1; background:#f59e0b; color:#000;" onclick='window.confirmarCorrecaoLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'>Substituir</button><button class="btn-tech" style="flex:1; background:#ff2a2a; color:#fff;" onclick='window.reverterCicloTotal("${dataBr}")'>Apagar Tudo</button></div>`;
+        
+        document.getElementById('resultado-correcao').innerHTML = html;
+        document.getElementById('resultado-correcao').style.display = 'block';
+    } catch (error) {
+        console.error(error);
+        window.mostrarToast("Erro ao preparar correção.", "error");
+    } finally {
+        window.mostrarLoader(false);
     }
-    html += `</ul><div style="display:flex; gap:10px;"><button class="btn-tech" style="flex:1; background:#f59e0b; color:#000;" onclick='window.confirmarCorrecaoLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'>Substituir</button><button class="btn-tech" style="flex:1; background:#ff2a2a; color:#fff;" onclick='window.reverterCicloTotal("${dataBr}")'>Apagar Tudo</button></div>`;
-    
-    document.getElementById('resultado-correcao').innerHTML = html;
-    document.getElementById('resultado-correcao').style.display = 'block';
 }
 
 window.confirmarCorrecaoLote = async function(contagem, idsColetados, dataBr) {
-    await window.reverterCicloTotal(dataBr, true);
-    await window.confirmarLote(contagem, idsColetados, dataBr);
-    window.mostrarToast("Correção aplicada!", "success");
-    document.getElementById('modal-correcao-lote').style.display = 'none';
+    window.mostrarLoader(true, "Substituindo ciclo no banco de dados...");
+    try {
+        await window.reverterCicloTotal(dataBr, true, true);
+        await window.confirmarLote(contagem, idsColetados, dataBr, true);
+        window.mostrarToast("Correção aplicada com sucesso!", "success");
+        document.getElementById('modal-correcao-lote').style.display = 'none';
+    } catch (error) {
+        console.error(error);
+        window.mostrarToast("Erro ao substituir ciclo.", "error");
+    } finally {
+        window.mostrarLoader(false);
+    }
 }
 
-window.reverterCicloTotal = async function(dataBr, silencioso = false) {
+window.reverterCicloTotal = async function(dataBr, silencioso = false, skipLoader = false) {
     if (!silencioso && !confirm(`Deseja APAGAR a validação de ${dataBr}?`)) return;
-    let snap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
-    for (let logDoc of snap.docs) {
-        let log = logDoc.data();
-        let matchProm = log.detalhes.match(/Validou (\d+)/);
-        let promoRevert = matchProm ? parseInt(matchProm[1]) : 0;
-        if (promoRevert > 0) {
-            let ref = window.db.collection("militares").doc(log.beneficiado);
-            let dM = await ref.get();
-            if (dM.exists) {
-                let p = dM.data().promocoes_realizadas || 0; let e = dM.data().estrelas || 0;
-                p -= promoRevert;
-                while (p < 0) { p += 3; e -= 1; }
-                if (e < 0) e = 0;
-                await ref.set({ promocoes_realizadas: p, estrelas: e }, { merge: true });
+    
+    if (!skipLoader) window.mostrarLoader(true, "Estornando ciclo do banco de dados...");
+
+    try {
+        let snap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
+        for (let logDoc of snap.docs) {
+            let log = logDoc.data();
+            let matchProm = log.detalhes.match(/Validou (\d+)/);
+            let promoRevert = matchProm ? parseInt(matchProm[1]) : 0;
+            if (promoRevert > 0) {
+                let ref = window.db.collection("militares").doc(log.beneficiado);
+                let dM = await ref.get();
+                if (dM.exists) {
+                    let p = dM.data().promocoes_realizadas || 0; let e = dM.data().estrelas || 0;
+                    p -= promoRevert;
+                    while (p < 0) { p += 3; e -= 1; }
+                    if (e < 0) e = 0;
+                    await ref.set({ promocoes_realizadas: p, estrelas: e }, { merge: true });
+                }
             }
+            await window.db.collection("logs_estrelas").doc(logDoc.id).delete();
         }
-        await window.db.collection("logs_estrelas").doc(logDoc.id).delete();
-    }
-    if (!silencioso) {
-        window.mostrarToast("Ciclo apagado!", "success");
-        document.getElementById('modal-correcao-lote').style.display = 'none';
+        if (!silencioso) {
+            window.mostrarToast("Ciclo apagado com sucesso!", "success");
+            document.getElementById('modal-correcao-lote').style.display = 'none';
+        }
+    } catch (error) {
+        console.error(error);
+        window.mostrarToast("Erro ao apagar ciclo.", "error");
+    } finally {
+        if (!skipLoader) window.mostrarLoader(false);
     }
 }
 
 window.escutarLogsEstrelas = function() {
-    window.db.collection("logs_estrelas").orderBy("timestamp", "desc").limit(50).onSnapshot(snap => {
+    window.db.collection("logs_estrelas").orderBy("timestamp", "desc").onSnapshot(snap => {
         let tbody = document.querySelector('#tb-logs tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -279,7 +356,6 @@ window.escutarLogsEstrelas = function() {
             let cor = d.acao.includes("Validação") || d.acao.includes("Promoção") ? "color:#4caf50;" : "color:#ff2a2a;";
             if (d.acao.includes("Correção")) cor = "color:#f59e0b;";
             
-            // ALTERAÇÃO: Adicionada a Data de Referência visível na tabela de Logs
             let refHtml = d.data_referencia ? `<br><span style="color:var(--sup-neon); font-size:11px; font-weight:bold;"><i class="fas fa-calendar-check"></i> Ref: ${d.data_referencia}</span>` : '';
             
             tbody.innerHTML += `<tr><td style="font-size:12px;">${d.data_hora}</td><td><strong>${d.autor}</strong></td><td>${d.beneficiado}</td><td style="${cor} font-weight:bold;">${d.acao}</td><td style="font-size:13px; color:var(--text-sub);">IDs: ${d.id_promocao} ${refHtml} <br> ${d.detalhes}</td></tr>`;
