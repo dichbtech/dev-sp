@@ -1,20 +1,17 @@
 let militaresEstrelasData = [];
 window.listenerDemitidosAtivo = false;
 
-// FUNÇÃO DE PERMISSÃO CORRIGIDA: Consulta diretamente o banco de dados imitando as Regras de Segurança
 window.verificarPermissaoCorrecao = async function() {
     try {
         let user = window.firebase.auth().currentUser;
-        if (!user) return; // Aguarda o usuário estar autenticado
+        if (!user) return; 
         
         let nivel = "NENHUM";
         
-        // 1. Tenta buscar o nível no acesso manual
         let docAcesso = await window.db.collection("acessos").doc(user.email).get();
         if (docAcesso.exists) {
             nivel = docAcesso.data().nivel;
         } else {
-            // 2. Se não achar, tenta buscar na planilha
             let docPlan = await window.db.collection("sistema").doc("acessos_planilha").get();
             if (docPlan.exists && docPlan.data().permissoes_regras && docPlan.data().permissoes_regras[user.email]) {
                 nivel = docPlan.data().permissoes_regras[user.email].nivel;
@@ -24,7 +21,6 @@ window.verificarPermissaoCorrecao = async function() {
         const cargosAutorizados = ["VICE-LIDER", "LIDER", "ADMIN"];
         let btn = document.getElementById('btn-dashboard-correcao');
         
-        // Se o nível estiver na lista autorizada, o botão aparece
         if (btn && cargosAutorizados.includes(nivel)) {
             btn.style.display = 'inline-block';
         }
@@ -86,7 +82,7 @@ window.escutarDemitidos = function() {
 }
 
 window.escutarMilitaresEstrelas = function() {
-    window.verificarPermissaoCorrecao(); // Invoca a verificação robusta de nível
+    window.verificarPermissaoCorrecao();
     window.escutarDemitidos(); 
 
     window.db.collection("militares").onSnapshot((snapshot) => {
@@ -182,7 +178,9 @@ window.buscarPromocoesLote = async function() {
 }
 
 window.confirmarLote = async function(contagem, idsColetados, dataBr) {
-    let idLoteStr = idsColetados.join(', ').substring(0, 50);
+    // ALTERAÇÃO: Removido o .substring(0, 50) para garantir que TODOS os IDs sejam salvos
+    let idLoteStr = idsColetados.join(', '); 
+    
     for (let nick in contagem) {
         let qtd = contagem[nick];
         let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase()) || nick;
@@ -280,7 +278,11 @@ window.escutarLogsEstrelas = function() {
             let d = doc.data();
             let cor = d.acao.includes("Validação") || d.acao.includes("Promoção") ? "color:#4caf50;" : "color:#ff2a2a;";
             if (d.acao.includes("Correção")) cor = "color:#f59e0b;";
-            tbody.innerHTML += `<tr><td style="font-size:12px;">${d.data_hora}</td><td><strong>${d.autor}</strong></td><td>${d.beneficiado}</td><td style="${cor} font-weight:bold;">${d.acao}</td><td style="font-size:13px; color:var(--text-sub);">ID/Lote: ${d.id_promocao} <br> ${d.detalhes}</td></tr>`;
+            
+            // ALTERAÇÃO: Adicionada a Data de Referência visível na tabela de Logs
+            let refHtml = d.data_referencia ? `<br><span style="color:var(--sup-neon); font-size:11px; font-weight:bold;"><i class="fas fa-calendar-check"></i> Ref: ${d.data_referencia}</span>` : '';
+            
+            tbody.innerHTML += `<tr><td style="font-size:12px;">${d.data_hora}</td><td><strong>${d.autor}</strong></td><td>${d.beneficiado}</td><td style="${cor} font-weight:bold;">${d.acao}</td><td style="font-size:13px; color:var(--text-sub);">IDs: ${d.id_promocao} ${refHtml} <br> ${d.detalhes}</td></tr>`;
         });
     });
 }
