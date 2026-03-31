@@ -87,8 +87,12 @@
 
         <div id="modulo-estrelas" class="admin-section">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; flex-wrap:wrap; gap:15px;">
-                <h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
-                <button id="btn-admin-correcao-lote" class="btn-tech btn-add" style="display:none; font-size:13px; padding:8px 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'"><i class="fas fa-tools"></i> Corrigir Ciclo (Líder/Admin)</button>
+                <div style="display:flex; align-items:center;">
+                    <h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
+                    <button id="btn-dashboard-correcao" class="btn-tech" style="display:none; padding: 6px 12px; margin-left: 15px; font-size: 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'" title="Painel de Correção de Ciclos">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </button>
+                </div>
             </div>
             <p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p>
             <div class="row" style="gap: 20px; align-items: flex-start;">
@@ -224,6 +228,37 @@
     </div>
   </div>
 
+  <div id="modal-correcao-lote" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
+      <div class="modal-content" style="max-width: 500px; width: 90%; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid var(--sup-neon); box-shadow: 0 0 20px rgba(251,191,36, 0.2);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h2 style="color:var(--sup-neon); margin:0; font-size:18px;"><i class="fas fa-tools"></i> CORREÇÃO DE CICLO</h2>
+              <button onclick="document.getElementById('modal-correcao-lote').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
+          </div>
+
+          <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">Use este painel para reverter ou substituir uma validação feita por erro.</p>
+
+          <div class="input-group" style="margin-bottom:15px;">
+              <label class="tech-label" style="display:block; margin-bottom:5px;">Data do Ciclo Original</label>
+              <div class="input-block">
+                  <input type="date" id="correcao-data" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;">
+              </div>
+          </div>
+
+          <div class="input-group" style="margin-bottom:15px;">
+              <label class="tech-label" style="display:block; margin-bottom:5px;">IDs para EXCLUIR (Separados por vírgula)</label>
+              <div class="input-block">
+                  <input type="text" id="correcao-excluidos" placeholder="Ex: 1023, 1025" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;">
+              </div>
+          </div>
+
+          <button class="btn-tech btn-add" style="width:100%; margin-bottom:15px; padding: 12px; font-size: 15px;" onclick="window.buscarCorrecaoLote()">
+              <i class="fas fa-search"></i> ANALISAR CICLO
+          </button>
+
+          <div id="resultado-correcao" style="display:none; max-height:300px; overflow-y:auto; margin-top:15px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;"></div>
+      </div>
+  </div>
+
   <footer>
     Desenvolvido com <i class="fa-solid fa-heart" style="color: #808080;"></i> por MegaMetall 
     <span style="margin: 0 10px; color: rgba(255,255,255,0.2);">|</span> 
@@ -244,5 +279,3 @@
   <script src="js/auth.js"></script>
 </body>
 </html>
-
-

@@ -1,6 +1,17 @@
 let militaresEstrelasData = [];
 window.listenerDemitidosAtivo = false;
 
+// FUNÇÃO DE PERMISSÃO: Mostra o tacômetro apenas para Vice+
+window.verificarPermissaoCorrecao = function() {
+    const nivel = window.usuarioLogadoNivel; // Assume-se que esta variável global existe com o nível do usuário
+    const cargosAutorizados = ["VICE-LIDER", "LIDER", "ADMIN"];
+    
+    let btn = document.getElementById('btn-dashboard-correcao');
+    if (btn && cargosAutorizados.includes(nivel)) {
+        btn.style.display = 'inline-block';
+    }
+}
+
 window.escutarCargos = function() {
     window.db.collection("sistema").doc("cargos").onSnapshot((doc) => {
         if (doc.exists && doc.data().dados) {
@@ -14,7 +25,6 @@ window.escutarCargos = function() {
     });
 }
 
-// O SITE ATUA E DEPOIS ESVAZIA A LIXEIRA
 window.escutarDemitidos = function() {
     if (window.listenerDemitidosAtivo) return;
     window.listenerDemitidosAtivo = true;
@@ -23,7 +33,6 @@ window.escutarDemitidos = function() {
         if (doc.exists && doc.data().lista) {
             try {
                 let demitidos = JSON.parse(doc.data().lista);
-                // Se a lista já estiver vazia, não faz nada
                 if (!Array.isArray(demitidos) || demitidos.length === 0) return;
 
                 let snap = await window.db.collection("militares").get();
@@ -32,8 +41,6 @@ window.escutarDemitidos = function() {
                 snap.forEach(militarDoc => {
                     let data = militarDoc.data();
                     let nomeMilitar = data.nome ? data.nome.trim() : militarDoc.id;
-
-                    // Verifica se o militar está na lista de demitidos
                     let isDemitido = demitidos.some(d => d.toLowerCase() === nomeMilitar.toLowerCase());
 
                     if (isDemitido) {
@@ -46,27 +53,20 @@ window.escutarDemitidos = function() {
                                 "O perfil foi removido automaticamente do rank de estrelas devido a registro de Demissão na planilha."
                             );
                         }).catch(e => console.error("Erro ao apagar demitido:", e));
-                        
                         promisesDeExclusao.push(p);
                     }
                 });
 
-                // Espera todas as exclusões terminarem e, em seguida, ESVAZIA a lista no Firebase
                 await Promise.all(promisesDeExclusao);
-                
-                window.db.collection("sistema").doc("demitidos").update({
-                    lista: "[]" // Limpa o documento para evitar que exclua novamente no futuro
-                }).catch(e => console.error("Erro ao esvaziar a lista de demitidos no Firebase:", e));
-
-            } catch (e) {
-                console.error("Erro na faxina de demitidos:", e);
-            }
+                window.db.collection("sistema").doc("demitidos").update({ lista: "[]" });
+            } catch (e) { console.error("Erro na faxina:", e); }
         }
     });
 }
 
 window.escutarMilitaresEstrelas = function() {
-    window.escutarDemitidos(); // Ativa a faxina automática ao abrir o módulo
+    window.verificarPermissaoCorrecao(); // Checa se mostra o ícone de tacômetro
+    window.escutarDemitidos(); 
 
     window.db.collection("militares").onSnapshot((snapshot) => {
         militaresEstrelasData = [];
@@ -80,7 +80,6 @@ window.escutarMilitaresEstrelas = function() {
 window.renderTabelaEstrelas = function() {
     let tbody = document.querySelector('#tb-militares-estrelas tbody');
     if (!tbody) return;
-    
     tbody.innerHTML = '';
     
     if (militaresEstrelasData.length === 0) {
@@ -94,32 +93,14 @@ window.renderTabelaEstrelas = function() {
     lista.forEach(dados => {
         let cargo = window.cargosMap[dados.nome] || '';
         let cargoHtml = cargo ? `<span style="color:var(--text-sub); font-size:11px; text-transform:uppercase; letter-spacing:1px; display:block; margin-top:2px;">${cargo}</span>` : '';
-        
         let str = '★'.repeat(dados.estrelas || 0);
         let eHtml = `<span style="color:var(--sup-neon); font-size:14px; letter-spacing:2px; filter: drop-shadow(0 0 5px var(--sup-glow));">${str}</span> <span style="font-weight:bold; color:#fff; margin-left:5px;">(${dados.estrelas || 0})</span>`;
-        
         let sHtml = dados.status === 'Suspenso' ? '<span style="color:#ff2a2a; font-weight:bold; background:rgba(255,42,42,0.1); padding:4px 8px; border-radius:4px; font-size:12px;">SUSPENSO</span>' : '<span style="color:#4caf50; background:rgba(76,175,80,0.1); padding:4px 8px; border-radius:4px; font-size:12px;">ATIVO</span>';
-        
-        let ts = new Date().getTime();
-        let avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${dados.nome}&action=std&direction=2&head_direction=2&gesture=sml&size=m&time=${ts}`;
-        
+        let avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${dados.nome}&action=std&direction=2&head_direction=2&gesture=sml&size=m&time=${new Date().getTime()}`;
         let premiosHtml = dados.premios_acumulados > 0 ? `<span title="${dados.premios_acumulados} Prêmio(s)">🎖️ x${dados.premios_acumulados}</span>` : '';
         
         let tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${avatarUrl}" onerror="this.style.display='none'" style="width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.8); border:2px solid var(--sup-neon); box-shadow:0 0 10px var(--sup-neon); object-fit:cover; object-position:center top;">
-                    <div>
-                        <div style="font-weight:bold; color:#fff; font-size:15px;">${dados.nome} ${premiosHtml}</div>
-                        ${cargoHtml}
-                    </div>
-                </div>
-            </td>
-            <td style="text-align:center; font-weight:bold; font-size:16px;">${dados.promocoes_realizadas || 0} <span style="color:#555; font-size:12px;">/ 3</span></td>
-            <td>${eHtml}</td>
-            <td style="text-align:center;">${sHtml}</td>
-        `;
+        tr.innerHTML = `<td><div style="display:flex; align-items:center; gap:12px;"><img src="${avatarUrl}" style="width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.8); border:2px solid var(--sup-neon); box-shadow:0 0 10px var(--sup-neon); object-fit:cover; object-position:center top;"><div><div style="font-weight:bold; color:#fff; font-size:15px;">${dados.nome} ${premiosHtml}</div>${cargoHtml}</div></div></td><td style="text-align:center; font-weight:bold; font-size:16px;">${dados.promocoes_realizadas || 0} <span style="color:#555; font-size:12px;">/ 3</span></td><td>${eHtml}</td><td style="text-align:center;">${sHtml}</td>`;
         tbody.appendChild(tr);
     });
 }
@@ -138,290 +119,148 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
     window.db.collection("logs_estrelas").add(docData);
 }
 
+// TRAVA ANTI-DUPLICIDADE
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if (!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
-
     let [y, m, d] = dateVal.split('-');
     let dataBr = `${d}/${m}/${y}`;
     
-    let excluidosStr = document.getElementById('lote-excluidos').value;
-    let excluidosArr = excluidosStr.split(',').map(s => s.trim()).filter(s => s !== "");
+    let logCheckSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
+    let validated = false;
+    logCheckSnap.forEach(doc => { if (doc.data().acao.includes("Lote")) validated = true; });
+    if (validated) return window.customAlert(`O ciclo do dia ${dataBr} já foi validado! Use a aba Correção para alterações.`, "Ciclo Já Validado");
 
     let docSnap = await window.db.collection("sistema").doc("promocoes").get();
-    if (!docSnap.exists) return window.customAlert("A planilha oficial ainda não enviou os dados de promoções para o sistema.", "Erro de Sincronização");
+    if (!docSnap.exists) return window.customAlert("Dados não sincronizados.", "Erro");
 
-    let promocoes = [];
-    try {
-        promocoes = JSON.parse(docSnap.data().dados);
-    } catch (e) {
-        return window.mostrarToast("Erro ao processar dados.", "error");
-    }
-
+    let promocoes = JSON.parse(docSnap.data().dados);
+    let excluidosArr = document.getElementById('lote-excluidos').value.split(',').map(s => s.trim()).filter(s => s !== "");
     let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
-    if (filtradas.length === 0) return window.customAlert(`Nenhuma promoção válida encontrada para a data ${dataBr}.`, "Busca Vazia");
+
+    if (filtradas.length === 0) return window.customAlert(`Nada encontrado para ${dataBr}.`, "Busca Vazia");
 
     let promotorData = {};
     let idsColetados = [];
-    
     filtradas.forEach(p => {
         if (!promotorData[p.promotor]) promotorData[p.promotor] = [];
         promotorData[p.promotor].push(p.id);
         idsColetados.push(p.id);
     });
 
-    let sysLink = `https://dic.systemhb.net/promocao?filtro%5Bdata_inicio%5D=${dateVal}&filtro%5Bdata_termino%5D=${dateVal}&filtro%5Blista%5D=todas`;
-
-    let html = `
-    <div style="color:#fff; margin-bottom:15px; font-size:15px; display:flex; flex-direction:column; gap:8px; background: rgba(76,175,80,0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(76,175,80,0.3);">
-        <div><i class="fas fa-check-circle" style="color:#4caf50;"></i> ${filtradas.length} promoções válidas localizadas.</div>
-        <a href="${sysLink}" target="_blank" style="color:var(--sup-neon); font-size:13px; text-decoration:none;"><i class="fas fa-external-link-alt"></i> Clique aqui para conferir promoções no system.</a>
-    </div>
-    <ul style="color:var(--text-sub); margin-bottom:15px; list-style: none; padding: 0; display:flex; flex-direction:column; gap:10px;">`;
-    
-    let contagemParaConfirmacao = {};
-
+    let html = `<div style="background:rgba(76,175,80,0.1); padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #4caf50;">${filtradas.length} promoções válidas encontradas.</div><ul style="list-style:none; padding:0;">`;
+    let contagem = {};
     for (let nick in promotorData) {
         let ids = promotorData[nick];
-        let qtd = ids.length;
-        contagemParaConfirmacao[nick] = qtd;
-        
-        let txtPromo = qtd === 1 ? "promoção válida" : "promoções válidas";
-        let linksIDs = ids.map(id => `<a href="https://dic.systemhb.net/promocao/ver/${id}" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-weight:bold; background:rgba(251,191,36,0.1); padding:3px 8px; border-radius:4px; margin-right:5px; border: 1px solid rgba(251,191,36,0.2); display:inline-block; margin-bottom:5px; transition:0.3s;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';">#${id}</a>`).join("");
-        
-        html += `
-        <li style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border-left:3px solid var(--sup-neon);">
-            <div style="color:#fff; font-size:15px; margin-bottom:8px;">
-                <strong style="color:var(--sup-neon); text-transform:uppercase;">${nick}</strong> efetuou ${qtd} ${txtPromo}.
-            </div>
-            <div style="font-size:12px; display:flex; flex-wrap:wrap; align-items:center;">
-                <span style="margin-right:10px;">IDs:</span> ${linksIDs}
-            </div>
-        </li>`;
+        contagem[nick] = ids.length;
+        html += `<li style="margin-bottom:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:5px;"><strong style="color:var(--sup-neon);">${nick}</strong> efetuou ${ids.length} promoção(ões).</li>`;
     }
+    html += `</ul><button class="btn-tech btn-save" style="width:100%;" onclick='window.confirmarLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'>Atribuir Ciclos</button>`;
     
-    html += `</ul><button class="btn-tech btn-save" style="width:100%; margin-top:10px;" onclick='window.confirmarLote(${JSON.stringify(contagemParaConfirmacao)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'><i class="fas fa-check-double"></i> Atribuir Ciclos Oficiais</button>`;
-
     document.getElementById('resultado-lote').innerHTML = html;
     document.getElementById('resultado-lote').style.display = 'block';
 }
 
 window.confirmarLote = async function(contagem, idsColetados, dataBr) {
-    let idLoteStr = idsColetados.join(', ');
-    if (idLoteStr.length > 50) idLoteStr = idLoteStr.substring(0, 47) + "...";
-
+    let idLoteStr = idsColetados.join(', ').substring(0, 50);
     for (let nick in contagem) {
         let qtd = contagem[nick];
-        let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase());
-        let dbNick = officialNick || nick;
-
-        let ref = window.db.collection("militares").doc(dbNick);
+        let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase()) || nick;
+        let ref = window.db.collection("militares").doc(officialNick);
         let docM = await ref.get();
-        
         let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
-        
         if (docM.exists) {
-            let dados = docM.data();
-            if (dados.status === 'Suspenso') continue;
-            p = dados.promocoes_realizadas || 0;
-            e = dados.estrelas || 0;
-            pr = dados.premios_acumulados || 0;
-            status = dados.status;
+            let d = docM.data(); if (d.status === 'Suspenso') continue;
+            p = d.promocoes_realizadas || 0; e = d.estrelas || 0; pr = d.premios_acumulados || 0; status = d.status;
         }
-
-        let estrelasAntes = e;
-        p += qtd;
-        let estrelasGanhas = Math.floor(p / 3);
-        p = p % 3;
-        e += estrelasGanhas;
-
-        let detailLog = `Validou ${qtd} promoção(ões). `;
-        if (estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
-
-        let atingiuPremio = Math.floor(estrelasAntes / 10) < Math.floor(e / 10);
-        if (atingiuPremio) {
-            window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas no sistema!<br><br>Avise o Comando para realizar o pagamento oficial destas 10 estrelas.`, "Aguardando Pagamento!");
-            detailLog += " Atingiu cota para prêmio. (Aguardando Comando)";
-        }
-
-        await ref.set({ nome: dbNick, status: status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, { merge: true });
-        window.registrarLogEstrela(dbNick, "Validação em Lote", idLoteStr, detailLog, dataBr);
+        let estrelasAntes = e; p += qtd; e += Math.floor(p / 3); p = p % 3;
+        if (Math.floor(estrelasAntes / 10) < Math.floor(e / 10)) window.customAlert(`🏅 ${officialNick} atingiu ${e} estrelas!`, "Pagamento!");
+        await ref.set({ nome: officialNick, status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, { merge: true });
+        window.registrarLogEstrela(officialNick, "Validação em Lote", idLoteStr, `Validou ${qtd} promo.`, dataBr);
     }
-
-    window.mostrarToast("Lote processado com sucesso!", "success");
-    window.registrarLogAtividade("Validação de Lote", `Processou e validou as promoções dos IDs: ${idLoteStr}`);
+    window.mostrarToast("Lote processado!", "success");
     document.getElementById('resultado-lote').style.display = 'none';
-    document.getElementById('lote-data').value = '';
-    document.getElementById('lote-excluidos').value = '';
 }
 
+// ÁREA DE CORREÇÃO (DASHBOARD)
 window.buscarCorrecaoLote = async function() {
     let dateVal = document.getElementById('correcao-data').value;
-    if (!dateVal) return window.mostrarToast("Selecione a data que deseja corrigir.", "error");
-
+    if (!dateVal) return window.mostrarToast("Selecione uma data.", "error");
     let [y, m, d] = dateVal.split('-');
     let dataBr = `${d}/${m}/${y}`;
     
     let oldLogsSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
     let hasLog = false;
-    oldLogsSnap.forEach(doc => {
-        if (doc.data().acao === "Validação em Lote" || doc.data().acao === "Correção de Lote") hasLog = true;
-    });
-
-    if (!hasLog) {
-        return window.customAlert(`O sistema não encontrou nenhum lote validado ou corrigido para o dia ${dataBr}. Não há o que reverter.`, "Sem Registros");
-    }
-
-    let excluidosStr = document.getElementById('correcao-excluidos').value;
-    let excluidosArr = excluidosStr.split(',').map(s => s.trim()).filter(s => s !== "");
+    oldLogsSnap.forEach(doc => { if (doc.data().acao.includes("Lote")) hasLog = true; });
+    if (!hasLog) return window.customAlert(`Sem registros para ${dataBr}.`, "Erro");
 
     let docSnap = await window.db.collection("sistema").doc("promocoes").get();
-    if (!docSnap.exists) return window.customAlert("A planilha oficial ainda não enviou os dados de promoções para o sistema.", "Erro");
-
-    let promocoes = [];
-    try { promocoes = JSON.parse(docSnap.data().dados); } catch (e) { return window.mostrarToast("Erro ao processar dados.", "error"); }
-
+    let promocoes = JSON.parse(docSnap.data().dados);
+    let excluidosArr = document.getElementById('correcao-excluidos').value.split(',').map(s => s.trim()).filter(s => s !== "");
     let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
-    if (filtradas.length === 0) return window.customAlert(`Nenhuma promoção restante na data ${dataBr} após as exclusões.`, "Aviso");
 
     let promotorData = {};
     let idsColetados = [];
-    
     filtradas.forEach(p => {
         if (!promotorData[p.promotor]) promotorData[p.promotor] = [];
         promotorData[p.promotor].push(p.id);
         idsColetados.push(p.id);
     });
 
-    let html = `
-    <div style="color:#fff; margin-bottom:15px; font-size:15px; display:flex; flex-direction:column; gap:8px; background: rgba(245,158,11,0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(245,158,11,0.3);">
-        <div><i class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i> O sistema apagará a matemática do ciclo anterior do dia ${dataBr} e implementará este novo com ${filtradas.length} promoções.</div>
-    </div>
-    <ul style="color:var(--text-sub); margin-bottom:15px; list-style: none; padding: 0; display:flex; flex-direction:column; gap:10px;">`;
-    
-    let contagemParaConfirmacao = {};
-
+    let html = `<div style="background:rgba(245,158,11,0.1); padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #f59e0b;">O sistema reverterá o ciclo de ${dataBr} e aplicará este novo.</div><ul style="list-style:none; padding:0;">`;
+    let contagem = {};
     for (let nick in promotorData) {
-        let ids = promotorData[nick];
-        let qtd = ids.length;
-        contagemParaConfirmacao[nick] = qtd;
-        
-        let txtPromo = qtd === 1 ? "promoção válida" : "promoções válidas";
-        let linksIDs = ids.map(id => `<a href="https://dic.systemhb.net/promocao/ver/${id}" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-weight:bold; background:rgba(251,191,36,0.1); padding:3px 8px; border-radius:4px; margin-right:5px; border: 1px solid rgba(251,191,36,0.2); display:inline-block; margin-bottom:5px; transition:0.3s;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';">#${id}</a>`).join("");
-        
-        html += `
-        <li style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border-left:3px solid var(--admin-neon);">
-            <div style="color:#fff; font-size:15px; margin-bottom:8px;">
-                <strong style="color:var(--admin-neon); text-transform:uppercase;">${nick}</strong> ficará com ${qtd} ${txtPromo}.
-            </div>
-            <div style="font-size:12px; display:flex; flex-wrap:wrap; align-items:center;">
-                <span style="margin-right:10px;">IDs:</span> ${linksIDs}
-            </div>
-        </li>`;
+        contagem[nick] = promotorData[nick].length;
+        html += `<li style="margin-bottom:5px;"><strong style="color:var(--admin-neon);">${nick}</strong> ficará com ${contagem[nick]} promo.</li>`;
     }
+    html += `</ul><div style="display:flex; gap:10px;"><button class="btn-tech" style="flex:1; background:#f59e0b; color:#000;" onclick='window.confirmarCorrecaoLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'>Substituir</button><button class="btn-tech" style="flex:1; background:#ff2a2a; color:#fff;" onclick='window.reverterCicloTotal("${dataBr}")'>Apagar Tudo</button></div>`;
     
-    html += `</ul><button class="btn-tech btn-save" style="width:100%; margin-top:10px; background:#f59e0b; color:#000;" onclick='window.confirmarCorrecaoLote(${JSON.stringify(contagemParaConfirmacao)}, ${JSON.stringify(idsColetados)}, "${dataBr}")'><i class="fas fa-tools"></i> Executar Substituição de Ciclo</button>`;
-
     document.getElementById('resultado-correcao').innerHTML = html;
     document.getElementById('resultado-correcao').style.display = 'block';
 }
 
 window.confirmarCorrecaoLote = async function(contagem, idsColetados, dataBr) {
-    let idLoteStr = idsColetados.join(', ');
-    if (idLoteStr.length > 50) idLoteStr = idLoteStr.substring(0, 47) + "...";
+    await window.reverterCicloTotal(dataBr, true);
+    await window.confirmarLote(contagem, idsColetados, dataBr);
+    window.mostrarToast("Correção aplicada!", "success");
+    document.getElementById('modal-correcao-lote').style.display = 'none';
+}
 
-    let oldLogsSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
-    let oldLogs = [];
-    oldLogsSnap.forEach(doc => {
-        if (doc.data().acao === "Validação em Lote" || doc.data().acao === "Correção de Lote") {
-            oldLogs.push({id: doc.id, ...doc.data()});
-        }
-    });
-
-    for (let log of oldLogs) {
+window.reverterCicloTotal = async function(dataBr, silencioso = false) {
+    if (!silencioso && !confirm(`Deseja APAGAR a validação de ${dataBr}?`)) return;
+    let snap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
+    for (let logDoc of snap.docs) {
+        let log = logDoc.data();
         let matchProm = log.detalhes.match(/Validou (\d+)/);
         let promoRevert = matchProm ? parseInt(matchProm[1]) : 0;
-        
         if (promoRevert > 0) {
             let ref = window.db.collection("militares").doc(log.beneficiado);
-            let docM = await ref.get();
-            if (docM.exists) {
-                let mData = docM.data();
-                let p = mData.promocoes_realizadas || 0;
-                let e = mData.estrelas || 0;
-                
+            let dM = await ref.get();
+            if (dM.exists) {
+                let p = dM.data().promocoes_realizadas || 0; let e = dM.data().estrelas || 0;
                 p -= promoRevert;
-                while (p < 0) {
-                    p += 3;
-                    e -= 1;
-                }
-                if (e < 0) e = 0; 
-                
+                while (p < 0) { p += 3; e -= 1; }
+                if (e < 0) e = 0;
                 await ref.set({ promocoes_realizadas: p, estrelas: e }, { merge: true });
             }
         }
-        await window.db.collection("logs_estrelas").doc(log.id).delete();
+        await window.db.collection("logs_estrelas").doc(logDoc.id).delete();
     }
-
-    for (let nick in contagem) {
-        let qtd = contagem[nick];
-        let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase());
-        let dbNick = officialNick || nick;
-
-        let ref = window.db.collection("militares").doc(dbNick);
-        let docM = await ref.get();
-        
-        let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
-        
-        if (docM.exists) {
-            let dados = docM.data();
-            if (dados.status === 'Suspenso') continue;
-            p = dados.promocoes_realizadas || 0;
-            e = dados.estrelas || 0;
-            pr = dados.premios_acumulados || 0;
-            status = dados.status;
-        }
-
-        let estrelasAntes = e;
-        p += qtd;
-        let estrelasGanhas = Math.floor(p / 3);
-        p = p % 3;
-        e += estrelasGanhas;
-
-        let detailLog = `Validou ${qtd} promoção(ões). `;
-        if (estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
-
-        let atingiuPremio = Math.floor(estrelasAntes / 10) < Math.floor(e / 10);
-        if (atingiuPremio) {
-            window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas após a correção!<br><br>Lembre-se de checar o pagamento pendente.`, "Aguardando Pagamento!");
-            detailLog += " Atingiu cota para prêmio. (Aguardando Comando)";
-        }
-
-        await ref.set({ nome: dbNick, status: status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, { merge: true });
-        window.registrarLogEstrela(dbNick, "Correção de Lote", idLoteStr, detailLog, dataBr);
+    if (!silencioso) {
+        window.mostrarToast("Ciclo apagado!", "success");
+        document.getElementById('modal-correcao-lote').style.display = 'none';
     }
-
-    window.mostrarToast("Ciclo corrigido com sucesso!", "success");
-    window.registrarLogAtividade("Correção de Ciclo", `Reverteu e recalculou o lote do dia ${dataBr} com os novos IDs: ${idLoteStr}`);
-    
-    document.getElementById('resultado-correcao').style.display = 'none';
-    document.getElementById('correcao-data').value = '';
-    document.getElementById('correcao-excluidos').value = '';
-    document.getElementById('modal-correcao-lote').style.display = 'none';
 }
 
 window.escutarLogsEstrelas = function() {
     window.db.collection("logs_estrelas").orderBy("timestamp", "desc").limit(50).onSnapshot(snap => {
         let tbody = document.querySelector('#tb-logs tbody');
         if (!tbody) return;
-        
         tbody.innerHTML = '';
         snap.forEach(doc => {
             let d = doc.data();
             let cor = d.acao.includes("Validação") || d.acao.includes("Promoção") ? "color:#4caf50;" : "color:#ff2a2a;";
-            if (d.acao.includes("Correção")) cor = "color:#f59e0b;"; 
-            if (d.acao.includes("Pagamento")) cor = "color:#fbbf24;";
-            
+            if (d.acao.includes("Correção")) cor = "color:#f59e0b;";
             tbody.innerHTML += `<tr><td style="font-size:12px;">${d.data_hora}</td><td><strong>${d.autor}</strong></td><td>${d.beneficiado}</td><td style="${cor} font-weight:bold;">${d.acao}</td><td style="font-size:13px; color:var(--text-sub);">ID/Lote: ${d.id_promocao} <br> ${d.detalhes}</td></tr>`;
         });
     });
