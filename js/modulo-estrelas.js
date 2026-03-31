@@ -1,4 +1,5 @@
 let militaresEstrelasData = [];
+window.listenerDemitidosAtivo = false;
 
 window.escutarCargos = function() {
     window.db.collection("sistema").doc("cargos").onSnapshot((doc) => {
@@ -13,7 +14,60 @@ window.escutarCargos = function() {
     });
 }
 
+// O SITE ATUA E DEPOIS ESVAZIA A LIXEIRA
+window.escutarDemitidos = function() {
+    if (window.listenerDemitidosAtivo) return;
+    window.listenerDemitidosAtivo = true;
+
+    window.db.collection("sistema").doc("demitidos").onSnapshot(async (doc) => {
+        if (doc.exists && doc.data().lista) {
+            try {
+                let demitidos = JSON.parse(doc.data().lista);
+                // Se a lista já estiver vazia, não faz nada
+                if (!Array.isArray(demitidos) || demitidos.length === 0) return;
+
+                let snap = await window.db.collection("militares").get();
+                let promisesDeExclusao = [];
+
+                snap.forEach(militarDoc => {
+                    let data = militarDoc.data();
+                    let nomeMilitar = data.nome ? data.nome.trim() : militarDoc.id;
+
+                    // Verifica se o militar está na lista de demitidos
+                    let isDemitido = demitidos.some(d => d.toLowerCase() === nomeMilitar.toLowerCase());
+
+                    if (isDemitido) {
+                        let p = window.db.collection("militares").doc(militarDoc.id).delete()
+                        .then(() => {
+                            window.registrarLogEstrela(
+                                nomeMilitar,
+                                "Remoção (Demissão)",
+                                "-",
+                                "O perfil foi removido automaticamente do rank de estrelas devido a registro de Demissão na planilha."
+                            );
+                        }).catch(e => console.error("Erro ao apagar demitido:", e));
+                        
+                        promisesDeExclusao.push(p);
+                    }
+                });
+
+                // Espera todas as exclusões terminarem e, em seguida, ESVAZIA a lista no Firebase
+                await Promise.all(promisesDeExclusao);
+                
+                window.db.collection("sistema").doc("demitidos").update({
+                    lista: "[]" // Limpa o documento para evitar que exclua novamente no futuro
+                }).catch(e => console.error("Erro ao esvaziar a lista de demitidos no Firebase:", e));
+
+            } catch (e) {
+                console.error("Erro na faxina de demitidos:", e);
+            }
+        }
+    });
+}
+
 window.escutarMilitaresEstrelas = function() {
+    window.escutarDemitidos(); // Ativa a faxina automática ao abrir o módulo
+
     window.db.collection("militares").onSnapshot((snapshot) => {
         militaresEstrelasData = [];
         snapshot.forEach((docSnap) => {
