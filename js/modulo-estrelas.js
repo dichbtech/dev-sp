@@ -14,21 +14,10 @@ window.escutarCargos = function() {
 }
 
 window.escutarMilitaresEstrelas = function() {
-    // A TÁTICA DO LIXEIRO: O painel escuta se alguém foi marcado como 'lixo' pelo Apps Script e apaga de vez
-    window.db.collection("militares").where("lixo", "==", true).onSnapshot((snapLixo) => {
-        snapLixo.forEach(docLixo => {
-            window.db.collection("militares").doc(docLixo.id).delete()
-            .catch(e => console.error("Erro ao limpar demitido:", e));
-        });
-    });
-
     window.db.collection("militares").onSnapshot((snapshot) => {
         militaresEstrelasData = [];
         snapshot.forEach((docSnap) => {
-            // Ignora na exibição quem está no processo de ser deletado
-            if (docSnap.data().lixo !== true) {
-                militaresEstrelasData.push({ id: docSnap.id, ...docSnap.data() });
-            }
+            militaresEstrelasData.push({ id: docSnap.id, ...docSnap.data() });
         });
         window.renderTabelaEstrelas();
     });
@@ -81,7 +70,6 @@ window.renderTabelaEstrelas = function() {
     });
 }
 
-// Atualizado para incluir o registro da data de referência no log
 window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = null) {
     let docData = {
         timestamp: new Date().getTime(),
@@ -213,7 +201,6 @@ window.confirmarLote = async function(contagem, idsColetados, dataBr) {
     document.getElementById('lote-excluidos').value = '';
 }
 
-// NOVO: Função para buscar o lote validado e prepará-lo para correção (Líderes)
 window.buscarCorrecaoLote = async function() {
     let dateVal = document.getElementById('correcao-data').value;
     if (!dateVal) return window.mostrarToast("Selecione a data que deseja corrigir.", "error");
@@ -221,7 +208,6 @@ window.buscarCorrecaoLote = async function() {
     let [y, m, d] = dateVal.split('-');
     let dataBr = `${d}/${m}/${y}`;
     
-    // Verifica se existe alguma validação ou correção prévia com a dataBr fornecida
     let oldLogsSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
     let hasLog = false;
     oldLogsSnap.forEach(doc => {
@@ -286,12 +272,10 @@ window.buscarCorrecaoLote = async function() {
     document.getElementById('resultado-correcao').style.display = 'block';
 }
 
-// NOVO: Função para reverter matematicamente e aplicar a correção
 window.confirmarCorrecaoLote = async function(contagem, idsColetados, dataBr) {
     let idLoteStr = idsColetados.join(', ');
     if (idLoteStr.length > 50) idLoteStr = idLoteStr.substring(0, 47) + "...";
 
-    // 1º Passo: Reverter EXATAMENTE o lote antigo para o dia selecionado (Estorno Matemático)
     let oldLogsSnap = await window.db.collection("logs_estrelas").where("data_referencia", "==", dataBr).get();
     let oldLogs = [];
     oldLogsSnap.forEach(doc => {
@@ -312,22 +296,19 @@ window.confirmarCorrecaoLote = async function(contagem, idsColetados, dataBr) {
                 let p = mData.promocoes_realizadas || 0;
                 let e = mData.estrelas || 0;
                 
-                // Reversão blindada (tira promoções e pega "emprestado" das estrelas se der negativo)
                 p -= promoRevert;
                 while (p < 0) {
                     p += 3;
                     e -= 1;
                 }
-                if (e < 0) e = 0; // Proteção contra quebras
+                if (e < 0) e = 0; 
                 
                 await ref.set({ promocoes_realizadas: p, estrelas: e }, { merge: true });
             }
         }
-        // Deleta o histórico velho para não acumular na pesquisa futura
         await window.db.collection("logs_estrelas").doc(log.id).delete();
     }
 
-    // 2º Passo: Aplicar o lote novo como se fosse um lote comum
     for (let nick in contagem) {
         let qtd = contagem[nick];
         let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase());
@@ -384,7 +365,7 @@ window.escutarLogsEstrelas = function() {
         snap.forEach(doc => {
             let d = doc.data();
             let cor = d.acao.includes("Validação") || d.acao.includes("Promoção") ? "color:#4caf50;" : "color:#ff2a2a;";
-            if (d.acao.includes("Correção")) cor = "color:#f59e0b;"; // Laranja pro aviso de Correção
+            if (d.acao.includes("Correção")) cor = "color:#f59e0b;"; 
             if (d.acao.includes("Pagamento")) cor = "color:#fbbf24;";
             
             tbody.innerHTML += `<tr><td style="font-size:12px;">${d.data_hora}</td><td><strong>${d.autor}</strong></td><td>${d.beneficiado}</td><td style="${cor} font-weight:bold;">${d.acao}</td><td style="font-size:13px; color:var(--text-sub);">ID/Lote: ${d.id_promocao} <br> ${d.detalhes}</td></tr>`;
