@@ -1,14 +1,35 @@
 let militaresEstrelasData = [];
 window.listenerDemitidosAtivo = false;
 
-// FUNÇÃO DE PERMISSÃO: Mostra o tacômetro apenas para Vice+
-window.verificarPermissaoCorrecao = function() {
-    const nivel = window.usuarioLogadoNivel; // Assume-se que esta variável global existe com o nível do usuário
-    const cargosAutorizados = ["VICE-LIDER", "LIDER", "ADMIN"];
-    
-    let btn = document.getElementById('btn-dashboard-correcao');
-    if (btn && cargosAutorizados.includes(nivel)) {
-        btn.style.display = 'inline-block';
+// FUNÇÃO DE PERMISSÃO CORRIGIDA: Consulta diretamente o banco de dados imitando as Regras de Segurança
+window.verificarPermissaoCorrecao = async function() {
+    try {
+        let user = window.firebase.auth().currentUser;
+        if (!user) return; // Aguarda o usuário estar autenticado
+        
+        let nivel = "NENHUM";
+        
+        // 1. Tenta buscar o nível no acesso manual
+        let docAcesso = await window.db.collection("acessos").doc(user.email).get();
+        if (docAcesso.exists) {
+            nivel = docAcesso.data().nivel;
+        } else {
+            // 2. Se não achar, tenta buscar na planilha
+            let docPlan = await window.db.collection("sistema").doc("acessos_planilha").get();
+            if (docPlan.exists && docPlan.data().permissoes_regras && docPlan.data().permissoes_regras[user.email]) {
+                nivel = docPlan.data().permissoes_regras[user.email].nivel;
+            }
+        }
+        
+        const cargosAutorizados = ["VICE-LIDER", "LIDER", "ADMIN"];
+        let btn = document.getElementById('btn-dashboard-correcao');
+        
+        // Se o nível estiver na lista autorizada, o botão aparece
+        if (btn && cargosAutorizados.includes(nivel)) {
+            btn.style.display = 'inline-block';
+        }
+    } catch (e) {
+        console.error("Erro ao verificar permissão do botão de correção:", e);
     }
 }
 
@@ -65,7 +86,7 @@ window.escutarDemitidos = function() {
 }
 
 window.escutarMilitaresEstrelas = function() {
-    window.verificarPermissaoCorrecao(); // Checa se mostra o ícone de tacômetro
+    window.verificarPermissaoCorrecao(); // Invoca a verificação robusta de nível
     window.escutarDemitidos(); 
 
     window.db.collection("militares").onSnapshot((snapshot) => {
@@ -109,7 +130,7 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
     let docData = {
         timestamp: new Date().getTime(),
         data_hora: new Date().toLocaleString('pt-BR'),
-        autor: window.usuarioLogadoNick,
+        autor: window.usuarioLogadoNick || "Sistema",
         beneficiado: bene,
         acao: acao,
         id_promocao: idProm || '-',
@@ -119,7 +140,6 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
     window.db.collection("logs_estrelas").add(docData);
 }
 
-// TRAVA ANTI-DUPLICIDADE
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if (!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
@@ -182,7 +202,6 @@ window.confirmarLote = async function(contagem, idsColetados, dataBr) {
     document.getElementById('resultado-lote').style.display = 'none';
 }
 
-// ÁREA DE CORREÇÃO (DASHBOARD)
 window.buscarCorrecaoLote = async function() {
     let dateVal = document.getElementById('correcao-data').value;
     if (!dateVal) return window.mostrarToast("Selecione uma data.", "error");
