@@ -113,118 +113,45 @@
             gap: 15px;
         }
 
-        .header-frame h1 {
-            color: var(--sup-neon);
-            margin: 0;
-            font-size: 22px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .header-frame h2 {
-            color: #aaa;
-            margin: 0;
-            font-size: 13px;
-            text-transform: uppercase;
-        }
+        .header-frame h1 { color: var(--sup-neon); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+        .header-frame h2 { color: #aaa; margin: 0; font-size: 13px; text-transform: uppercase; }
 
         .event-container {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            height: calc(100vh - 70px); 
-            box-sizing: border-box;
+            width: 100%; max-width: 900px; display: flex; flex-direction: column; padding: 20px;
+            height: calc(100vh - 70px); box-sizing: border-box;
         }
 
         .event-banner {
-            width: 100%;
-            min-height: 220px;
-            height: 28vh;      
-            max-height: 300px; 
-            border-radius: 12px;
-            background-color: #1a1a24;
-            background-position: center;
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            border: 2px solid rgba(251, 191, 36, 0.3);
-            margin-bottom: 15px;
-            flex-shrink: 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 100%; min-height: 220px; height: 28vh; max-height: 300px; border-radius: 12px;
+            background-color: #1a1a24; background-position: center; background-size: 100% 100%;
+            background-repeat: no-repeat; border: 2px solid rgba(251, 191, 36, 0.3);
+            margin-bottom: 15px; flex-shrink: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         .radio-glass-box {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 15px;
-            flex-shrink: 0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            position: relative;
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 15px; flex-wrap: wrap; gap: 15px; flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative;
         }
 
-        .listeners-badge {
-            position: absolute;
-            top: -10px;
-            right: 20px;
-            background: #ef4444;
-            color: #fff;
-            padding: 2px 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 0 2px 5px rgba(239,68,68,0.5);
-        }
+        .radio-left { display: flex; align-items: center; gap: 15px; }
 
-        .radio-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .avatar-wrapper {
-            position: relative;
-            width: 75px; height: 75px;
-            flex-shrink: 0;
-        }
+        .avatar-wrapper { position: relative; width: 75px; height: 75px; flex-shrink: 0; }
 
         .locutor-avatar-box {
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(251,191,36,0.3) 0%, rgba(0,0,0,0.9) 100%);
-            border: 2px solid var(--sup-neon);
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(251,191,36,0.4);
-            position: absolute;
-            top: 0; left: 0;
-            overflow: hidden; 
-            z-index: 1;
-            box-sizing: border-box;
+            width: 100%; height: 100%; background: radial-gradient(circle, rgba(251,191,36,0.3) 0%, rgba(0,0,0,0.9) 100%);
+            border: 2px solid var(--sup-neon); border-radius: 50%; box-shadow: 0 0 15px rgba(251,191,36,0.4);
+            position: absolute; top: 0; left: 0; overflow: hidden; z-index: 1; box-sizing: border-box;
         }
 
         .avatar-head-popout {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 10; 
-            clip-path: inset(-100px -100px 30px -100px); 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+            z-index: 10; clip-path: inset(-100px -100px 30px -100px); 
         }
 
         .avatar-image-inside, .avatar-image-outside {
-            width: 90px;
-            position: absolute;
-            bottom: -28px; 
-            left: 50%;
-            transform: translateX(-50%);
+            width: 90px; position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
         }
 
         .locutor-info { display: flex; flex-direction: column; justify-content: center; }
@@ -236,74 +163,33 @@
         .radio-controls { display: flex; align-items: center; gap: 15px; }
 
         .btn-play-radio {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #fbbf24, #d97706);
-            color: #000;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #d97706);
+            color: #000; border: none; font-size: 20px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
         }
         .btn-play-radio:active { transform: scale(0.95); }
 
         .btn-pedidos {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: bold;
-            font-size: 13px;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff;
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Rajdhani', sans-serif;
+            font-weight: bold; font-size: 13px; transition: 0.2s; display: flex; align-items: center; gap: 8px;
         }
         .btn-pedidos:hover { background: rgba(255,255,255,0.1); border-color: var(--sup-neon); color: var(--sup-neon); }
 
         .event-content-box {
-            background: var(--glass-bg);
-            border-radius: 12px;
-            padding: 20px;
-            color: #ddd;
-            font-size: 15px;
-            line-height: 1.5;
-            border: 1px solid var(--glass-border);
-            flex: 1; 
-            overflow-y: auto; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            background: var(--glass-bg); border-radius: 12px; padding: 20px; color: #ddd;
+            font-size: 15px; line-height: 1.5; border: 1px solid var(--glass-border);
+            flex: 1; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
         .floating-btns {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 100;
+            position: fixed; bottom: 15px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 100;
         }
 
         .secret-btn {
-            background: rgba(0,0,0,0.8);
-            border: 1px solid var(--glass-border);
-            color: rgba(255,255,255,0.3);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 16px;
+            background: rgba(0,0,0,0.8); border: 1px solid var(--glass-border); color: rgba(255,255,255,0.3);
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; font-size: 16px;
         }
         .secret-btn:hover { color: var(--sup-neon); border-color: var(--sup-neon); }
 
@@ -319,44 +205,21 @@
         .pedido-item { background: rgba(0,0,0,0.4); border-left: 3px solid var(--sup-neon); padding: 8px 12px; border-radius: 6px; }
 
         .editor-toolbar {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--glass-border);
-            border-bottom: none;
-            padding: 5px;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-            display: flex;
-            gap: 5px;
-            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.5); border: 1px solid var(--glass-border); border-bottom: none;
+            padding: 5px; border-top-left-radius: 5px; border-top-right-radius: 5px; display: flex; gap: 5px; box-sizing: border-box;
         }
         .editor-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: 0.2s;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: #fff;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s;
             display: flex; align-items: center; justify-content: center;
         }
         .editor-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--sup-neon); color: var(--sup-neon); }
         .editor-btn-color { background: none; border: none; padding: 0; cursor: pointer; width: 25px; height: 25px; }
         
         .visual-editor {
-            width: 100%; 
-            padding: 10px; 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid var(--glass-border); 
-            color: #fff; 
-            border-bottom-left-radius: 5px; 
-            border-bottom-right-radius: 5px; 
-            border-top:none; 
-            box-sizing:border-box;
-            min-height: 100px;
-            max-height: 200px;
-            overflow-y: auto;
-            outline: none;
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); 
+            color: #fff; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-top:none; 
+            box-sizing:border-box; min-height: 100px; max-height: 200px; overflow-y: auto; outline: none;
         }
     </style>
 </head>
@@ -388,8 +251,6 @@
             <div class="event-banner" id="view-banner" style="background-image: url('https://i.imgur.com/placeholder.png');"></div>
 
             <div class="radio-glass-box">
-                <div class="listeners-badge"><i class="fas fa-users"></i> <span id="view-listeners">0</span></div>
-                
                 <div class="radio-left">
                     <div class="avatar-wrapper">
                         <div class="locutor-avatar-box">
@@ -402,7 +263,7 @@
                     <div class="locutor-info">
                         <h3 id="view-title">Rádio Oficial</h3>
                         <p><i class="fas fa-microphone-alt"></i> Locutor: <span id="view-locutor">AutoDJ</span></p>
-                        <p class="song-info"><i class="fas fa-music"></i> <span id="view-song">Carregando...</span></p>
+                        <p class="song-info"><i class="fas fa-music"></i> <span id="view-song">Ao Vivo</span></p>
                     </div>
                 </div>
 
@@ -422,7 +283,7 @@
                 </div>
                 
                 <audio id="stream-player" preload="none">
-                    <source id="stream-source" src="http://uk19freenew.listen2myradio.com:37504/stream" type="audio/mpeg">
+                    <source id="stream-source" src="" type="audio/mpeg">
                 </audio>
             </div>
 
@@ -486,8 +347,8 @@
             </div>
 
             <div class="input-group" style="margin-bottom:10px;">
-                <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Streaming (HTTPS ou HTTP)</label>
-                <input type="text" id="edit-radio" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; border-radius: 5px; box-sizing:border-box;">
+                <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Streaming (HTTPS obrigatório na Vercel)</label>
+                <input type="text" id="edit-radio" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; border-radius: 5px; box-sizing:border-box;" placeholder="Ex: https://stream.zeno.fm/c1ct7nz68f8uv">
             </div>
 
             <div class="input-group" style="margin-bottom:15px;">
@@ -563,7 +424,6 @@
                 const response = await fetch('/api/ouvintes');
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('view-listeners').innerText = data.ouvintes;
                     document.getElementById('view-song').innerText = data.musica || "Ao Vivo";
                 }
             } catch (error) {
@@ -587,28 +447,14 @@
 
         function toggleRadio() {
             if (audioPlayer.paused) {
-                audioPlayer.src = document.getElementById('stream-source').src + "?" + new Date().getTime();
                 audioPlayer.load(); 
-                
                 audioPlayer.play().then(() => {
                     iconPlay.classList.replace('fa-play', 'fa-pause');
-                    
-                    audioPlayer.addEventListener('timeupdate', function forcarAoVivo() {
-                        if (audioPlayer.buffered.length > 0) {
-                            let fimDoBuffer = audioPlayer.buffered.end(audioPlayer.buffered.length - 1);
-                            let tempoAtual = audioPlayer.currentTime;
-                            if (fimDoBuffer - tempoAtual > 3) {
-                                audioPlayer.currentTime = fimDoBuffer;
-                            }
-                        }
-                    });
-
                 }).catch(e => {
-                    console.error("Autoplay bloqueado pelo navegador.");
+                    console.error("Autoplay bloqueado pelo navegador.", e);
                 });
             } else {
                 audioPlayer.pause();
-                audioPlayer.src = "";
                 iconPlay.classList.replace('fa-pause', 'fa-play');
             }
         }
@@ -639,7 +485,6 @@
                     document.getElementById('view-title').innerText = data.titulo || "Rádio Oficial";
                     document.getElementById('view-banner').style.backgroundImage = `url('${data.banner || 'https://i.imgur.com/placeholder.png'}')`;
                     
-                    // LINHA RESTAURADA E CORRIGIDA:
                     document.getElementById('view-content').innerHTML = data.conteudo || "";
                     
                     let nick = data.locutorAtual || "AutoDJ";
@@ -647,10 +492,10 @@
                     const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=2&head_direction=3&gesture=sml&size=l&time=${new Date().getTime()}`;
                     document.querySelectorAll('.avatar-image-inside, .avatar-image-outside').forEach(img => img.src = avatarUrl);
 
-                    let urlBanco = data.radioUrl || "http://uk19freenew.listen2myradio.com:37504/stream";
+                    let urlBanco = data.radioUrl || "https://stream.zeno.fm/c1ct7nz68f8uv";
                     let currentStream = document.getElementById('stream-source').src;
                     
-                    if(currentStream.split('?')[0] !== urlBanco) {
+                    if(urlBanco && currentStream !== urlBanco) {
                         document.getElementById('stream-source').src = urlBanco;
                         if (!audioPlayer.paused) { audioPlayer.load(); audioPlayer.play(); }
                     }
@@ -661,7 +506,7 @@
                     document.getElementById('edit-codigo').value = globalLocutorCode;
                     document.getElementById('edit-title').value = data.titulo || "";
                     document.getElementById('edit-banner').value = data.banner || "";
-                    document.getElementById('edit-radio').value = data.radioUrl || "http://uk19freenew.listen2myradio.com:37504/stream";
+                    document.getElementById('edit-radio').value = data.radioUrl || "https://stream.zeno.fm/c1ct7nz68f8uv";
                     document.getElementById('edit-content').innerHTML = data.conteudo || "";
                 } else {
                     document.getElementById('state-off').style.display = 'flex';
@@ -684,6 +529,8 @@
                         `;
                     });
                 }
+            }, (error) => {
+                console.error("Erro Firebase. O documento 'pedidos_radio' precisa ser público nas Regras do Firestore.");
             });
         });
 

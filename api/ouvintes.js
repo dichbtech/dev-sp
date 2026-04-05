@@ -7,36 +7,46 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // O seu ID da Zeno.fm capturado do link
     const STATION_ID = "c1ct7nz68f8uv"; 
 
     try {
-        const response = await fetch(`https://tools.zeno.fm/api/station/${STATION_ID}/status`, {
-            headers: { 'User-Agent': 'Mozilla/5.0' },
-            cache: 'no-store'
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            
-            if (result.status === "success" && result.data) {
-                const info = result.data;
-                const listeners = info.listeners || 0;
-                
-                let song = "Ao Vivo";
-                if (info.now_playing) {
-                    const artist = info.now_playing.artist || "";
-                    const track = info.now_playing.song || "";
-                    song = artist && track ? `${artist} - ${track}` : (track || artist || "Ao Vivo");
-                }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-                return res.status(200).json({ ouvintes: listeners, musica: song });
+        const response = await fetch(`https://api.zeno.fm/mounts/metadata/subscribe/${STATION_ID}`, {
+            headers: { 'Accept': 'text/event-stream' },
+            signal: controller.signal
+        });
+
+        let song = "Ao Vivo";
+
+        if (response.ok && response.body) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            const { value } = await reader.read();
+            clearTimeout(timeoutId);
+            controller.abort(); 
+
+            if (value) {
+                const text = decoder.decode(value);
+                const match = text.match(/data:\s*({.*})/);
+                if (match && match[1]) {
+                    try {
+                        const data = JSON.parse(match[1]);
+                        if (data.streamTitle && data.streamTitle !== "Unknown") {
+                            song = data.streamTitle;
+                        }
+                    } catch (e) {
+                        console.error("Erro ao ler música da Zeno");
+                    }
+                }
             }
         }
-        
-        return res.status(200).json({ ouvintes: 0, musica: "Ao Vivo" });
+
+        return res.status(200).json({ musica: song });
+
     } catch (error) {
-        console.error("Erro ao conectar com a API da Zeno:", error);
-        return res.status(200).json({ ouvintes: 0, musica: "Conectando..." });
+        return res.status(200).json({ musica: "Transmissão Automática" });
     }
 }
