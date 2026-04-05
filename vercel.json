@@ -1,5 +1,14 @@
 {
+  "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/eventos",
+      "destination": "/eventos.html"
+    },
+    {
+      "source": "/consulta-estrelas",
+      "destination": "/consulta-estrelas.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

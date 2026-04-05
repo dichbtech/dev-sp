@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Estrelas - DIC</title>
+    <link rel="icon" type="image/gif" href="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-deep: #070602; 
+            --bg-panel: #121008; 
+            --sup-neon: #fbbf24; 
+            --sup-glow: rgba(251, 191, 36, 0.4); 
+            --text-main: #f4f4f4; 
+            --text-sub: #c9b98b; 
+            --font-ui: 'Rajdhani', sans-serif; 
+            --border-tech: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-ui); background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 50%; left: 50%; width: 150vw; height: 150vh; transform: translate(-50%, -50%); background: radial-gradient(circle at center, rgba(251, 191, 36, 0.05) 0%, transparent 60%); pointer-events: none; z-index: -1; }
+
+        .top-btn-cmd { position: absolute; top: 20px; right: 20px; background: rgba(255,42,42,0.1); border: 1px solid rgba(255,42,42,0.3); color: #ff2a2a; padding: 10px 20px; border-radius: 6px; font-family: var(--font-ui); font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; gap: 8px; transition: 0.3s; z-index: 100;}
+        .top-btn-cmd:hover { background: #ff2a2a; color: #fff; box-shadow: 0 0 15px rgba(255,42,42,0.4); }
+
+        .header-frame { background: rgba(10, 8, 2, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 20px 50px; display: flex; align-items: center; gap: 25px; box-shadow: 0 0 20px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.05); margin-bottom: 40px; position: relative; }
+        .header-frame::before { content: ''; position: absolute; top: -1px; left: 10%; width: 80%; height: 2px; background: linear-gradient(90deg, transparent, var(--sup-neon), transparent); }
+        .logo-dic { width: 70px; filter: drop-shadow(0 0 8px var(--sup-neon)); }
+        .title-area { display: flex; flex-direction: column; justify-content: center; }
+        .title-area h1 { font-size: 32px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--sup-glow); margin-bottom: -5px; }
+        .title-area h2 { font-size: 16px; font-weight: 500; color: var(--sup-neon); text-transform: uppercase; letter-spacing: 3px; }
+
+        .container { width: 100%; max-width: 1300px; display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; }
+        
+        .box-panel { background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        .box-panel h3 { color: var(--sup-neon); font-size: 20px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; }
+
+        /* Coluna da Esquerda (Consulta de Membro) */
+        .col-membro { flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .input-block { position: relative; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(251, 191, 36, 0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 15px; transition: all 0.3s; }
+        .input-block:focus-within { border-color: var(--sup-neon); box-shadow: 0 0 12px var(--sup-glow); }
+        .input-block i { color: var(--sup-neon); font-size: 16px; }
+        .input-block select { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 600; padding: 15px 10px; outline: none; letter-spacing: 1px; cursor: pointer; color-scheme: dark;}
+        .input-block select option { background: var(--bg-panel); color: #fff; }
+
+        /* Palco do Membro com Posições Exatas */
+        .member-stage-box { width: 100%; max-width: 380px; height: 360px; background: rgba(0,0,0,0.5); border: 2px solid var(--sup-neon); border-radius: 12px; position: relative; box-shadow: 0 0 20px var(--sup-glow), inset 0 0 30px rgba(0,0,0,0.8); overflow: hidden; margin: 0 auto; }
+        .stage-glow { position: absolute; inset: 0; box-shadow: inset 0 0 50px rgba(251,191,36,0.2); pointer-events: none; z-index: 10; border-radius: 10px; }
+        
+        .fixed-item { position: absolute; image-rendering: pixelated; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .stat-card { background: rgba(20,15,0,0.6); border: 1px solid rgba(251,191,36,0.15); border-radius: 8px; padding: 15px; text-align: center; transition: all 0.3s; }
+        .stat-card:hover { border-color: var(--sup-neon); background: rgba(251,191,36,0.05); transform: translateY(-2px); }
+        .stat-card h4 { color: var(--text-sub); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .stat-card .val { color: #fff; font-size: 24px; font-weight: 700; text-shadow: 0 0 10px rgba(255,255,255,0.2); font-family: sans-serif; }
+        
+        .stat-total { background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0.6) 100%); border-color: var(--sup-neon); grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px;}
+        .stat-total .val { color: var(--sup-neon); font-size: 42px; text-shadow: 0 0 15px var(--sup-glow); display: flex; align-items: center; gap: 8px; }
+
+        /* Coluna da Direita (Ranking Tabela) */
+        .col-ranking { flex: 1.5; min-width: 400px; display: flex; flex-direction: column; }
+        .table-wrapper { width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); max-height: 600px; overflow-y: auto;}
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { color: var(--text-sub); background: rgba(0,0,0,0.4); padding: 18px 20px; font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid rgba(251, 191, 36, 0.2); white-space: nowrap; position: sticky; top: 0; z-index: 10;}
+        td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; font-size: 15px; font-weight: 500; transition: background 0.3s; }
+        tr:hover td { background: rgba(251, 191, 36, 0.05); }
+        tr:last-child td { border-bottom: none; }
+
+        .star { color: var(--sup-neon); font-size: 1.3em; filter: drop-shadow(0 0 5px var(--sup-glow)); letter-spacing: 2px; }
+        .avatar-cell { display: flex; align-items: center; gap: 15px; }
+        .avatar-img { width: 45px; height: 45px; object-fit: cover; object-position: center top; border-radius: 50%; background: rgba(0,0,0,0.8); border: 2px solid var(--sup-neon); box-shadow: 0 0 10px var(--sup-neon); }
+
+        .loader { text-align: center; padding: 40px; color: var(--sup-neon); font-size: 18px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+        .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(251, 191, 36, 0.1); border-top-color: var(--sup-neon); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Modal do Comando */
+        .modal { display: none; position: fixed; z-index: 999999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background-color: var(--bg-panel); border: 1px solid #ff2a2a; border-radius: 12px; width: 100%; max-width: 500px; position: relative; box-shadow: 0 0 40px rgba(255,42,42,0.3); padding: 35px; }
+        .close-btn { position: absolute; right: 20px; top: 20px; width: 35px; height: 35px; background: rgba(255,42,42,0.1); border-radius: 50%; color: #ff2a2a; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
+        .close-btn:hover { background: #ff2a2a; color: #fff; transform: rotate(90deg); }
+        .input-block-cmd { position: relative; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,42,42,0.3); border-radius: 6px; display: flex; align-items: center; padding: 0 15px; margin-bottom: 15px; }
+        .input-block-cmd i { color: #ff2a2a; font-size: 16px; }
+        .input-block-cmd input, .input-block-cmd select { width: 100%; background: transparent; border: none; color: #fff; font-size: 15px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; }
+        .input-block-cmd select option { background: var(--bg-panel); color: #fff; }
+        .btn-red { background: #ff2a2a; color: #fff; border: none; padding: 15px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
+        .btn-red:hover { background: #e51e1e; box-shadow: 0 0 15px rgba(255,42,42,0.5); }
+
+        footer { width: 100%; text-align: center; padding: 30px; font-size: 14px; color: #888; font-weight: 500; margin-top: auto; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <button id="btn-login-cmd" class="top-btn-cmd" onclick="abrirPainelComando()"><i class="fas fa-tachometer-alt"></i> Comando</button>
+
+    <header>
+        <div class="header-frame">
+            <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo" class="logo-dic">
+            <div class="title-area">
+                <h1>Departamento de Investigação Criminal</h1>
+                <h2>Consulta de Estrelas</h2>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div class="col-membro box-panel">
+            <h3><i class="fas fa-user-check"></i> Consulta Individual</h3>
+            
+            <div class="input-block">
+                <i class="fas fa-search"></i>
+                <select id="select-membro" onchange="renderMemberDetails()">
+                    <option value="" disabled selected>Selecione um policial...</option>
+                </select>
+            </div>
+
+            <div id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
+                <div class="member-stage-box">
+                    <div class="stage-glow"></div>
+                    <img id="img-palco-base" class="fixed-item" src="https://i.imgur.com/7XXAuf4.png" style="left: 102px; top: 255px; width: 170px; z-index: 2;">
+                    <img id="img-brasao" class="fixed-item" src="https://i.imgur.com/aOXCYBj.png" style="left: -7px; top: 47px; width: 181px; z-index: 3;">
+                    <img id="img-emblema-sup" class="fixed-item" src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" style="left: 38px; top: 93px; width: 84px; z-index: 4;">
+                    <img id="avatar-selecionado" class="fixed-item" src="" style="left: 104px; top: 59px; width: 154px; z-index: 5;">
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card stat-total">
+                        <h4 style="margin-bottom:0;">Estrelas Acumuladas</h4>
+                        <div class="val" id="det-estrelas">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Ciclo Atual</h4>
+                        <div class="val" id="det-promocoes" style="font-size:20px;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Prêmios</h4>
+                        <div class="val" id="det-premios" style="font-size:20px;">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-ranking box-panel">
+            <h3><i class="fas fa-list-ol"></i> Ranking Oficial</h3>
+            <div class="table-wrapper">
+                <table id="tabela-militares">
+                    <thead>
+                        <tr>
+                            <th>Policial</th>
+                            <th style="text-align: center;">Ciclo Validados</th>
+                            <th>Estrelas Acumuladas</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-militares">
+                        <tr>
+                            <td colspan="4">
+                                <div class="loader"><div class="spinner-ring"></div>Sincronizando com o Banco de Dados...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="modal-comando" class="modal">
+        <div class="modal-content">
+            <div class="close-btn" onclick="fecharPainelComando()"><i class="fas fa-times"></i></div>
+            <h3 style="color: #ff2a2a; margin-bottom: 20px; font-size:22px; text-transform:uppercase;"><i class="fas fa-gavel"></i> Painel do Comando</h3>
+            <p style="color:var(--text-sub); margin-bottom:20px;">Área exclusiva do Comando. Todas as ações geram log de auditoria na Central.</p>
+
+            <div class="input-block-cmd"><i class="fas fa-search"></i><input type="text" id="cmd-nick" placeholder="Digite o Nick do Policial..."></div>
+            <button class="btn-red" style="background:transparent; border:1px solid #ff2a2a; color:#ff2a2a; margin-bottom:20px;" onclick="verificarNickCmd()" id="btn-cmd-verificar"><i class="fas fa-search"></i> Localizar Militar</button>
+
+            <div id="area-sancao" style="display:none; padding-top:15px; border-top:1px dashed rgba(255,42,42,0.3);">
+                <div style="color:#fff; margin-bottom:15px; font-size:15px;">Policial Confirmado: <strong id="cmd-lbl-nick" style="color:#ff2a2a;"></strong></div>
+                <div class="input-block-cmd"><i class="fas fa-exclamation-circle"></i>
+                    <select id="cmd-tipo-sancao" onchange="mudarTipoSancaoCmd()">
+                        <option value="pagar_premio" style="color: #fbbf24; font-weight:bold;">Registrar Pagamento (Zerar 10 Estrelas)</option>
+                        <option value="deduzir">Deduzir Estrelas</option>
+                        <option value="cassar_todas">Cassar Todas as Estrelas (Zerar)</option>
+                        <option value="suspender">Suspender Temporariamente</option>
+                        <option value="reativar">Reativar Policial</option>
+                    </select>
+                </div>
+                <div class="input-block-cmd" id="cmd-box-qtd" style="display:none;"><i class="fas fa-minus"></i><input type="number" id="cmd-qtd" placeholder="Qtd. a deduzir"></div>
+                <button class="btn-red" onclick="aplicarSancaoCmd()"><i class="fas fa-check-double"></i> Confirmar Ação</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>Desenvolvido com <i class="fa-solid fa-heart" style="color: #808080;"></i> por MegaMetall</footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCvyt0IyruvPqZPb6OqX5yiGuvIjUWpktA",
+            authDomain: "central-supervisores.firebaseapp.com",
+            projectId: "central-supervisores",
+            storageBucket: "central-supervisores.firebasestorage.app",
+            messagingSenderId: "882541677437",
+            appId: "1:882541677437:web:ed25d1e7aa273ca40cda14"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let militarVerificadoCmd = null;
+        let loggedNick = "Comando";
+        let isAdmin = false;
+        let militaresGlobais = [];
+        let cargosMap = {};
+
+        function renderizarEstrelas(quantidade) {
+            if (!quantidade || quantidade <= 0) return `<span style="color:#555;">0</span>`;
+            let estrelasHtml = '★'.repeat(quantidade);
+            return `<span class="star">${estrelasHtml}</span> <span style="color:#fff; font-weight:bold; margin-left:8px;">(${quantidade})</span>`;
+        }
+
+        // Puxa cargos da planilha para exibir
+        db.collection("sistema").doc("cargos").onSnapshot((doc) => {
+            if (doc.exists && doc.data().dados) {
+                try { cargosMap = JSON.parse(doc.data().dados); atualizarTela(); } catch(e) {}
+            }
+        });
+
+        // Puxa militares
+        db.collection("militares").onSnapshot((snapshot) => {
+            militaresGlobais = [];
+            snapshot.forEach((docSnap) => { militaresGlobais.push({ id: docSnap.id, ...docSnap.data() }); });
+            atualizarTela();
+        });
+
+        function atualizarTela() {
+            const lista = document.getElementById('lista-militares');
+            const select = document.getElementById('select-membro');
+            let valAtual = select.value;
+            
+            lista.innerHTML = '';
+            select.innerHTML = '<option value="" disabled selected>Selecione um policial...</option>';
+
+            if (militaresGlobais.length === 0) { 
+                lista.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Nenhum policial registrado.</td></tr>'; 
+                return; 
+            }
+
+            militaresGlobais.sort((a, b) => {
+                let eA = a.estrelas || 0; let eB = b.estrelas || 0;
+                if (eB !== eA) return eB - eA;
+                return (b.promocoes_realizadas || 0) - (a.promocoes_realizadas || 0);
+            });
+
+            militaresGlobais.forEach((dados) => {
+                let cargo = cargosMap[dados.nome] || '';
+                let cargoHtml = cargo ? `<span style="color:var(--text-sub); font-size:11px; text-transform:uppercase; letter-spacing:1px; display:block; margin-top:2px;">${cargo}</span>` : '';
+                
+                let statusHtml = dados.status === 'Suspenso' ? '<span style="color:#ff2a2a; background:rgba(255,42,42,0.1); padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold;">SUSPENSO</span>' : '<span style="color:#4caf50; background:rgba(76,175,80,0.1); padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold;">ATIVO</span>';
+                let premiosHtml = dados.premios_acumulados > 0 ? `<span title="${dados.premios_acumulados} Prêmio(s) de Ciclo Completo">🏆 x${dados.premios_acumulados}</span>` : '';
+                let avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${dados.nome}&action=std&direction=2&head_direction=2&gesture=sml&size=m`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="avatar-cell">
+                            <img src="${avatarUrl}" class="avatar-img" onerror="this.style.display='none'">
+                            <div>
+                                <div style="color:#fff; font-weight:bold;">${dados.nome} ${premiosHtml}</div>
+                                ${cargoHtml}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align: center; color: var(--text-sub); font-weight: bold; font-size: 18px;">
+                        ${dados.promocoes_realizadas || 0} <span style="color:#555; font-size:14px;">/ 3</span>
+                    </td>
+                    <td>${renderizarEstrelas(dados.estrelas)}</td>
+                    <td style="text-align: center;">${statusHtml}</td>
+                `;
+                lista.appendChild(tr);
+                select.innerHTML += `<option value="${dados.nome}">${dados.nome}</option>`;
+            });
+
+            if(valAtual) { select.value = valAtual; renderMemberDetails(); }
+        }
+
+        function renderMemberDetails() {
+            let nick = document.getElementById('select-membro').value;
+            let m = militaresGlobais.find(x => x.nome === nick);
+            if(!m) return;
+
+            let area = document.getElementById('area-detalhes-membro');
+            area.style.display = 'block'; 
+            setTimeout(() => { area.style.opacity = '1'; }, 50);
+
+            document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${m.nome}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+            document.getElementById('det-estrelas').innerHTML = `★ ${m.estrelas || 0}`;
+            document.getElementById('det-promocoes').innerHTML = `${m.promocoes_realizadas || 0} <span style="font-size:14px; color:#888;">/ 3</span>`;
+            document.getElementById('det-premios').innerHTML = `${m.premios_acumulados || 0} 🏆`;
+        }
+
+        // ===================================
+        // Autenticação Comando
+        // ===================================
+        function abrirPainelComando() {
+            if(isAdmin) { document.getElementById('modal-comando').style.display = 'flex'; } 
+            else { const provider = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider); }
+        }
+        function fecharPainelComando() { document.getElementById('modal-comando').style.display = 'none'; }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                db.collection("acessos").doc(user.email.toLowerCase().trim()).get().then(doc => {
+                    let lvl = doc.exists ? doc.data().nivel.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+                    if(lvl === 'VICELIDER') lvl = 'VICE-LIDER';
+
+                    if(["COMANDO", "LIDER", "VICE-LIDER"].includes(lvl)) {
+                        isAdmin = true; loggedNick = doc.data().nick || "Comando";
+                        document.getElementById('btn-login-cmd').innerHTML = `<i class="fas fa-gavel"></i> Olá, ${loggedNick}`;
+                        document.getElementById('modal-comando').style.display = 'flex';
+                    } else { alert("Você não possui o cargo de COMANDO."); auth.signOut(); }
+                });
+            } else { isAdmin = false; document.getElementById('btn-login-cmd').innerHTML = `<i class="fas fa-tachometer-alt"></i> Comando`; }
+        });
+
+        async function verificarNickCmd() {
+            let nick = document.getElementById('cmd-nick').value.trim();
+            if(!nick) return;
+            document.getElementById('btn-cmd-verificar').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+            
+            let query = await db.collection("militares").get();
+            let docId = null; let dataM = null;
+            query.forEach(d => { if(d.id.toLowerCase() === nick.toLowerCase() || (d.data().nome && d.data().nome.toLowerCase() === nick.toLowerCase())) { docId = d.id; dataM = d.data(); } });
+
+            if(docId) {
+                militarVerificadoCmd = { id: docId, ...dataM };
+                document.getElementById('cmd-lbl-nick').innerText = militarVerificadoCmd.nome;
+                document.getElementById('area-sancao').style.display = 'block';
+            } else {
+                alert("Nick inexistente no system."); document.getElementById('area-sancao').style.display = 'none'; militarVerificadoCmd = null;
+            }
+            document.getElementById('btn-cmd-verificar').innerHTML = '<i class="fas fa-search"></i> Localizar Militar';
+        }
+
+        function mudarTipoSancaoCmd() {
+            let v = document.getElementById('cmd-tipo-sancao').value;
+            document.getElementById('cmd-box-qtd').style.display = v === 'deduzir' ? 'flex' : 'none';
+        }
+
+        function aplicarSancaoCmd() {
+            if(!militarVerificadoCmd) return;
+            let sancao = document.getElementById('cmd-tipo-sancao').value;
+            let ref = db.collection("militares").doc(militarVerificadoCmd.id);
+            let att = { nome: militarVerificadoCmd.nome }; 
+            let acaoLog = ""; let detailLog = "";
+
+            if(sancao === 'pagar_premio') {
+                if((militarVerificadoCmd.estrelas || 0) < 10) return alert(`Ação Negada!\nO militar possui apenas ${militarVerificadoCmd.estrelas || 0} estrelas. São necessárias no mínimo 10 para registrar um pagamento de premiação.`);
+                att.estrelas = militarVerificadoCmd.estrelas - 10;
+                att.premios_acumulados = (militarVerificadoCmd.premios_acumulados || 0) + 1;
+                acaoLog = "Pagamento de Prêmio"; detailLog = "10 estrelas convertidas em prêmio (Ciclo Pago e Zerado).";
+            }
+            else if(sancao === 'deduzir') {
+                let qtd = parseInt(document.getElementById('cmd-qtd').value);
+                if(isNaN(qtd) || qtd <= 0) return alert("Informe a quantidade para deduzir.");
+                if(militarVerificadoCmd.estrelas < qtd) return alert(`O militar possui apenas ${militarVerificadoCmd.estrelas} estrelas.`);
+                att.estrelas = militarVerificadoCmd.estrelas - qtd; acaoLog = "Dedução"; detailLog = `-${qtd} estrela(s).`;
+            } else if(sancao === 'cassar_todas') { att.estrelas = 0; att.promocoes_realizadas = 0; acaoLog = "Cassação"; detailLog = "Estrelas e ciclo zerados.";
+            } else if(sancao === 'suspender') { att.status = 'Suspenso'; acaoLog = "Suspensão"; detailLog = "Status alterado para Suspenso.";
+            } else if(sancao === 'reativar') { att.status = 'Ativo'; acaoLog = "Reativação"; detailLog = "Status alterado para Ativo."; }
+
+            ref.set(att, {merge:true}).then(() => {
+                db.collection("logs_estrelas").add({ timestamp: new Date().getTime(), data_hora: new Date().toLocaleString('pt-BR'), autor: loggedNick, beneficiado: militarVerificadoCmd.nome, acao: acaoLog, id_promocao: '-', detalhes: detailLog });
+                alert("Ação registrada com sucesso!");
+                document.getElementById('area-sancao').style.display = 'none'; document.getElementById('cmd-nick').value = ''; militarVerificadoCmd = null;
+            });
+        }
+    </script>
+</body>
+</html>
