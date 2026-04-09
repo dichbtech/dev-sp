@@ -493,11 +493,26 @@
                     document.querySelectorAll('.avatar-image-inside, .avatar-image-outside').forEach(img => img.src = avatarUrl);
 
                     let urlBanco = data.radioUrl || "https://stream.zeno.fm/c1ct7nz68f8uv";
-                    let currentStream = document.getElementById('stream-source').src;
+                    let sourceElem = document.getElementById('stream-source');
                     
-                    if(urlBanco && currentStream !== urlBanco) {
-                        document.getElementById('stream-source').src = urlBanco;
-                        if (!audioPlayer.paused) { audioPlayer.load(); audioPlayer.play(); }
+                    if(urlBanco && sourceElem.getAttribute('src') !== urlBanco) {
+                        sourceElem.src = urlBanco;
+                        audioPlayer.load();
+                        
+                        let playPromise = audioPlayer.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                iconPlay.classList.replace('fa-play', 'fa-pause');
+                            }).catch(e => console.log("Autoplay bloqueado pelo navegador. O usuário precisa interagir com a página antes."));
+                        }
+                    } else if (data.status === true && audioPlayer.paused) {
+                        // Tenta dar autoplay mesmo se a URL for a mesma mas a pessoa recarregou a página
+                        let playPromise = audioPlayer.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                iconPlay.classList.replace('fa-play', 'fa-pause');
+                            }).catch(e => console.log("Autoplay bloqueado pelo navegador."));
+                        }
                     }
 
                     globalLocutorCode = data.locutorCodigo || "12345";
