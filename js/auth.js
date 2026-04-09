@@ -11,7 +11,10 @@ window.liberarPainel = function() {
     document.getElementById('data-consulta').valueAsDate = new Date();
     
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    document.getElementById('mes-atual').innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
+    const elementoMes = document.getElementById('mes-atual');
+    if (elementoMes) {
+        elementoMes.innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
+    }
     
     window.carregarLayoutConfig();
     window.escutarCargos();
@@ -35,6 +38,11 @@ window.liberarPainel = function() {
     if(window.registrarLogAtividade) window.registrarLogAtividade("Login Efetuado", "Acessou a Central de Sistemas.");
 }
 
+// ================================================================
+// LÓGICA DE AUTENTICAÇÃO BLINDADA (REDIRECT EM VEZ DE POPUP)
+// ================================================================
+
+// 1. Monitora o estado da autenticação
 auth.onAuthStateChanged((user) => {
     if (user) {
         window.usuarioLogadoEmail = user.email.toLowerCase();
@@ -46,6 +54,26 @@ auth.onAuthStateChanged((user) => {
         setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10);
     }
 });
+
+// 2. Captura o resultado do redirecionamento após o login
+auth.getRedirectResult().catch((error) => {
+    console.error("Erro ao retornar do login:", error);
+    document.getElementById('loginLoader').style.display = 'none';
+    document.getElementById('loginCard').style.display = 'block';
+});
+
+// 3. Função de Login por Redirecionamento (Evita bloqueio COOP/Popups)
+window.loginGoogle = function() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    // Força o Google a pedir a conta sempre, evitando logins automáticos bugados
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('loginLoader').style.display = 'block';
+    
+    auth.signInWithRedirect(provider);
+}
+// ================================================================
 
 window.verificarAcessoBD = async function(email) {
     try {
@@ -60,25 +88,24 @@ window.verificarAcessoBD = async function(email) {
         window.acessosData = [];
         manualSnap.forEach(doc => { window.acessosData.push({ id: doc.id, ...doc.data() }); });
 
-        if (window.acessosData.length === 0 && Object.keys(window.planilhaAcessos).length === 0) {
+        if (window.acessosData.length === 0 && Object.keys(window.planilhaAcessos || {}).length === 0) {
             await window.db.collection("acessos").doc(authEmail).set({ email: authEmail, nick: 'Admin', nivel: "LIDER" });
             window.location.reload(); return;
         }
 
         let userManual = window.acessosData.find(u => (u.email || '').toLowerCase().trim() === authEmail);
         let userPlan = null;
-        for (let key in window.planilhaAcessos) {
-            if (key.toLowerCase().trim() === authEmail) { userPlan = window.planilhaAcessos[key]; break; }
+        if (window.planilhaAcessos) {
+            for (let key in window.planilhaAcessos) {
+                if (key.toLowerCase().trim() === authEmail) { userPlan = window.planilhaAcessos[key]; break; }
+            }
         }
 
         let autorizado = false;
-
-        if (userPlan && (userPlan.nivel.includes("LIDER") || userPlan.nivel.includes("VICE") || userPlan.nivel.includes("ADMIN"))) {
+        if (userPlan) {
             autorizado = true; window.nivelUsuarioGlobal = userPlan.nivel; window.usuarioLogadoNick = userPlan.nick;
         } else if (userManual) {
             autorizado = true; window.nivelUsuarioGlobal = userManual.nivel; window.usuarioLogadoNick = userManual.nick;
-        } else if (userPlan) {
-            autorizado = true; window.nivelUsuarioGlobal = userPlan.nivel; window.usuarioLogadoNick = userPlan.nick;
         }
 
         if (autorizado) {
@@ -94,82 +121,40 @@ window.verificarAcessoBD = async function(email) {
                 return;
             }
 
-            let menuAvais = document.getElementById('menu-avais');
-            let menuFeedbacks = document.getElementById('menu-feedbacks');
-            let menuEstrelas = document.getElementById('menu-estrelas');
-            let menuGrupos = document.getElementById('menu-grupos');
-            let menuCorrecoes = document.getElementById('menu-correcoes'); 
-            let menuAdmin = document.getElementById('admin-only-menus');
-            let menuRevisao = document.getElementById('menu-revisao');
-            
-            let dragControls = document.getElementById('admin-drag-controls');
-            let btnEditPos = document.getElementById('btn-edit-pos');
-            let btnSavePos = document.querySelector('button[onclick="window.savePositions()"]');
-            let dicaResize = document.getElementById('dica-resize');
+            // Controle de Menus
+            const menus = {
+                avais: document.getElementById('menu-avais'),
+                feedbacks: document.getElementById('menu-feedbacks'),
+                estrelas: document.getElementById('menu-estrelas'),
+                correcoes: document.getElementById('menu-correcoes'),
+                revisao: document.getElementById('menu-revisao'),
+                admin: document.getElementById('admin-only-menus')
+            };
 
             if (lvl === 'SUPERVISOR') {
-                if(menuAvais) menuAvais.style.display = 'none';
-                if(menuFeedbacks) menuFeedbacks.style.display = 'none';
-                if(menuEstrelas) menuEstrelas.style.display = 'none';
-                if(menuCorrecoes) menuCorrecoes.style.display = 'none';
-                if(menuRevisao) menuRevisao.style.display = 'none';
+                ['avais', 'feedbacks', 'estrelas', 'correcoes', 'revisao'].forEach(m => { if(menus[m]) menus[m].style.display = 'none'; });
             } 
             else if (lvl === 'AUXILIAR') {
-                if(menuEstrelas) menuEstrelas.style.display = 'none';
-                if(menuCorrecoes) menuCorrecoes.style.display = 'none';
-                if(menuRevisao) menuRevisao.style.display = 'none';
+                ['estrelas', 'correcoes', 'revisao'].forEach(m => { if(menus[m]) menus[m].style.display = 'none'; });
             } 
             else if (lvl === 'SUB-LIDER') {
-                if(dragControls) dragControls.style.display = 'flex';
-                if(btnEditPos) btnEditPos.style.display = 'none';
-                if(btnSavePos) btnSavePos.style.display = 'none';
-                if(dicaResize) dicaResize.style.display = 'none';
-                if(menuCorrecoes && window.carregarAtividadesPendentes) window.carregarAtividadesPendentes();
-                if(menuRevisao) menuRevisao.style.display = 'none';
+                if(document.getElementById('admin-drag-controls')) document.getElementById('admin-drag-controls').style.display = 'flex';
+                if(menus.revisao) menus.revisao.style.display = 'none';
             } 
-            else if (lvl === 'VICE-LIDER' || lvl === 'LIDER' || lvl === 'ADMIN') {
-                if(menuAdmin) menuAdmin.style.display = 'flex';
-                if(dragControls) dragControls.style.display = 'flex';
-                if(menuCorrecoes && window.carregarAtividadesPendentes) window.carregarAtividadesPendentes();
+            else if (['VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
+                if(menus.admin) menus.admin.style.display = 'flex';
+                if(document.getElementById('admin-drag-controls')) document.getElementById('admin-drag-controls').style.display = 'flex';
                 window.renderTabelaAcessos();
-                let boxPrivacidade = document.getElementById('box-editor-privacidade');
-                if (boxPrivacidade) { boxPrivacidade.innerHTML = window.buildEditorHTML('editor-privacidade', 'Carregando...'); }
-            }
-            
-            // NOVO: Lógica inteligente de Roteamento pós-login
-            let path = window.location.pathname.replace('/', '').trim();
-            if (path && path !== 'index.html') {
-                let sectionId = 'modulo-' + path;
-                let btnId = 'menu-' + path;
-                if (document.getElementById(sectionId)) {
-                    window.switchSection(sectionId, document.getElementById(btnId));
-                } else {
-                    window.switchSection('modulo-metas', document.getElementById('menu-metas'));
-                }
-            } else {
-                window.switchSection('modulo-metas', document.getElementById('menu-metas'));
             }
             
             window.liberarPainel();
         } else {
-            window.customAlert(`ACESSO NEGADO.<br><br>O e-mail <b>${authEmail}</b> não foi encontrado com permissões ativas.`, "Falha de Permissão");
+            window.customAlert(`ACESSO NEGADO.<br><br>O e-mail <b>${authEmail}</b> não tem permissão.`, "Falha");
             setTimeout(() => auth.signOut(), 5000);
         }
     } catch (err) {
-        window.customAlert("Erro na comunicação com o banco de dados: " + err.message, "Erro Crítico");
+        console.error(err);
     }
-}
-
-window.loginGoogle = function() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    document.getElementById('loginCard').style.display = 'none';
-    document.getElementById('loginLoader').style.display = 'block';
-    
-    auth.signInWithPopup(provider).catch(() => {
-        document.getElementById('loginLoader').style.display = 'none';
-        document.getElementById('loginCard').style.display = 'block';
-        document.getElementById('login-error').style.display = 'block';
-    });
 }
 
 window.fazerLogout = function() { 
@@ -179,7 +164,4 @@ window.fazerLogout = function() {
 
 window.abrirSystemDIC = function() {
     window.open('https://dic.systemhb.net/divisao/supervisores', '_blank');
-    if(window.registrarLogAtividade) {
-        window.registrarLogAtividade("Acesso Externo", "Clicou para abrir o System DIC num separador novo.");
-    }
 }
