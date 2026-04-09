@@ -1,5 +1,4 @@
 let militaresEstrelasData = [];
-window.listenerDemitidosAtivo = false;
 
 // NOVO: Gerenciador de Tela de Carregamento (Loader)
 window.mostrarLoader = function(mostrar, texto = "Processando...") {
@@ -40,14 +39,22 @@ window.verificarPermissaoCorrecao = async function() {
             }
         }
         
+        // Exibe botões restritos
         const cargosAutorizados = ["VICE-LIDER", "LIDER", "ADMIN"];
-        let btn = document.getElementById('btn-dashboard-correcao');
-        
-        if (btn && cargosAutorizados.includes(nivel)) {
-            btn.style.display = 'inline-block';
+        let btnCorrecao = document.getElementById('btn-dashboard-correcao');
+        if (btnCorrecao && cargosAutorizados.includes(nivel)) {
+            btnCorrecao.style.display = 'inline-block';
         }
+
+        // Permissão para o Botão Limpar Rank
+        const cargosSubPlus = ["SUB-LIDER", "VICE-LIDER", "LIDER", "ADMIN"];
+        let btnLimpar = document.getElementById('btn-limpar-rank');
+        if (btnLimpar && cargosSubPlus.includes(nivel)) {
+            btnLimpar.style.display = 'inline-block';
+        }
+
     } catch (e) {
-        console.error("Erro ao verificar permissão do botão de correção:", e);
+        console.error("Erro ao verificar permissões:", e);
     }
 }
 
@@ -64,48 +71,10 @@ window.escutarCargos = function() {
     });
 }
 
-window.escutarDemitidos = function() {
-    if (window.listenerDemitidosAtivo) return;
-    window.listenerDemitidosAtivo = true;
-
-    window.db.collection("sistema").doc("demitidos").onSnapshot(async (doc) => {
-        if (doc.exists && doc.data().lista) {
-            try {
-                let demitidos = JSON.parse(doc.data().lista);
-                if (!Array.isArray(demitidos) || demitidos.length === 0) return;
-
-                let snap = await window.db.collection("militares").get();
-                let promisesDeExclusao = [];
-
-                snap.forEach(militarDoc => {
-                    let data = militarDoc.data();
-                    let nomeMilitar = data.nome ? data.nome.trim() : militarDoc.id;
-                    let isDemitido = demitidos.some(d => d.toLowerCase() === nomeMilitar.toLowerCase());
-
-                    if (isDemitido) {
-                        let p = window.db.collection("militares").doc(militarDoc.id).delete()
-                        .then(() => {
-                            window.registrarLogEstrela(
-                                nomeMilitar,
-                                "Remoção (Demissão)",
-                                "-",
-                                "O perfil foi removido automaticamente do rank de estrelas devido a registro de Demissão na planilha."
-                            );
-                        }).catch(e => console.error("Erro ao apagar demitido:", e));
-                        promisesDeExclusao.push(p);
-                    }
-                });
-
-                await Promise.all(promisesDeExclusao);
-                window.db.collection("sistema").doc("demitidos").update({ lista: "[]" });
-            } catch (e) { console.error("Erro na faxina:", e); }
-        }
-    });
-}
+// A AUTOMAÇÃO DE DEMITIDOS FOI REMOVIDA DAQUI PERMANENTEMENTE
 
 window.escutarMilitaresEstrelas = function() {
     window.verificarPermissaoCorrecao();
-    window.escutarDemitidos(); 
 
     window.db.collection("militares").onSnapshot((snapshot) => {
         militaresEstrelasData = [];
@@ -131,7 +100,7 @@ window.renderTabelaEstrelas = function() {
     lista.sort((a, b) => (b.estrelas || 0) - (a.estrelas || 0) || (b.promocoes_realizadas || 0) - (a.promocoes_realizadas || 0));
     
     lista.forEach(dados => {
-        let cargo = window.cargosMap[dados.nome] || '';
+        let cargo = window.cargosMap && window.cargosMap[dados.nome] ? window.cargosMap[dados.nome] : '';
         let cargoHtml = cargo ? `<span style="color:var(--text-sub); font-size:11px; text-transform:uppercase; letter-spacing:1px; display:block; margin-top:2px;">${cargo}</span>` : '';
         
         let str = '★'.repeat(dados.estrelas || 0);
@@ -167,7 +136,7 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
     let docData = {
         timestamp: new Date().getTime(),
         data_hora: new Date().toLocaleString('pt-BR'),
-        autor: window.usuarioLogadoNick || window.usuarioLogadoNick,
+        autor: window.usuarioLogadoNick || "Oficial",
         beneficiado: bene,
         acao: acao,
         id_promocao: idProm || '-',
@@ -176,6 +145,84 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
     if (dataRef) docData.data_referencia = dataRef;
     window.db.collection("logs_estrelas").add(docData);
 }
+
+// ==========================================
+// NOVO: REMOÇÃO MANUAL DE DEMITIDOS DO RANK
+// ==========================================
+window.abrirModalLimparRank = async function() {
+    let user = window.firebase.auth().currentUser;
+    if (!user) return window.mostrarToast("Sessão expirada.", "error");
+
+    let docAcesso = await window.db.collection("acessos").doc(user.email).get();
+    let nivel = docAcesso.exists ? docAcesso.data().nivel : '';
+    if (nivel === 'VICELIDER') nivel = 'VICE-LIDER';
+    if (nivel === 'SUBLIDER') nivel = 'SUB-LIDER';
+
+    if (!["COMANDO", "LIDER", "VICE-LIDER", "SUB-LIDER", "ADMIN"].includes(nivel)) {
+        return window.customAlert("Acesso negado! Apenas Sub-Líderes ou superiores podem remover militares demitidos do rank.", "Sem Permissão");
+    }
+
+    let modal = document.getElementById('modal-limpar-rank-central');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-limpar-rank-central';
+        modal.style.cssText = 'display:flex; position:fixed; z-index:999999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;';
+        document.body.appendChild(modal);
+    }
+
+    let options = '<option value="" disabled selected>Selecione um policial...</option>';
+    let ordenados = [...militaresEstrelasData].sort((a,b) => a.nome.localeCompare(b.nome));
+    ordenados.forEach(m => {
+        options += `<option value="${m.id}">${m.nome}</option>`;
+    });
+
+    modal.innerHTML = `
+        <div style="background-color:#121008; border:1px solid #ff9800; border-radius:12px; width:100%; max-width:500px; position:relative; box-shadow:0 0 40px rgba(255,152,0,0.3); padding:35px; font-family:'Rajdhani', sans-serif;">
+            <div style="position:absolute; right:20px; top:20px; width:35px; height:35px; background:rgba(255,152,0,0.1); border-radius:50%; color:#ff9800; font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:0.3s;" onmouseover="this.style.background='#ff9800'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,152,0,0.1)'; this.style.color='#ff9800';" onclick="document.getElementById('modal-limpar-rank-central').style.display='none'">
+                <i class="fas fa-times"></i>
+            </div>
+            <h3 style="color:#ff9800; margin-bottom:20px; font-size:22px; text-transform:uppercase;"><i class="fas fa-user-slash"></i> Remover do Rank</h3>
+            <p style="color:var(--text-sub, #c9b98b); margin-bottom:20px; font-size:15px;">Selecione o policial demitido para apagá-lo permanentemente do ranking.</p>
+            
+            <div style="position:relative; width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,152,0,0.3); border-radius:6px; display:flex; align-items:center; padding:0 15px; margin-bottom:20px;">
+                <i class="fas fa-search" style="color:#ff9800; font-size:16px;"></i>
+                <select id="select-remover-central" style="width:100%; background:transparent; border:none; color:#fff; font-size:15px; font-family:'Rajdhani', sans-serif; font-weight:500; padding:15px 10px; outline:none; color-scheme:dark;">
+                    ${options}
+                </select>
+            </div>
+
+            <button onclick="window.confirmarRemocaoRankCentral()" style="background:#ff9800; color:#fff; border:none; padding:15px; border-radius:6px; font-family:'Rajdhani', sans-serif; font-size:15px; font-weight:600; cursor:pointer; text-transform:uppercase; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; transition:0.3s;">
+                <i class="fas fa-trash-alt"></i> Apagar Permanentemente
+            </button>
+        </div>
+    `;
+    modal.style.display = 'flex';
+}
+
+window.confirmarRemocaoRankCentral = function() {
+    let id = document.getElementById('select-remover-central').value;
+    if (!id) return window.mostrarToast("Selecione um policial primeiro.", "error");
+    
+    let m = militaresEstrelasData.find(x => x.id === id);
+    if (!m) return;
+
+    if (confirm(`ATENÇÃO! Isso vai apagar TODOS os dados e estrelas de ${m.nome} permanentemente.\n\nTem certeza que este policial foi demitido?`)) {
+        window.mostrarLoader(true, "Apagando policial do sistema...");
+        window.db.collection("militares").doc(id).delete().then(() => {
+            window.registrarLogEstrela(m.nome, "Remoção do Rank", "-", "Militar demitido foi removido permanentemente do banco de dados (Ação Manual).");
+            window.mostrarToast(`${m.nome} foi removido do rank com sucesso.`, "success");
+            if(window.registrarLogAtividade) window.registrarLogAtividade("Limpeza de Rank", `Removeu permanentemente o(a) ex-militar ${m.nome} do banco de estrelas.`);
+            document.getElementById('modal-limpar-rank-central').style.display = 'none';
+        }).catch(e => {
+            console.error(e);
+            window.mostrarToast("Erro ao remover.", "error");
+        }).finally(() => {
+            window.mostrarLoader(false);
+        });
+    }
+}
+// ==========================================
+
 
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
