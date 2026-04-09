@@ -1,19 +1,19 @@
 window.liberarPainel = function() {
-    document.getElementById('loginCard').style.display = 'none';
-    document.getElementById('loginLoader').style.display = 'none';
+    // Garante que a tela de login suma e o painel apareça
     document.getElementById('loginScreen').style.opacity = '0';
-    
     setTimeout(() => {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appWrapper').style.display = 'flex';
+        document.getElementById('loginCard').style.display = 'none';
+        document.getElementById('loginLoader').style.display = 'none';
     }, 300);
     
-    const dataConsulta = document.getElementById('data-consulta');
-    if(dataConsulta) dataConsulta.valueAsDate = new Date();
+    const dataC = document.getElementById('data-consulta');
+    if(dataC) dataC.valueAsDate = new Date();
     
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const campoMes = document.getElementById('mes-atual');
-    if(campoMes) campoMes.innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
+    const txtMes = document.getElementById('mes-atual');
+    if(txtMes) txtMes.innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
     
     window.carregarLayoutConfig();
     window.escutarCargos();
@@ -21,7 +21,6 @@ window.liberarPainel = function() {
     window.escutarMetasDoFirebase();
     
     let lvl = window.nivelUsuarioGlobal;
-    
     if (['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
         window.escutarMilitaresEstrelas();
     }
@@ -33,18 +32,19 @@ window.liberarPainel = function() {
     }
     
     window.setupAllDraggables();
-    
     if(window.registrarLogAtividade) window.registrarLogAtividade("Login Efetuado", "Acessou a Central de Sistemas.");
 }
 
-// MONITOR DE SESSÃO ATUALIZADO
+// MONITOR DE SESSÃO ESTABILIZADO
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // Se há um usuário, não mostramos o login, vamos direto verificar o acesso
         window.usuarioLogadoEmail = user.email.toLowerCase();
+        // Se já estamos logados, mostramos o loader e verificamos o acesso
+        document.getElementById('loginCard').style.display = 'none';
+        document.getElementById('loginLoader').style.display = 'block';
         window.verificarAcessoBD(window.usuarioLogadoEmail);
     } else {
-        // Se não há usuário, garantimos que a tela de login apareça
+        // Se deslogado, volta para a tela de login
         document.getElementById('appWrapper').style.display = 'none';
         document.getElementById('loginLoader').style.display = 'none';
         document.getElementById('loginCard').style.display = 'block';
@@ -57,14 +57,14 @@ window.verificarAcessoBD = async function(email) {
     try {
         let authEmail = email.toLowerCase().trim();
         
-        // Busca permissões da planilha
-        let planSnap = await window.db.collection("sistema").doc("acessos_planilha").get();
+        // Tenta buscar dados do sistema
+        const planRef = window.db.collection("sistema").doc("acessos_planilha");
+        const planSnap = await planRef.get();
         if (planSnap.exists && planSnap.data().dados) {
             try { window.planilhaAcessos = JSON.parse(planSnap.data().dados); } catch (e) { window.planilhaAcessos = {}; }
         }
         
-        // Busca permissões manuais
-        let manualSnap = await window.db.collection("acessos").get();
+        const manualSnap = await window.db.collection("acessos").get();
         window.acessosData = [];
         manualSnap.forEach(doc => { window.acessosData.push({ id: doc.id, ...doc.data() }); });
 
@@ -78,13 +78,9 @@ window.verificarAcessoBD = async function(email) {
 
         let autorizado = false;
         if (userPlan) {
-            autorizado = true; 
-            window.nivelUsuarioGlobal = userPlan.nivel; 
-            window.usuarioLogadoNick = userPlan.nick;
+            autorizado = true; window.nivelUsuarioGlobal = userPlan.nivel; window.usuarioLogadoNick = userPlan.nick;
         } else if (userManual) {
-            autorizado = true; 
-            window.nivelUsuarioGlobal = userManual.nivel; 
-            window.usuarioLogadoNick = userManual.nick;
+            autorizado = true; window.nivelUsuarioGlobal = userManual.nivel; window.usuarioLogadoNick = userManual.nick;
         }
 
         if (autorizado) {
@@ -92,32 +88,29 @@ window.verificarAcessoBD = async function(email) {
             if (window.nivelUsuarioGlobal === 'VICELIDER') window.nivelUsuarioGlobal = 'VICE-LIDER';
             if (window.nivelUsuarioGlobal === 'SUBLIDER') window.nivelUsuarioGlobal = 'SUB-LIDER';
             
-            let lvl = window.nivelUsuarioGlobal;
-
-            if (lvl === 'COMANDO') {
-                window.customAlert("Acesso de Comando restrito ao Painel Público.", "Aviso");
+            if (window.nivelUsuarioGlobal === 'COMANDO') {
+                window.customAlert("Acesso restrito ao Painel Público.", "Aviso");
                 setTimeout(() => { auth.signOut(); }, 3000);
                 return;
             }
 
-            // Exibe menus conforme nível
-            if (lvl === 'VICE-LIDER' || lvl === 'LIDER' || lvl === 'ADMIN') {
-                const menuAdmin = document.getElementById('admin-only-menus');
-                if(menuAdmin) menuAdmin.style.display = 'flex';
+            if (['VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
+                if(document.getElementById('admin-only-menus')) document.getElementById('admin-only-menus').style.display = 'flex';
                 window.renderTabelaAcessos();
             }
             
             window.liberarPainel();
         } else {
-            // Se o e-mail não estiver na lista, avisamos e deslogamos
-            window.customAlert(`ACESSO NEGADO.<br><br>O e-mail <b>${authEmail}</b> não possui permissão de acesso.`, "Falha de Autenticação");
+            window.customAlert(`O e-mail <b>${authEmail}</b> não tem permissão.`, "Acesso Negado");
             setTimeout(() => auth.signOut(), 4000);
         }
     } catch (err) {
-        console.error("Erro ao verificar banco de dados:", err);
-        // Se der erro de permissão aqui (bloqueio do navegador), tentamos liberar o painel mesmo assim para ver se recupera
-        if(err.message.includes("permissions")) {
-            console.warn("Navegador bloqueando Firestore. Tentando carregar modo limitado.");
+        console.error("Erro na verificação:", err);
+        // Se der erro de permissão (bloqueio de navegador), NÃO deslogamos o usuário. 
+        // Tentamos apenas liberar o painel para ver se o Firebase se recupera sozinho.
+        if (err.message.includes("permissions") || err.message.includes("Insufficient")) {
+            console.warn("Bloqueio de segurança detectado. Tentando contornar...");
+            if (window.nivelUsuarioGlobal) window.liberarPainel();
         }
     }
 }
@@ -125,11 +118,18 @@ window.verificarAcessoBD = async function(email) {
 window.loginGoogle = function() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('loginLoader').style.display = 'block';
     
-    auth.signInWithRedirect(provider);
+    // Voltamos para o Popup, mas com tratamento de erro melhorado
+    auth.signInWithPopup(provider).catch((error) => {
+        console.error("Erro no login:", error);
+        document.getElementById('loginLoader').style.display = 'none';
+        document.getElementById('loginCard').style.display = 'block';
+        if(error.code !== 'auth/popup-closed-by-user') {
+            window.customAlert("Erro ao abrir login. Verifique se o seu navegador não bloqueou o popup.", "Erro");
+        }
+    });
 }
 
 window.fazerLogout = function() { 
