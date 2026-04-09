@@ -27,27 +27,32 @@ window.verificarPermissaoCorrecao = async function() {
         let user = window.firebase.auth().currentUser;
         if (!user) return; 
         
-        let nivel = "NENHUM";
+        let nivelRaw = "NENHUM";
         
         let docAcesso = await window.db.collection("acessos").doc(user.email).get();
         if (docAcesso.exists) {
-            nivel = docAcesso.data().nivel;
+            nivelRaw = docAcesso.data().nivel;
         } else {
             let docPlan = await window.db.collection("sistema").doc("acessos_planilha").get();
             if (docPlan.exists && docPlan.data().permissoes_regras && docPlan.data().permissoes_regras[user.email]) {
-                nivel = docPlan.data().permissoes_regras[user.email].nivel;
+                nivelRaw = docPlan.data().permissoes_regras[user.email].nivel;
             }
         }
         
-        // Exibe botões restritos
-        const cargosAutorizados = ["VICE-LIDER", "LIDER", "ADMIN"];
+        // CORREÇÃO: Padroniza o texto para evitar erro de acentuação (ex: 'Líder' vira 'LIDER')
+        let nivel = nivelRaw.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (nivel === 'VICELIDER') nivel = 'VICE-LIDER';
+        if (nivel === 'SUBLIDER') nivel = 'SUB-LIDER';
+        
+        // Exibe botões restritos (Correção em Lote)
+        const cargosAutorizados = ["COMANDO", "LIDER", "VICE-LIDER", "ADMIN"];
         let btnCorrecao = document.getElementById('btn-dashboard-correcao');
         if (btnCorrecao && cargosAutorizados.includes(nivel)) {
             btnCorrecao.style.display = 'inline-block';
         }
 
         // Permissão para o Botão Limpar Rank
-        const cargosSubPlus = ["SUB-LIDER", "VICE-LIDER", "LIDER", "ADMIN"];
+        const cargosSubPlus = ["COMANDO", "LIDER", "VICE-LIDER", "SUB-LIDER", "ADMIN"];
         let btnLimpar = document.getElementById('btn-limpar-rank');
         if (btnLimpar && cargosSubPlus.includes(nivel)) {
             btnLimpar.style.display = 'inline-block';
@@ -70,8 +75,6 @@ window.escutarCargos = function() {
         }
     });
 }
-
-// A AUTOMAÇÃO DE DEMITIDOS FOI REMOVIDA DAQUI PERMANENTEMENTE
 
 window.escutarMilitaresEstrelas = function() {
     window.verificarPermissaoCorrecao();
@@ -147,14 +150,17 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
 }
 
 // ==========================================
-// NOVO: REMOÇÃO MANUAL DE DEMITIDOS DO RANK
+// REMOÇÃO MANUAL DE DEMITIDOS DO RANK
 // ==========================================
 window.abrirModalLimparRank = async function() {
     let user = window.firebase.auth().currentUser;
     if (!user) return window.mostrarToast("Sessão expirada.", "error");
 
     let docAcesso = await window.db.collection("acessos").doc(user.email).get();
-    let nivel = docAcesso.exists ? docAcesso.data().nivel : '';
+    let nivelRaw = docAcesso.exists ? docAcesso.data().nivel : '';
+    
+    // CORREÇÃO: Padronização para a segurança do Modal
+    let nivel = nivelRaw.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     if (nivel === 'VICELIDER') nivel = 'VICE-LIDER';
     if (nivel === 'SUBLIDER') nivel = 'SUB-LIDER';
 
