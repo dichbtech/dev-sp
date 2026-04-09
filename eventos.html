@@ -678,6 +678,29 @@
                 localStorage.removeItem('dic_locutor_code'); 
             });
         }
+
+        // ---------- SISTEMA ANTI-QUEDA (RECONEXÃO AUTOMÁTICA) ----------
+// Verifica a cada 10 segundos se a rádio caiu (está pausada ou sem rede)
+// e tenta reconectar automaticamente burlando o cache do navegador.
+setInterval(() => {
+    // Só tenta reconectar se o usuário NÃO clicou no pause de propósito
+    if (!userIntentionallyPaused && audioPlayer.paused) {
+        
+        let urlBanco = document.getElementById('stream-source').src.split('?')[0]; // Pega a URL limpa sem parâmetros antigos
+        let novaUrl = urlBanco + "?t=" + new Date().getTime(); // Cria uma URL única e fresca
+        
+        console.log("Tentando reconectar a rádio na URL:", novaUrl);
+        
+        document.getElementById('stream-source').src = novaUrl;
+        audioPlayer.load();
+        
+        audioPlayer.play().then(() => {
+            iconPlay.classList.replace('fa-play', 'fa-pause');
+        }).catch(e => {
+            console.log("Reconexão feita, aguardando clique do usuário para tocar som.");
+        });
+    }
+}, 10000); // 10000 milissegundos = 10 segundos
     </script>
 </body>
 </html>
