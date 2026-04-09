@@ -156,8 +156,16 @@ window.abrirModalLimparRank = async function() {
     let user = window.firebase.auth().currentUser;
     if (!user) return window.mostrarToast("Sessão expirada.", "error");
 
+    let nivelRaw = "NENHUM";
     let docAcesso = await window.db.collection("acessos").doc(user.email).get();
-    let nivelRaw = docAcesso.exists ? docAcesso.data().nivel : '';
+    if (docAcesso.exists) {
+        nivelRaw = docAcesso.data().nivel;
+    } else {
+        let docPlan = await window.db.collection("sistema").doc("acessos_planilha").get();
+        if (docPlan.exists && docPlan.data().permissoes_regras && docPlan.data().permissoes_regras[user.email]) {
+            nivelRaw = docPlan.data().permissoes_regras[user.email].nivel;
+        }
+    }
     
     // CORREÇÃO: Padronização para a segurança do Modal
     let nivel = nivelRaw.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
