@@ -268,9 +268,14 @@
                 </div>
 
                 <div class="radio-controls">
-                    <button class="btn-pedidos" onclick="abrirModalPedidos()">
-                        <i class="fas fa-envelope-open-text"></i> Pedidos
-                    </button>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="btn-pedidos" onclick="abrirPopupPlayerAlt()" style="background: rgba(251,191,36,0.1); border-color: var(--sup-neon); color: var(--sup-neon);">
+                            <i class="fas fa-compact-disc"></i> Player Alternativo
+                        </button>
+                        <button class="btn-pedidos" onclick="abrirModalPedidos()">
+                            <i class="fas fa-envelope-open-text"></i> Pedidos
+                        </button>
+                    </div>
                     
                     <div style="color: var(--text-sub); display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-volume-down"></i>
@@ -417,7 +422,9 @@
             }
         }
 
+        // ---------- FUNÇÕES DA RÁDIO ----------
         let radioInterval;
+        let userIntentionallyPaused = false; 
 
         async function buscarStatusRadio() {
             try {
@@ -447,15 +454,53 @@
 
         function toggleRadio() {
             if (audioPlayer.paused) {
+                userIntentionallyPaused = false;
                 audioPlayer.play().then(() => {
                     iconPlay.classList.replace('fa-play', 'fa-pause');
-                }).catch(e => {
-                    console.error("Autoplay bloqueado pelo navegador.", e);
-                });
+                }).catch(e => console.error("Erro no play manual", e));
             } else {
+                userIntentionallyPaused = true;
                 audioPlayer.pause();
                 iconPlay.classList.replace('fa-pause', 'fa-play');
             }
+        }
+
+        function autoPlayStandby() {
+            if (userIntentionallyPaused) return; 
+
+            let playPromise = audioPlayer.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    iconPlay.classList.replace('fa-play', 'fa-pause');
+                }).catch(e => {
+                    console.log("Autoplay bloqueado pelo navegador. Aguardando interação...");
+                    
+                    const startAudioOnInteract = () => {
+                        if (audioPlayer.paused && !userIntentionallyPaused) {
+                            audioPlayer.play().then(() => {
+                                iconPlay.classList.replace('fa-play', 'fa-pause');
+                            }).catch(err => console.log("Ainda bloqueado", err));
+                        }
+                        document.removeEventListener('click', startAudioOnInteract);
+                        document.removeEventListener('touchstart', startAudioOnInteract);
+                        document.removeEventListener('keydown', startAudioOnInteract);
+                    };
+                    
+                    document.addEventListener('click', startAudioOnInteract);
+                    document.addEventListener('touchstart', startAudioOnInteract);
+                    document.addEventListener('keydown', startAudioOnInteract);
+                });
+            }
+        }
+
+        // Função para abrir o Popup independente
+        function abrirPopupPlayerAlt() {
+            // Pausa o player da página principal para não tocar duas vezes
+            if (!audioPlayer.paused) {
+                toggleRadio();
+            }
+            // Abre o arquivo player.html numa nova janela de dimensões fixas
+            window.open('player.html', 'PlayerSupervisores', 'width=350,height=300,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no');
         }
 
         function formatDoc(command, value = null) {
@@ -497,20 +542,9 @@
                     if(urlBanco && sourceElem.getAttribute('src') !== urlBanco) {
                         sourceElem.src = urlBanco;
                         audioPlayer.load();
-                        
-                        let playPromise = audioPlayer.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(() => {
-                                iconPlay.classList.replace('fa-play', 'fa-pause');
-                            }).catch(e => console.log("Autoplay bloqueado pelo navegador. O usuário precisa interagir com a página antes."));
-                        }
+                        autoPlayStandby(); 
                     } else if (data.status === true && audioPlayer.paused) {
-                        let playPromise = audioPlayer.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(() => {
-                                iconPlay.classList.replace('fa-play', 'fa-pause');
-                            }).catch(e => console.log("Autoplay bloqueado pelo navegador."));
-                        }
+                        autoPlayStandby(); 
                     }
 
                     globalLocutorCode = data.locutorCodigo || "12345";
