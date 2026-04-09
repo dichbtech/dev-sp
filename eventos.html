@@ -282,7 +282,7 @@
                     </button>
                 </div>
                 
-                <audio id="stream-player" preload="none">
+                <audio id="stream-player" preload="auto">
                     <source id="stream-source" src="" type="audio/mpeg">
                 </audio>
             </div>
@@ -447,7 +447,6 @@
 
         function toggleRadio() {
             if (audioPlayer.paused) {
-                audioPlayer.load(); 
                 audioPlayer.play().then(() => {
                     iconPlay.classList.replace('fa-play', 'fa-pause');
                 }).catch(e => {
@@ -506,7 +505,6 @@
                             }).catch(e => console.log("Autoplay bloqueado pelo navegador. O usuário precisa interagir com a página antes."));
                         }
                     } else if (data.status === true && audioPlayer.paused) {
-                        // Tenta dar autoplay mesmo se a URL for a mesma mas a pessoa recarregou a página
                         let playPromise = audioPlayer.play();
                         if (playPromise !== undefined) {
                             playPromise.then(() => {
