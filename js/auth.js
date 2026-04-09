@@ -35,17 +35,24 @@ window.liberarPainel = function() {
     if(window.registrarLogAtividade) window.registrarLogAtividade("Login Efetuado", "Acessou a Central de Sistemas.");
 }
 
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        window.usuarioLogadoEmail = user.email.toLowerCase();
-        window.verificarAcessoBD(window.usuarioLogadoEmail);
-    } else {
-        document.getElementById('appWrapper').style.display = 'none';
-        document.getElementById('loginCard').style.display = 'block';
-        document.getElementById('loginScreen').style.display = 'flex';
-        setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10);
-    }
-});
+// CORREÇÃO: Aplicando a persistência LOCAL antes de checar a mudança de estado.
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+      auth.onAuthStateChanged((user) => {
+          if (user) {
+              window.usuarioLogadoEmail = user.email.toLowerCase();
+              window.verificarAcessoBD(window.usuarioLogadoEmail);
+          } else {
+              document.getElementById('appWrapper').style.display = 'none';
+              document.getElementById('loginCard').style.display = 'block';
+              document.getElementById('loginScreen').style.display = 'flex';
+              setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10);
+          }
+      });
+  })
+  .catch((error) => {
+      console.error("Erro na persistência de autenticação:", error);
+  });
 
 window.verificarAcessoBD = async function(email) {
     try {

@@ -184,10 +184,11 @@ window.abrirModalLimparRank = async function() {
         document.body.appendChild(modal);
     }
 
-    let options = '<option value="" disabled selected>Selecione um policial...</option>';
+    // CORREÇÃO VISUAL: Forçando fundo escuro e texto claro nas opções nativas
+    let options = '<option value="" disabled selected style="background:#121008; color:#fff;">Selecione um policial...</option>';
     let ordenados = [...militaresEstrelasData].sort((a,b) => a.nome.localeCompare(b.nome));
     ordenados.forEach(m => {
-        options += `<option value="${m.id}">${m.nome}</option>`;
+        options += `<option value="${m.id}" style="background:#121008; color:#fff;">${m.nome}</option>`;
     });
 
     modal.innerHTML = `
