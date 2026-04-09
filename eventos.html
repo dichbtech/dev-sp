@@ -18,7 +18,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            background-color: var(--bg-dark);
             height: 100vh;
             margin: 0;
             display: flex;
@@ -32,9 +32,9 @@
         .bg-smoke {
             position: absolute;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at 15% 30%, rgba(255,255,255,0.4) 0%, transparent 50%),
-                        radial-gradient(circle at 85% 70%, rgba(255,255,255,0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(251,191,36,0.6) 0%, transparent 60%);
+            background: radial-gradient(circle at 15% 30%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 85% 70%, rgba(255,255,255,0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(251,191,36,0.1) 0%, transparent 60%);
             filter: blur(40px);
             z-index: 0;
             animation: smoke-move 15s ease-in-out infinite alternate;
@@ -56,12 +56,18 @@
             z-index: 1;
         }
 
+        /* Camada de Efeitos Globais (Morcegos, Neve, etc) */
+        #effect-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5; overflow: hidden;
+        }
+
         #state-loading {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             background: var(--bg-dark);
             z-index: 60;
-            background-color: #09090b;
         }
 
         #state-off {
@@ -96,36 +102,50 @@
             z-index: 10;
         }
 
+        /* NOVO HEADER/BANNER FULL WIDTH */
         header {
             width: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            border-bottom: 1px solid var(--glass-border);
+            min-height: 280px;
+            background-color: #1a1a24;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            border-bottom: 2px solid rgba(251, 191, 36, 0.5);
+            display: flex;
+            align-items: flex-end;
+            position: relative;
             flex-shrink: 0;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .header-gradient {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 180px;
+            background: linear-gradient(to top, var(--bg-dark), transparent);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .header-frame {
             max-width: 900px;
+            width: 100%;
             margin: 0 auto;
-            padding: 10px 20px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
+            z-index: 2;
+            box-sizing: border-box;
         }
 
-        .header-frame h1 { color: var(--sup-neon); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
-        .header-frame h2 { color: #aaa; margin: 0; font-size: 13px; text-transform: uppercase; }
+        .header-frame h1 { color: var(--sup-neon); margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        .header-frame h2 { color: #fff; margin: 0; font-size: 14px; text-transform: uppercase; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        .header-frame img { border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
         .event-container {
             width: 100%; max-width: 900px; display: flex; flex-direction: column; padding: 20px;
-            height: calc(100vh - 70px); box-sizing: border-box;
-        }
-
-        .event-banner {
-            width: 100%; min-height: 220px; height: 28vh; max-height: 300px; border-radius: 12px;
-            background-color: #1a1a24; background-position: center; background-size: 100% 100%;
-            background-repeat: no-repeat; border: 2px solid rgba(251, 191, 36, 0.3);
-            margin-bottom: 15px; flex-shrink: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            height: calc(100vh - 280px); box-sizing: border-box;
         }
 
         .radio-glass-box {
@@ -133,6 +153,7 @@
             padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 15px; flex-wrap: wrap; gap: 15px; flex-shrink: 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative;
+            z-index: 10;
         }
 
         .radio-left { display: flex; align-items: center; gap: 15px; }
@@ -160,12 +181,12 @@
         .locutor-info p.song-info { color: #ccc; font-size: 12px; margin-top: 3px; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
         .locutor-info p.song-info span { color: #fff; }
 
-        .radio-controls { display: flex; align-items: center; gap: 15px; }
+        .radio-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: flex-end; flex: 1;}
 
         .btn-play-radio {
             width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #d97706);
             color: #000; border: none; font-size: 20px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .btn-play-radio:active { transform: scale(0.95); }
 
@@ -176,10 +197,17 @@
         }
         .btn-pedidos:hover { background: rgba(255,255,255,0.1); border-color: var(--sup-neon); color: var(--sup-neon); }
 
+        .btn-like { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.5); color: #ef4444; }
+        .btn-like:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+        
+        .btn-presenca { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.5); color: #3b82f6; }
+        .btn-presenca:hover { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #3b82f6; }
+
         .event-content-box {
             background: var(--glass-bg); border-radius: 12px; padding: 20px; color: #ddd;
             font-size: 15px; line-height: 1.5; border: 1px solid var(--glass-border);
             flex: 1; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 10;
         }
 
         .floating-btns {
@@ -227,8 +255,7 @@
 
     <div class="bg-smoke"></div>
     <div class="bg-text-pattern"></div>
-
-    <div id="state-loading">
+    <div id="effect-layer"></div> <div id="state-loading">
         <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: var(--sup-neon);"></i>
     </div>
 
@@ -237,19 +264,18 @@
     </div>
 
     <div id="state-on">
-        <header>
+        <header id="view-banner" style="background-image: url('https://i.imgur.com/placeholder.png');">
+            <div class="header-gradient"></div>
             <div class="header-frame">
                 <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo">
                 <div class="title-area">
-                    <h1>EVENTOS - SUPERVISORES</h1>
-                    <h2>Cobertura Oficial</h2>
+                    <h1 id="view-header-title">EVENTOS - SUPERVISORES</h1>
+                    <h2 id="view-ouvintes" title="Aguardando conexão com servidor"><i class="fas fa-users" style="margin-right: 5px;"></i> -- Ouvintes</h2>
                 </div>
             </div>
         </header>
 
         <div class="event-container">
-            <div class="event-banner" id="view-banner" style="background-image: url('https://i.imgur.com/placeholder.png');"></div>
-
             <div class="radio-glass-box">
                 <div class="radio-left">
                     <div class="avatar-wrapper">
@@ -268,9 +294,18 @@
                 </div>
 
                 <div class="radio-controls">
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-pedidos btn-like" onclick="darLike(event)" title="Curtir Locutor">
+                            <i class="fas fa-heart"></i> <span id="view-likes">0</span>
+                        </button>
+                        <button class="btn-pedidos btn-presenca" onclick="marcarPresenca(event)" title="Marcar Presença">
+                            <i class="fas fa-check-circle"></i> Presença
+                        </button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button class="btn-pedidos" onclick="abrirPopupPlayerAlt()" style="background: rgba(251,191,36,0.1); border-color: var(--sup-neon); color: var(--sup-neon);">
-                            <i class="fas fa-compact-disc"></i> Player Alternativo
+                            <i class="fas fa-compact-disc"></i>
                         </button>
                         <button class="btn-pedidos" onclick="abrirModalPedidos()">
                             <i class="fas fa-envelope-open-text"></i> Pedidos
@@ -341,13 +376,24 @@
                 <button class="btn-tech" style="margin-top:23px;" onclick="gerarNovoCodigo()"><i class="fas fa-sync"></i> Gerar Novo</button>
             </div>
 
-            <div class="input-group" style="margin-bottom:10px;">
-                <label class="tech-label" style="display:block; margin-bottom:5px;">Título da Rádio</label>
-                <input type="text" id="edit-title" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; border-radius: 5px; box-sizing:border-box;">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <div style="flex:2;">
+                    <label class="tech-label" style="display:block; margin-bottom:5px;">Título Secundário (Banner)</label>
+                    <input type="text" id="edit-title" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; border-radius: 5px; box-sizing:border-box;">
+                </div>
+                <div style="flex:1;">
+                    <label class="tech-label" style="display:block; margin-bottom:5px;">Efeito na Tela</label>
+                    <select id="edit-effect" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; border-radius: 5px; box-sizing:border-box;">
+                        <option value="none">Nenhum</option>
+                        <option value="stars">Estrelas Cadentes</option>
+                        <option value="snow">Neve (Inverno)</option>
+                        <option value="bats">Morcegos (Hallowen)</option>
+                    </select>
+                </div>
             </div>
 
             <div class="input-group" style="margin-bottom:10px;">
-                <label class="tech-label" style="display:block; margin-bottom:5px;">Banner Oficial (URL 900x300)</label>
+                <label class="tech-label" style="display:block; margin-bottom:5px;">Imagem do Banner (URL HD Recomendado)</label>
                 <input type="text" id="edit-banner" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; border-radius: 5px; box-sizing:border-box;">
             </div>
 
@@ -422,6 +468,93 @@
             }
         }
 
+        // ---------- ANIMAÇÕES DE CLIQUE (LIKES E PRESENÇA) ----------
+        function spawnClickEffect(emoji, e) {
+            const effect = document.createElement('div');
+            effect.innerText = emoji;
+            effect.style.position = 'fixed';
+            effect.style.left = (e.clientX - 10) + 'px';
+            effect.style.top = (e.clientY - 20) + 'px';
+            effect.style.fontSize = '25px';
+            effect.style.pointerEvents = 'none';
+            effect.style.zIndex = '9999';
+            effect.style.transition = 'all 1s ease-out';
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.style.transform = `translateY(-100px) scale(1.5) translateX(${(Math.random() - 0.5) * 50}px)`;
+                effect.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => effect.remove(), 1000);
+        }
+
+        function darLike(e) {
+            spawnClickEffect('❤️', e);
+            window.db.collection("sistema").doc("pagina_eventos").update({
+                likes: window.firebase.firestore.FieldValue.increment(1)
+            }).catch(()=>{}); // Catch mudo caso locutor sem login tente curtir (Regras Firestore)
+        }
+
+        function marcarPresenca(e) {
+            spawnClickEffect('⭐', e);
+            // Aqui futuramente você pode colocar um alert ou abrir modal de presença
+        }
+
+        // ---------- EFEITOS SAZONAIS DA LIDERANÇA ----------
+        let seasonalInterval;
+        function renderizarEfeitos(tipo) {
+            const layer = document.getElementById('effect-layer');
+            layer.innerHTML = ''; 
+            if(seasonalInterval) clearInterval(seasonalInterval);
+            if(tipo === 'none' || !tipo) return;
+
+            seasonalInterval = setInterval(() => {
+                const el = document.createElement('div');
+                el.style.position = 'absolute';
+                el.style.pointerEvents = 'none';
+                
+                let startX = Math.random() * window.innerWidth;
+                let startY = -50;
+                let duration = Math.random() * 3000 + 3000;
+
+                if (tipo === 'snow') {
+                    el.innerText = '❄'; el.style.color = '#fff';
+                    el.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                    el.style.opacity = Math.random() * 0.8 + 0.2;
+                } else if (tipo === 'stars') {
+                    el.innerText = '⭐';
+                    el.style.fontSize = (Math.random() * 10 + 15) + 'px';
+                    duration = Math.random() * 2000 + 2000;
+                } else if (tipo === 'bats') {
+                    el.innerText = '🦇';
+                    el.style.fontSize = '20px';
+                    startX = window.innerWidth + 50;
+                    startY = Math.random() * window.innerHeight;
+                    duration = 5000;
+                }
+
+                el.style.left = startX + 'px';
+                el.style.top = startY + 'px';
+                layer.appendChild(el);
+                
+                let animation;
+                if(tipo === 'bats') {
+                    animation = el.animate([
+                        { transform: `translate(0, 0) scale(${Math.random() + 0.5})`, opacity: 1 },
+                        { transform: `translate(-${window.innerWidth+100}px, ${Math.random()*200-100}px) scale(${Math.random() + 0.5})`, opacity: 0 }
+                    ], { duration: duration, easing: 'linear' });
+                } else {
+                    animation = el.animate([
+                        { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                        { transform: `translate(${Math.random()*150-75}px, ${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }
+                    ], { duration: duration, easing: 'linear' });
+                }
+
+                animation.onfinish = () => el.remove();
+            }, tipo === 'bats' ? 800 : 300);
+        }
+
         // ---------- FUNÇÕES DA RÁDIO ----------
         let radioInterval;
         let userIntentionallyPaused = false; 
@@ -432,6 +565,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('view-song').innerText = data.musica || "Ao Vivo";
+                    // document.getElementById('view-ouvintes').innerHTML = `<i class="fas fa-users" style="margin-right: 5px;"></i> ${data.ouvintes || "--"} Ouvintes`;
                 }
             } catch (error) {
                 console.error("Erro na API da Rádio.");
@@ -473,33 +607,23 @@
                 playPromise.then(() => {
                     iconPlay.classList.replace('fa-play', 'fa-pause');
                 }).catch(e => {
-                    console.log("Autoplay bloqueado pelo navegador. Aguardando interação...");
-                    
                     const startAudioOnInteract = () => {
                         if (audioPlayer.paused && !userIntentionallyPaused) {
                             audioPlayer.play().then(() => {
                                 iconPlay.classList.replace('fa-play', 'fa-pause');
-                            }).catch(err => console.log("Ainda bloqueado", err));
+                            }).catch(err => console.log("Ainda bloqueado"));
                         }
                         document.removeEventListener('click', startAudioOnInteract);
-                        document.removeEventListener('touchstart', startAudioOnInteract);
                         document.removeEventListener('keydown', startAudioOnInteract);
                     };
-                    
                     document.addEventListener('click', startAudioOnInteract);
-                    document.addEventListener('touchstart', startAudioOnInteract);
                     document.addEventListener('keydown', startAudioOnInteract);
                 });
             }
         }
 
-        // Função para abrir o Popup independente
         function abrirPopupPlayerAlt() {
-            // Pausa o player da página principal para não tocar duas vezes
-            if (!audioPlayer.paused) {
-                toggleRadio();
-            }
-            // Abre o arquivo player.html numa nova janela de dimensões fixas
+            if (!audioPlayer.paused) toggleRadio();
             window.open('player.html', 'PlayerSupervisores', 'width=350,height=300,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no');
         }
 
@@ -526,10 +650,16 @@
                         if(radioInterval) clearInterval(radioInterval);
                     }
 
-                    document.getElementById('view-title').innerText = data.titulo || "Rádio Oficial";
+                    // Preenche Info do Header/Banner
+                    document.getElementById('view-header-title').innerText = data.titulo || "Rádio Oficial";
                     document.getElementById('view-banner').style.backgroundImage = `url('${data.banner || 'https://i.imgur.com/placeholder.png'}')`;
                     
                     document.getElementById('view-content').innerHTML = data.conteudo || "";
+                    document.getElementById('view-likes').innerText = data.likes || 0;
+                    
+                    // Renderiza Efeitos da Tela
+                    renderizarEfeitos(data.efeito || 'none');
+                    document.getElementById('edit-effect').value = data.efeito || 'none';
                     
                     let nick = data.locutorAtual || "AutoDJ";
                     document.getElementById('view-locutor').innerText = nick;
@@ -576,10 +706,21 @@
                         `;
                     });
                 }
-            }, (error) => {
-                console.error("Erro Firebase. O documento 'pedidos_radio' precisa ser público nas Regras do Firestore.");
             });
         });
+
+        // ---------- SISTEMA ANTI-QUEDA (RECONEXÃO AUTOMÁTICA) ----------
+        setInterval(() => {
+            if (!userIntentionallyPaused && audioPlayer.paused && document.getElementById('state-on').style.display === 'flex') {
+                let urlBanco = document.getElementById('stream-source').src.split('?')[0]; 
+                let novaUrl = urlBanco + "?t=" + new Date().getTime(); 
+                document.getElementById('stream-source').src = novaUrl;
+                audioPlayer.load();
+                audioPlayer.play().then(() => {
+                    iconPlay.classList.replace('fa-play', 'fa-pause');
+                }).catch(e => { console.log("Reconexão feita."); });
+            }
+        }, 10000);
 
         function enviarPedido() {
             let nick = document.getElementById('pedido-nick').value.trim();
@@ -587,7 +728,6 @@
             if(!nick || !msg) return;
 
             let docRef = window.db.collection("sistema").doc("pedidos_radio");
-            
             docRef.get().then(doc => {
                 let lista = doc.exists && doc.data().lista ? doc.data().lista : [];
                 let hora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
@@ -670,6 +810,7 @@
                 status: document.getElementById('edit-status').checked,
                 locutorCodigo: document.getElementById('edit-codigo').value,
                 titulo: document.getElementById('edit-title').value,
+                efeito: document.getElementById('edit-effect').value,
                 banner: document.getElementById('edit-banner').value,
                 radioUrl: document.getElementById('edit-radio').value,
                 conteudo: document.getElementById('edit-content').innerHTML,
@@ -678,29 +819,6 @@
                 localStorage.removeItem('dic_locutor_code'); 
             });
         }
-
-        // ---------- SISTEMA ANTI-QUEDA (RECONEXÃO AUTOMÁTICA) ----------
-// Verifica a cada 10 segundos se a rádio caiu (está pausada ou sem rede)
-// e tenta reconectar automaticamente burlando o cache do navegador.
-setInterval(() => {
-    // Só tenta reconectar se o usuário NÃO clicou no pause de propósito
-    if (!userIntentionallyPaused && audioPlayer.paused) {
-        
-        let urlBanco = document.getElementById('stream-source').src.split('?')[0]; // Pega a URL limpa sem parâmetros antigos
-        let novaUrl = urlBanco + "?t=" + new Date().getTime(); // Cria uma URL única e fresca
-        
-        console.log("Tentando reconectar a rádio na URL:", novaUrl);
-        
-        document.getElementById('stream-source').src = novaUrl;
-        audioPlayer.load();
-        
-        audioPlayer.play().then(() => {
-            iconPlay.classList.replace('fa-play', 'fa-pause');
-        }).catch(e => {
-            console.log("Reconexão feita, aguardando clique do usuário para tocar som.");
-        });
-    }
-}, 10000); // 10000 milissegundos = 10 segundos
     </script>
 </body>
 </html>
