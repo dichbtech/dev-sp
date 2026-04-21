@@ -1,3 +1,4 @@
+// ====== GESTÃO DE PRIVACIDADE ======
 window.carregarPrivacidade = function() {
     window.db.collection("sistema").doc("config_geral").get().then((doc) => {
         let htmlPadrao = `<p>Escreva aqui a Política de Privacidade.</p>`;
@@ -18,7 +19,7 @@ window.salvarPrivacidade = function() {
     });
 }
 
-// NOVO: Adiciona a caixa visual para um novo aval
+// ====== CÁLCULO DE LICENÇAS (AVAIS) ======
 window.adicionarAval = function() {
     let container = document.getElementById('lista-avais-container');
     let count = container.querySelectorAll('.aval-item').length + 1;
@@ -40,17 +41,16 @@ window.adicionarAval = function() {
     container.appendChild(div);
 }
 
-// NOVO: Motor de cálculo dia-a-dia para cruzar todos os avais inseridos
 window.processarCalculo = function() {
     const d1 = document.getElementById('data-login').value;
     const d3 = document.getElementById('data-consulta').value;
     
-    if (!d1 || !d3) return window.customAlert("Preencha Último Login e Data da Consulta.", "Atenção");
+    if (!d1 || !d3) return window.mostrarToast("Preencha Último Login e Data da Consulta.", "error");
     
     const u = new Date(d1 + 'T00:00:00');
     const c = new Date(d3 + 'T00:00:00');
     
-    if (c < u) return window.customAlert("A Data da Consulta não pode ser anterior ao Último Login.", "Erro");
+    if (c < u) return window.mostrarToast("A Data da Consulta não pode ser anterior ao Último Login.", "error");
     
     let periodos = [];
     document.querySelectorAll('.aval-item').forEach(node => {
@@ -72,16 +72,14 @@ window.processarCalculo = function() {
     }
     
     let curr = new Date(u);
-    curr.setDate(curr.getDate() + 1); // A contagem começa 1 dia após o último login oficial
+    curr.setDate(curr.getDate() + 1); 
     
     let gaps = [];
     let curGapStart = null;
     let curGapLen = 0;
     
-    // Percorre todos os dias entre o último login e a data da consulta
     while(curr <= c) {
         let covered = false;
-        // Checa se o dia atual cai dentro de qualquer um dos avais (mesmo que se cruzem)
         for(let p of periodos) {
             if(curr >= p.i && curr <= p.f) { covered = true; break; }
         }
@@ -102,7 +100,6 @@ window.processarCalculo = function() {
         curr.setDate(curr.getDate() + 1);
     }
     
-    // Se terminou a contagem com um "buraco" ainda aberto
     if(curGapStart) {
         let endGap = new Date(c);
         gaps.push({ s: curGapStart, e: endGap, len: curGapLen });
@@ -139,6 +136,7 @@ window.processarCalculo = function() {
     window.registrarLogAtividade("Cálculo de Aval", `Calculou avais múltiplos resultando em ${totalAusencia} dia(s) de falta.`);
 }
 
+// ====== GESTÃO DE ACESSOS ======
 window.renderTabelaAcessos = function() {
     var tbody = document.querySelector('#tbAcessos tbody');
     if (!tbody) return;
@@ -248,6 +246,7 @@ window.salvarAcessos = function() {
     });
 }
 
+// ====== LOGS GLOBAIS ======
 window.escutarLogsAtividades = function() {
     window.db.collection("logs_atividades").orderBy("timestamp", "desc").limit(100).onSnapshot(snap => {
         let tbody = document.querySelector('#tb-logs-atividades tbody');

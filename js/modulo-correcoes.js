@@ -21,7 +21,7 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
     }
 
     let container = document.getElementById('lista-atividades-pendentes');
-    container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:40px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Buscando atividades pendentes...</div>';
+    if(container) container.innerHTML = '<div style="color:var(--sup-neon); text-align:center; padding:40px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Buscando atividades pendentes...</div>';
 
     // A SOLUÇÃO FINAL: O Site atua como Lixeiro. Tudo que a planilha marcar como "lixo", o site apaga do banco.
     if (!window.listenerLixoAtivo) {
@@ -64,10 +64,10 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
                 }
             }
 
-            container.innerHTML = '';
+            if(container) container.innerHTML = '';
             
             if (docsAtuais.length === 0) {
-                container.innerHTML = `
+                if(container) container.innerHTML = `
                     <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(76, 175, 80, 0.4); padding: 50px 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%;">
                         <i class="fas fa-check-circle" style="color: #4caf50; font-size: 50px; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(76,175,80,0.3));"></i>
                         <h3 style="color: #4caf50; font-size: 22px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Tudo Limpo!</h3>
@@ -77,10 +77,10 @@ window.carregarAtividadesPendentes = function(tipo = window.tipoAtividadeAtual, 
             }
 
             docsAtuais.forEach(d => {
-                container.appendChild(window.criarCardAtividade(d));
+                if(container) container.appendChild(window.criarCardAtividade(d));
             });
         }, err => {
-            container.innerHTML = `<div style="color:#ff2a2a; text-align:center; padding:20px;"><i class="fas fa-exclamation-triangle"></i> Erro ao espelhar as atividades em tempo real: ${err.message}</div>`;
+            if(container) container.innerHTML = `<div style="color:#ff2a2a; text-align:center; padding:20px;"><i class="fas fa-exclamation-triangle"></i> Erro ao espelhar as atividades em tempo real: ${err.message}</div>`;
         });
 }
 
@@ -265,7 +265,7 @@ window.salvarAvaliacaoAtividade = function(id, tipo) {
 
     window.db.collection("atividades_pendentes").doc(id).update(payload).then(() => {
         window.mostrarToast("Correção finalizada!", "success");
-        window.registrarLogAtividade("Avaliação de Atividade", `Avaliou uma atividade de [${tipo}] ID do doc: ${id}. Status Atribuído: ${payload.status}`);
+        if(window.registrarLogAtividade) window.registrarLogAtividade("Avaliação de Atividade", `Avaliou uma atividade de [${tipo}] ID do doc: ${id}. Status Atribuído: ${payload.status}`);
     }).catch(e => {
         window.mostrarToast("Ocorreu um erro ao tentar salvar a avaliação: " + e.message, "error");
     });
@@ -285,3 +285,14 @@ window.gerarAvatarNick = function(nick) {
         ${n}
     </a>`;
 }
+
+// ==========================================
+// AUTO-INICIALIZAÇÃO DO MÓDULO
+// ==========================================
+// Garante que os números e a primeira aba carreguem sozinhos assim que o sistema iniciar
+let correcoesInitCheck = setInterval(() => {
+    if (window.db && document.getElementById('tab-Relatórios')) {
+        clearInterval(correcoesInitCheck);
+        window.carregarAtividadesPendentes('Relatórios');
+    }
+}, 500);

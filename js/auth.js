@@ -94,6 +94,12 @@ window.verificarAcessoBD = async function(email) {
                 return;
             }
 
+            // Exibe botões de ferramentas (Dashboard, Layout) para a Liderança
+            if (['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
+                if(document.getElementById('admin-drag-controls')) document.getElementById('admin-drag-controls').style.display = 'flex';
+            }
+
+            // Exibe menus restritos da Liderança
             if (['VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
                 if(document.getElementById('admin-only-menus')) document.getElementById('admin-only-menus').style.display = 'flex';
                 window.renderTabelaAcessos();

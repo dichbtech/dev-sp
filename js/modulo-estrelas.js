@@ -39,23 +39,24 @@ window.verificarPermissaoCorrecao = async function() {
             }
         }
         
-        // CORREÇÃO: Padroniza o texto para evitar erro de acentuação (ex: 'Líder' vira 'LIDER')
         let nivel = nivelRaw.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         if (nivel === 'VICELIDER') nivel = 'VICE-LIDER';
         if (nivel === 'SUBLIDER') nivel = 'SUB-LIDER';
         
-        // Exibe botões restritos (Correção em Lote)
-        const cargosAutorizados = ["COMANDO", "LIDER", "VICE-LIDER", "ADMIN"];
-        let btnCorrecao = document.getElementById('btn-dashboard-correcao');
-        if (btnCorrecao && cargosAutorizados.includes(nivel)) {
-            btnCorrecao.style.display = 'inline-block';
-        }
+        window.nivelUsuarioGlobal = nivel; // Guarda para o Hub
 
-        // Permissão para o Botão Limpar Rank
-        const cargosSubPlus = ["COMANDO", "LIDER", "VICE-LIDER", "SUB-LIDER", "ADMIN"];
+        // Oculta para sempre o botão antigo de limpar rank para evitar poluição visual
         let btnLimpar = document.getElementById('btn-limpar-rank');
-        if (btnLimpar && cargosSubPlus.includes(nivel)) {
-            btnLimpar.style.display = 'inline-block';
+        if (btnLimpar) btnLimpar.style.display = 'none';
+
+        // O botão tachometer agora se torna o HUB ADMINISTRATIVO GERAL (Sub-Líderes+)
+        const cargosHub = ["COMANDO", "LIDER", "VICE-LIDER", "ADMIN", "SUB-LIDER"];
+        let btnCorrecao = document.getElementById('btn-dashboard-correcao');
+        if (btnCorrecao && cargosHub.includes(nivel)) {
+            btnCorrecao.style.display = 'inline-block';
+            // Intercepta o clique para abrir o nosso novo Hub em vez do HTML antigo
+            btnCorrecao.onclick = () => window.abrirPainelAdminEstrelas();
+            btnCorrecao.title = "Painel Administrativo de Estrelas";
         }
 
     } catch (e) {
@@ -150,73 +151,129 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
 }
 
 // ==========================================
-// REMOÇÃO MANUAL DE DEMITIDOS DO RANK
+// NOVO: HUB ADMINISTRATIVO CENTRALIZADO
 // ==========================================
-window.abrirModalLimparRank = async function() {
-    let user = window.firebase.auth().currentUser;
-    if (!user) return window.mostrarToast("Sessão expirada.", "error");
+window.abrirPainelAdminEstrelas = async function() {
+    let nivel = window.nivelUsuarioGlobal;
+    if (!["COMANDO", "LIDER", "VICE-LIDER", "SUB-LIDER", "ADMIN"].includes(nivel)) return;
 
-    let nivelRaw = "NENHUM";
-    let docAcesso = await window.db.collection("acessos").doc(user.email).get();
-    if (docAcesso.exists) {
-        nivelRaw = docAcesso.data().nivel;
-    } else {
-        let docPlan = await window.db.collection("sistema").doc("acessos_planilha").get();
-        if (docPlan.exists && docPlan.data().permissoes_regras && docPlan.data().permissoes_regras[user.email]) {
-            nivelRaw = docPlan.data().permissoes_regras[user.email].nivel;
-        }
-    }
-    
-    // CORREÇÃO: Padronização para a segurança do Modal
-    let nivel = nivelRaw.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    if (nivel === 'VICELIDER') nivel = 'VICE-LIDER';
-    if (nivel === 'SUBLIDER') nivel = 'SUB-LIDER';
-
-    if (!["COMANDO", "LIDER", "VICE-LIDER", "SUB-LIDER", "ADMIN"].includes(nivel)) {
-        return window.customAlert("Acesso negado! Apenas Sub-Líderes ou superiores podem remover militares demitidos do rank.", "Sem Permissão");
-    }
-
-    let modal = document.getElementById('modal-limpar-rank-central');
+    let modal = document.getElementById('modal-hub-estrelas');
     if (!modal) {
         modal = document.createElement('div');
-        modal.id = 'modal-limpar-rank-central';
-        modal.style.cssText = 'display:flex; position:fixed; z-index:999999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;';
+        modal.id = 'modal-hub-estrelas';
+        modal.style.cssText = 'display:flex; position:fixed; z-index:999990; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;';
         document.body.appendChild(modal);
     }
 
-    // CORREÇÃO VISUAL: Forçando fundo escuro e texto claro nas opções nativas
     let options = '<option value="" disabled selected style="background:#121008; color:#fff;">Selecione um policial...</option>';
     let ordenados = [...militaresEstrelasData].sort((a,b) => a.nome.localeCompare(b.nome));
     ordenados.forEach(m => {
         options += `<option value="${m.id}" style="background:#121008; color:#fff;">${m.nome}</option>`;
     });
 
+    let isVicePlus = ["COMANDO", "LIDER", "VICE-LIDER", "ADMIN"].includes(nivel);
+
     modal.innerHTML = `
-        <div style="background-color:#121008; border:1px solid #ff9800; border-radius:12px; width:100%; max-width:500px; position:relative; box-shadow:0 0 40px rgba(255,152,0,0.3); padding:35px; font-family:'Rajdhani', sans-serif;">
-            <div style="position:absolute; right:20px; top:20px; width:35px; height:35px; background:rgba(255,152,0,0.1); border-radius:50%; color:#ff9800; font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:0.3s;" onmouseover="this.style.background='#ff9800'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,152,0,0.1)'; this.style.color='#ff9800';" onclick="document.getElementById('modal-limpar-rank-central').style.display='none'">
-                <i class="fas fa-times"></i>
-            </div>
-            <h3 style="color:#ff9800; margin-bottom:20px; font-size:22px; text-transform:uppercase;"><i class="fas fa-user-slash"></i> Remover do Rank</h3>
-            <p style="color:var(--text-sub, #c9b98b); margin-bottom:20px; font-size:15px;">Selecione o policial demitido para apagá-lo permanentemente do ranking.</p>
-            
-            <div style="position:relative; width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,152,0,0.3); border-radius:6px; display:flex; align-items:center; padding:0 15px; margin-bottom:20px;">
-                <i class="fas fa-search" style="color:#ff9800; font-size:16px;"></i>
-                <select id="select-remover-central" style="width:100%; background:transparent; border:none; color:#fff; font-size:15px; font-family:'Rajdhani', sans-serif; font-weight:500; padding:15px 10px; outline:none; color-scheme:dark;">
-                    ${options}
-                </select>
+        <div style="background-color:#1a1a24; border:1px solid var(--sup-neon); border-radius:12px; width:100%; max-width:550px; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 0 30px rgba(251,191,36,0.2); padding:25px; font-family:'Rajdhani', sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="color:var(--sup-neon); margin:0; font-size:20px; text-transform:uppercase;"><i class="fas fa-toolbox"></i> Administração de Estrelas</h2>
+                <button onclick="document.getElementById('modal-hub-estrelas').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
             </div>
 
-            <button onclick="window.confirmarRemocaoRankCentral()" style="background:#ff9800; color:#fff; border:none; padding:15px; border-radius:6px; font-family:'Rajdhani', sans-serif; font-size:15px; font-weight:600; cursor:pointer; text-transform:uppercase; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; transition:0.3s;">
-                <i class="fas fa-trash-alt"></i> Apagar Permanentemente
-            </button>
+            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin-bottom:15px;">
+                <h4 style="color:#fff; margin:0 0 10px 0; font-size:15px;"><i class="fas fa-exchange-alt" style="color:#3b82f6;"></i> Transferência de Nick</h4>
+                <p style="color:var(--text-sub); font-size:12px; margin-bottom:10px;">Transfere ou soma os dados de um nick antigo para um novo.</p>
+                <select id="transfer-old" style="width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:10px; border-radius:5px; margin-bottom:10px;">${options}</select>
+                <input type="text" id="transfer-new" placeholder="Digite o NOVO Nick Exato" style="width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:10px; border-radius:5px; margin-bottom:10px; box-sizing:border-box; font-family:'Rajdhani', sans-serif;">
+                <button onclick="window.confirmarTransferencia()" style="width:100%; background:#3b82f6; color:#fff; border:none; padding:10px; border-radius:5px; font-family:'Rajdhani', sans-serif; font-size:14px; font-weight:bold; cursor:pointer; text-transform:uppercase; transition:0.2s;"><i class="fas fa-random"></i> Efetuar Transferência</button>
+            </div>
+
+            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin-bottom:15px;">
+                <h4 style="color:#fff; margin:0 0 10px 0; font-size:15px;"><i class="fas fa-user-slash" style="color:#ef4444;"></i> Tirar Demitidos</h4>
+                <p style="color:var(--text-sub); font-size:12px; margin-bottom:10px;">Remove permanentemente o policial do ranking e apaga sua carteira.</p>
+                <select id="select-remover-central" style="width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:10px; border-radius:5px; margin-bottom:10px;">${options}</select>
+                <button onclick="window.confirmarRemocaoRankCentral()" style="width:100%; background:transparent; color:#ef4444; border:1px solid #ef4444; padding:10px; border-radius:5px; font-family:'Rajdhani', sans-serif; font-size:14px; font-weight:bold; cursor:pointer; text-transform:uppercase; transition:0.2s;"><i class="fas fa-trash-alt"></i> Apagar Policial</button>
+            </div>
+
+            ${isVicePlus ? `
+            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+                <h4 style="color:#fff; margin:0 0 10px 0; font-size:15px;"><i class="fas fa-tools" style="color:var(--sup-neon);"></i> Correção de Lotes e Ciclos</h4>
+                <p style="color:var(--text-sub); font-size:12px; margin-bottom:10px;">Reverta ou substitua validações feitas em datas anteriores.</p>
+                <button onclick="document.getElementById('modal-hub-estrelas').style.display='none'; document.getElementById('modal-correcao-lote').style.display='flex';" style="width:100%; background:var(--sup-neon); color:#000; border:none; padding:10px; border-radius:5px; font-family:'Rajdhani', sans-serif; font-size:14px; font-weight:bold; cursor:pointer; text-transform:uppercase; transition:0.2s;"><i class="fas fa-external-link-alt"></i> Abrir Painel de Correção</button>
+            </div>
+            ` : ''}
         </div>
     `;
     modal.style.display = 'flex';
 }
 
+window.confirmarTransferencia = async function() {
+    let oldId = document.getElementById('transfer-old').value;
+    let newNick = document.getElementById('transfer-new').value.trim();
+
+    if(!oldId || !newNick) {
+        return window.mostrarToast ? window.mostrarToast("Preencha os campos.", "error") : alert("Preencha os campos!");
+    }
+    if(oldId.toLowerCase() === newNick.toLowerCase()) {
+        return window.mostrarToast ? window.mostrarToast("Os nicks não podem ser iguais.", "error") : alert("Nicks iguais!");
+    }
+
+    let oldM = militaresEstrelasData.find(x => x.id === oldId);
+    if(!oldM) return;
+
+    if(confirm(`Tem certeza que deseja transferir todo o saldo de ${oldM.nome} para a conta ${newNick}?\n\nIsso somará os valores se o nick novo já existir, e excluirá o registro antigo.`)) {
+        window.mostrarLoader(true, "Migrando dados...");
+        try {
+            let newRef = window.db.collection("militares").doc(newNick);
+            let docNew = await newRef.get();
+
+            let p = oldM.promocoes_realizadas || 0;
+            let e = oldM.estrelas || 0;
+            let pr = oldM.premios_acumulados || 0;
+
+            if (docNew.exists) {
+                let newD = docNew.data();
+                p += (newD.promocoes_realizadas || 0);
+                e += (newD.estrelas || 0);
+                pr += (newD.premios_acumulados || 0);
+                
+                // Converte as promoções que excederam em estrelas
+                let extraEstrelas = Math.floor(p / 3);
+                e += extraEstrelas;
+                p = p % 3;
+            }
+
+            // Grava os dados no Nick Novo
+            await newRef.set({
+                nome: newNick,
+                estrelas: e,
+                promocoes_realizadas: p,
+                premios_acumulados: pr,
+                status: docNew.exists ? docNew.data().status : "Ativo"
+            }, {merge: true});
+
+            // Apaga o Nick Antigo
+            await window.db.collection("militares").doc(oldM.id).delete();
+
+            window.registrarLogEstrela(newNick, "Transferência de Nick", "-", `Recebeu as promoções e estrelas migradas do antigo nick: ${oldM.nome}.`);
+            if(window.registrarLogAtividade) window.registrarLogAtividade("Transferência de Nick", `Migrou os dados do militar de ${oldM.nome} para ${newNick}.`);
+
+            if(window.mostrarToast) window.mostrarToast("Transferência concluída com sucesso!", "success");
+            
+            document.getElementById('transfer-new').value = '';
+            document.getElementById('modal-hub-estrelas').style.display = 'none';
+        } catch(err) {
+            console.error(err);
+            if(window.mostrarToast) window.mostrarToast("Erro ao transferir.", "error");
+        } finally {
+            window.mostrarLoader(false);
+        }
+    }
+}
+
 window.confirmarRemocaoRankCentral = function() {
     let id = document.getElementById('select-remover-central').value;
-    if (!id) return window.mostrarToast("Selecione um policial primeiro.", "error");
+    if (!id) return window.mostrarToast ? window.mostrarToast("Selecione um policial.", "error") : alert("Selecione um policial!");
     
     let m = militaresEstrelasData.find(x => x.id === id);
     if (!m) return;
@@ -225,12 +282,12 @@ window.confirmarRemocaoRankCentral = function() {
         window.mostrarLoader(true, "Apagando policial do sistema...");
         window.db.collection("militares").doc(id).delete().then(() => {
             window.registrarLogEstrela(m.nome, "Remoção do Rank", "-", "Militar demitido foi removido permanentemente do banco de dados (Ação Manual).");
-            window.mostrarToast(`${m.nome} foi removido do rank com sucesso.`, "success");
-            if(window.registrarLogAtividade) window.registrarLogAtividade("Limpeza de Rank", `Removeu permanentemente o(a) ex-militar ${m.nome} do banco de estrelas.`);
-            document.getElementById('modal-limpar-rank-central').style.display = 'none';
+            if(window.mostrarToast) window.mostrarToast(`${m.nome} removido.`, "success");
+            if(window.registrarLogAtividade) window.registrarLogAtividade("Limpeza de Rank", `Removeu permanentemente o(a) ex-militar ${m.nome} do banco.`);
+            document.getElementById('modal-hub-estrelas').style.display = 'none';
         }).catch(e => {
             console.error(e);
-            window.mostrarToast("Erro ao remover.", "error");
+            if(window.mostrarToast) window.mostrarToast("Erro ao remover.", "error");
         }).finally(() => {
             window.mostrarLoader(false);
         });

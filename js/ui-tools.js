@@ -9,7 +9,7 @@ const modaisGlobaisHTML = `
     <div class="login-card" id="loginCard">
       <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo">
       <h2>Central de Sistemas</h2>
-      <p>Acesso restrito à Liderança e Supervisores</p>
+      <p>Acesso restrito aos membros dos Supervisores</p>
       <button onclick="window.loginGoogle()" class="btn-tech" style="width:100%; font-size:16px;"><i class="fab fa-google"></i> Entrar com o Google</button>
       <p id="login-error" style="color: #ff2a2a; font-size: 14px; margin-top: 15px; display: none; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Erro ao logar.</p>
     </div>
