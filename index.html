@@ -74,11 +74,12 @@
                 <div class="events-title"><span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span><span id="mes-atual" style="color:#fff; font-size:14px;"></span></div>
                 <div id="ui-lista-eventos" style="flex:1;"></div>
                 <div class="events-title" style="font-size: 15px; margin-top:10px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
-                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px; position:relative;" id="sponsors-container" class="sponsor-list"></div>
+                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px; position:relative; flex-wrap:wrap;" id="sponsors-container" class="sponsor-list"></div>
                 <div class="sponsor-text">"<span id="ui-txt-patrocinio"></span>"<br><br><span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span></div>
              </div>
           </div>
           <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;"><div class="input-block" style="max-width: 300px; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div></div>
+          
           <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
              <div class="member-stage-box" id="stage-container" style="position: relative; height: 350px;">
                  <div class="stage-glow"></div>
@@ -87,13 +88,13 @@
                  <img id="img-emblema-sup" src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" draggable="false" style="z-index: 4; position: absolute; left: 38px; top: 93px; width: 84px; image-rendering: pixelated;">
                  <img id="avatar-selecionado" src="" draggable="false" style="z-index: 5; position: absolute; left: 104px; top: 59px; width: 154px; image-rendering: pixelated;">
              </div>
+             
              <div class="stats-grid-box">
-                <div class="stat-total"><div><h4 style="color:var(--text-sub); margin-bottom:0;">Total de Pontos</h4><div class="val" id="det-total" style="display:flex; align-items:baseline; gap:10px;">-</div></div><div style="text-align: right;"><h4 style="color:var(--text-sub); margin-bottom:0;">Status da Meta</h4><div id="det-status" style="font-size: 20px; font-weight: 700; text-transform: uppercase; margin-top:5px;">-</div></div></div>
-                <div class="stat-card"><h4>Convites</h4><div class="val" id="det-convite">-</div></div>
-                <div class="stat-card"><h4>PPP</h4><div class="val" id="det-ppp">-</div></div>
-                <div class="stat-card"><h4>Rel. Soldados</h4><div class="val" id="det-rels">-</div></div>
-                <div class="stat-card"><h4>Rel. C.Grupos</h4><div class="val" id="det-relcg">-</div></div>
-                <div class="stat-card"><h4>Avisos</h4><div class="val" id="det-avisos">-</div></div>
+                <div class="stat-total" style="grid-column: 1 / -1; margin-bottom: 10px;">
+                    <div><h4 style="color:var(--text-sub); margin-bottom:0;">Total de Pontos</h4><div class="val" id="det-total" style="display:flex; align-items:baseline; gap:10px;">-</div></div>
+                    <div style="text-align: right;"><h4 style="color:var(--text-sub); margin-bottom:0;">Status da Meta</h4><div id="det-status" style="font-size: 20px; font-weight: 700; text-transform: uppercase; margin-top:5px;">-</div></div>
+                </div>
+                <div id="dynamic-stats-cards" style="display: contents;"></div>
              </div>
           </div>
 
@@ -168,12 +169,7 @@
         <div id="modulo-logs" class="admin-section"><h3><i class="fas fa-history"></i> Logs de Auditoria (Estrelas)</h3><p class="subtext">Acompanhamento das promoções e sanções validadas e registradas.</p><div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;"><table class="admin-table" id="tb-logs"><thead><tr><th>Data/Hora</th><th>Autor</th><th>Beneficiado</th><th>Ação</th><th>ID/Detalhes</th></tr></thead><tbody></tbody></table></div></div>
         <div id="modulo-avais" class="admin-section"><h3><i class="fas fa-calculator"></i> Cálculo Automático de Licenças</h3><p class="subtext" style="margin-bottom:15px;">Adicione múltiplas licenças se necessário. O sistema calculará os exatos intervalos descobertos.</p><div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;"><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Último Login Oficial</label><div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="data-login"></div></div><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Data da Consulta</label><div class="input-block"><i class="far fa-calendar-check"></i><input type="date" id="data-consulta"></div></div></div><div id="lista-avais-container"><div class="row aval-item" style="display:flex; gap:20px; flex-wrap:wrap;"><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Início da Licença 1</label><div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" class="data-aval-input"></div></div><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Dias de Licença</label><div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" class="dias-aval-input" min="1" placeholder="Ex: 7"></div></div></div></div><div style="display:flex; gap:15px; margin-top: 10px; flex-wrap:wrap;"><button class="btn-tech btn-add" onclick="window.adicionarAval()"><i class="fas fa-plus"></i> Adicionar Outra Licença</button><button class="btn-tech btn-save" onclick="window.processarCalculo()" style="flex:1;"><i class="fas fa-sync-alt"></i> Processar Cálculo Definitivo</button></div><div id="resultado-aval" style="display: none; margin-top: 25px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.3);"><h4 style="color: var(--sup-neon); margin-bottom: 15px; text-transform:uppercase; font-size:16px;"><i class="fas fa-poll-h"></i> Resultado da Análise</h4><p id="texto-resultado" style="line-height: 1.6; font-size: 15px; margin:0;"></p></div></div>
         <div id="modulo-feedbacks" class="admin-section"><h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3><div style="width: 100%; height: 75vh; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://dichbtech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe></div></div>
-        <div id="modulo-privacidade" class="admin-section">
-            <h3><i class="fas fa-shield-alt"></i> Editar Política de Privacidade</h3>
-            <p class="subtext">O texto abaixo é refletido instantaneamente na página pública de privacidade.</p>
-            <div style="margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.3); color: #fff; min-height: 200px; outline: none; font-family: 'Rajdhani', sans-serif;" id="editor-privacidade" contenteditable="true"></div>
-            <button class="btn-tech btn-save" onclick="window.salvarPrivacidade()"><i class="fas fa-save"></i> Salvar Política</button>
-        </div>
+        <div id="modulo-privacidade" class="admin-section"><h3><i class="fas fa-shield-alt"></i> Editar Política de Privacidade</h3><p class="subtext">O texto abaixo é refletido instantaneamente na página pública de privacidade.</p><div style="margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.3); color: #fff; min-height: 200px; outline: none; font-family: 'Rajdhani', sans-serif;" id="editor-privacidade" contenteditable="true"></div><button class="btn-tech btn-save" onclick="window.salvarPrivacidade()"><i class="fas fa-save"></i> Salvar Política</button></div>
         <div id="modulo-acessos" class="admin-section"><h3><i class="fas fa-users-cog"></i> Gerenciar Acessos</h3><div class="admin-table-wrapper"><table class="admin-table" id="tbAcessos"><thead><tr><th style="width:35%">E-mail Google</th><th style="width:25%">Nick no Habbo</th><th style="width:25%">Nível de Acesso</th><th style="width:15%">Ações</th></tr></thead><tbody></tbody></table></div><div class="admin-controls-bottom"><button class="btn-tech btn-add" onclick="window.addLinhaAcesso()"><i class="fas fa-plus"></i> Novo Acesso Manual</button><button class="btn-tech btn-save" onclick="window.salvarAcessos()"><i class="fas fa-save"></i> Salvar Manuais</button></div></div>
 
       </div>
@@ -182,53 +178,20 @@
 
   <div id="modal-correcao-lote" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
       <div class="modal-content" style="max-width: 500px; width: 90%; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid var(--sup-neon); box-shadow: 0 0 20px rgba(251,191,36, 0.2);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-              <h2 style="color:var(--sup-neon); margin:0; font-size:18px;"><i class="fas fa-tools"></i> CORREÇÃO DE CICLO</h2>
-              <button onclick="document.getElementById('modal-correcao-lote').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
-          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="color:var(--sup-neon); margin:0; font-size:18px;"><i class="fas fa-tools"></i> CORREÇÃO DE CICLO</h2><button onclick="document.getElementById('modal-correcao-lote').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button></div>
           <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">Use este painel para reverter ou substituir uma validação feita por erro.</p>
-          <div class="input-group" style="margin-bottom:15px;">
-              <label class="tech-label" style="display:block; margin-bottom:5px;">Data do Ciclo Original</label>
-              <div class="input-block">
-                  <input type="date" id="correcao-data" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;">
-              </div>
-          </div>
-          <div class="input-group" style="margin-bottom:15px;">
-              <label class="tech-label" style="display:block; margin-bottom:5px;">IDs para EXCLUIR (Separados por vírgula)</label>
-              <div class="input-block">
-                  <input type="text" id="correcao-excluidos" placeholder="Ex: 1023, 1025" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;">
-              </div>
-          </div>
-          <button class="btn-tech btn-add" style="width:100%; margin-bottom:15px; padding: 12px; font-size: 15px;" onclick="window.buscarCorrecaoLote()">
-              <i class="fas fa-search"></i> ANALISAR CICLO
-          </button>
+          <div class="input-group" style="margin-bottom:15px;"><label class="tech-label" style="display:block; margin-bottom:5px;">Data do Ciclo Original</label><div class="input-block"><input type="date" id="correcao-data" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></div></div>
+          <div class="input-group" style="margin-bottom:15px;"><label class="tech-label" style="display:block; margin-bottom:5px;">IDs para EXCLUIR (Separados por vírgula)</label><div class="input-block"><input type="text" id="correcao-excluidos" placeholder="Ex: 1023, 1025" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></div></div>
+          <button class="btn-tech btn-add" style="width:100%; margin-bottom:15px; padding: 12px; font-size: 15px;" onclick="window.buscarCorrecaoLote()"><i class="fas fa-search"></i> ANALISAR CICLO</button>
           <div id="resultado-correcao" style="display:none; max-height:300px; overflow-y:auto; margin-top:15px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;"></div>
       </div>
   </div>
 
   <div id="modal-pontos-extras" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
       <div class="modal-content" style="max-width: 500px; width: 90%; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #4caf50;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-              <h2 style="color:#4caf50; margin:0; font-size:18px;"><i class="fas fa-star"></i> PONTOS EXTRAS</h2>
-              <button onclick="window.fecharModalPontosExtras()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
-          </div>
-          <div style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-end;">
-              <div style="flex:1;">
-                  <label class="tech-label">Militar</label>
-                  <select id="pe-select-membro" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></select>
-              </div>
-              <div style="width:100px;">
-                  <label class="tech-label">Pontos</label>
-                  <input type="number" id="pe-input-pontos" step="0.5" placeholder="Ex: 1.5" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px; box-sizing:border-box;">
-              </div>
-              <button class="btn-tech" style="background:#4caf50; color:#fff; border:none; padding:10px; border-radius:5px; cursor:pointer;" onclick="window.salvarPontoExtra()">Adicionar</button>
-          </div>
-          <div class="admin-table-wrapper" style="max-height: 250px; overflow-y: auto;">
-              <table class="admin-table" id="tb-pontos-extras">
-                  <thead><tr><th>Policial</th><th style="text-align:center;">Bônus</th><th style="text-align:right;">Ação</th></tr></thead>
-                  <tbody></tbody>
-              </table>
-          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="color:#4caf50; margin:0; font-size:18px;"><i class="fas fa-star"></i> PONTOS EXTRAS</h2><button onclick="window.fecharModalPontosExtras()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button></div>
+          <div style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-end;"><div style="flex:1;"><label class="tech-label">Militar</label><select id="pe-select-membro" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></select></div><div style="width:100px;"><label class="tech-label">Pontos</label><input type="number" id="pe-input-pontos" step="0.5" placeholder="Ex: 1.5" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px; box-sizing:border-box;"></div><button class="btn-tech" style="background:#4caf50; color:#fff; border:none; padding:10px; border-radius:5px; cursor:pointer;" onclick="window.salvarPontoExtra()">Adicionar</button></div>
+          <div class="admin-table-wrapper" style="max-height: 250px; overflow-y: auto;"><table class="admin-table" id="tb-pontos-extras"><thead><tr><th>Policial</th><th style="text-align:center;">Bônus</th><th style="text-align:right;">Ação</th></tr></thead><tbody></tbody></table></div>
       </div>
   </div>
 
@@ -238,6 +201,7 @@
               <h2 style="color:var(--sup-neon); margin:0; font-size:18px;"><i class="fas fa-tachometer-alt"></i> DASHBOARD DE METAS</h2>
               <button onclick="window.fecharDashboard()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
           </div>
+          
           <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
               <h4 style="color:#fff; margin-bottom:10px; font-size:14px;">Configurações Globais</h4>
               <div style="display:flex; gap:15px; align-items:center; margin-bottom:10px;">
@@ -250,11 +214,28 @@
               <label class="tech-label">Frase dos Patrocinadores</label>
               <input type="text" id="dash-txt-patrocinio" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px; box-sizing:border-box;">
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.05);">
+              <h4 style="color:var(--sup-neon); margin:0; font-size:16px;"><i class="fas fa-cogs"></i> Hub de Atividades</h4>
+              <button class="btn-tech btn-add" style="padding: 5px 10px; font-size: 12px;" onclick="window.adicionarNovaAtividadeBox()"><i class="fas fa-plus"></i> Nova Atividade</button>
+          </div>
+          <div id="dash-atividades-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 25px;"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.05);">
+              <h4 style="color:var(--sup-neon); margin:0; font-size:16px;"><i class="fas fa-crown"></i> Hub de Patrocinadores</h4>
+              <div style="display:flex; gap:10px;">
+                  <input type="text" id="dash-novo-sponsor" placeholder="Nick do Patrocinador" class="admin-input" style="width: 150px; padding: 5px 10px;">
+                  <button class="btn-tech btn-add" style="padding: 5px 10px; font-size: 12px;" onclick="window.adicionarNovoSponsor()"><i class="fas fa-plus"></i> Adicionar</button>
+              </div>
+          </div>
+          <div id="dash-sponsors-container" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 25px;"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.05);">
               <h4 style="color:#fff; margin:0; font-size:14px;">Mural de Eventos</h4>
               <button class="btn-tech btn-add" style="padding: 5px 10px; font-size: 12px;" onclick="window.adicionarNovoEventoBox()"><i class="fas fa-plus"></i> Novo Evento</button>
           </div>
           <div id="dash-eventos-container" style="display:flex; flex-direction:column; gap:15px; margin-bottom: 20px;"></div>
+          
           <button class="btn-tech btn-save" style="width:100%; padding: 12px; font-size: 15px;" onclick="window.salvarDashboard()"><i class="fas fa-save"></i> Salvar Alterações</button>
       </div>
   </div>

@@ -8,19 +8,19 @@ window.pontosExtrasMap = {};
 window.dashboardEventosData = [];
 window.cargosMap = {};
 
-// Normaliza o nick para comparações lógicas (minúsculo e sem colchetes)
+window.configAtividades = [];
+window.dashboardSponsorsData = []; // Array do novo Hub de Patrocinadores
+
 window.normalizeNick = function(str) {
     if (!str) return "";
     return String(str).replace(/\[/g, '').replace(/\]/g, '').trim().toLowerCase();
 }
 
-// Limpa o nick apenas para gerar o Avatar do Habbo sem quebrar o link
 window.cleanHabboNick = function(str) {
     if (!str) return "DIC-Sp";
     return String(str).replace(/\[/g, '').replace(/\]/g, '').trim();
 }
 
-// Leitor ultra-resiliente para ignorar caracteres invisíveis do Sheets
 window.parseQualquerData = function(dataRaw) {
     if (!dataRaw) return { formatada: "Não localizada", dateObj: null };
     let str = String(dataRaw).trim();
@@ -125,7 +125,7 @@ window.escutarMetasDoFirebase = function() {
 }
 
 window.processarPontuacoesSemanais = function() {
-    if (!window.logsHistoricoGeral || Object.keys(window.admissoesGeral).length === 0) return;
+    if (!window.logsHistoricoGeral || Object.keys(window.admissoesGeral).length === 0 || window.configAtividades.length === 0) return;
 
     let valInicio = document.getElementById('filtro-semana-inicio');
     let valFim = document.getElementById('filtro-semana-fim');
@@ -141,9 +141,8 @@ window.processarPontuacoesSemanais = function() {
 
     nicksValidos.forEach(nickLimpo => {
         let info = window.admissoesGeral[nickLimpo];
-        
-        // Isola apenas quem é SP (Supervisor)
         let cargoClean = info.cargo ? String(info.cargo).toUpperCase().trim().replace(/[^A-Z]/g, '') : "SP";
+        
         if (cargoClean !== "SP") return;
 
         let parsedAdm = window.parseQualquerData(info.data);
@@ -151,18 +150,21 @@ window.processarPontuacoesSemanais = function() {
 
         let stats = {
             nick: info.nickOriginal,
-            convite: 0, ppp: 0, rels: 0, relcg: 0, avisos: 0,
-            total_base: 0, status_base: 'Não cumprida', cargo: 'Supervisor'
+            total_base: 0, 
+            status_base: 'Não cumprida', 
+            cargo: 'Supervisor',
+            atividades_dinamicas: {} 
         };
+
+        window.configAtividades.forEach(cfg => {
+            stats.atividades_dinamicas[cfg.nome] = 0;
+        });
 
         let ativMembro = window.logsHistoricoGeral.filter(a => {
             if (window.normalizeNick(a.nick) !== nickLimpo) return false;
-            
             let dtParsed = window.parseQualquerData(a.data);
             if (!dtParsed.dateObj) return false;
-            
             if (dAdm && dtParsed.dateObj < dAdm) return false;
-            
             return dtParsed.dateObj >= dataI && dtParsed.dateObj <= dataF;
         });
 
@@ -171,26 +173,32 @@ window.processarPontuacoesSemanais = function() {
             let valido = st.startsWith('v');
             
             if (valido) {
-                let valQtd = String(a.qtd || "0").trim();
-                let qtdNum = parseFloat(valQtd.replace(',', '.'));
-                if (isNaN(qtdNum)) qtdNum = 0;
+                let abaLimpa = a.aba ? String(a.aba).toLowerCase().trim() : "";
+                let cfgAtividade = window.configAtividades.find(c => abaLimpa.includes(String(c.nome).toLowerCase().trim()));
                 
-                let valDesc = String(a.descontos || "0").trim();
-                let descNum = parseFloat(valDesc.replace(',', '.'));
-                if (isNaN(descNum)) descNum = 0;
-                
-                let abaClean = a.aba ? String(a.aba).toLowerCase().trim() : "";
-                
-                if (abaClean.includes('grupo')) stats.relcg += (qtdNum * 0.5);
-                if (abaClean.includes('soldado')) stats.rels += (qtdNum * 0.5);
-                if (abaClean.includes('convite')) stats.convite += (1 - descNum);
-                if (abaClean.includes('ppp')) stats.ppp += (1 - descNum);
+                if (cfgAtividade) {
+                    let valQtd = String(a.qtd || "").trim();
+                    let qtdNum = parseFloat(valQtd.replace(',', '.'));
+                    if (isNaN(qtdNum) || valQtd === "") qtdNum = 1; 
+                    
+                    let valDesc = String(a.descontos || "0").trim();
+                    let descNum = parseFloat(valDesc.replace(',', '.'));
+                    if (isNaN(descNum)) descNum = 0;
+                    
+                    let basePts = parseFloat(cfgAtividade.pontos);
+                    if (isNaN(basePts)) basePts = 0;
+                    
+                    let ptsAtuais = cfgAtividade.multiplica ? (basePts * qtdNum) : basePts;
+                    ptsAtuais -= descNum;
+                    if (ptsAtuais < 0) ptsAtuais = 0;
+                    
+                    stats.atividades_dinamicas[cfgAtividade.nome] += ptsAtuais;
+                    stats.total_base += ptsAtuais;
+                }
             }
         });
 
-        stats.total_base = stats.relcg + stats.rels + stats.convite + stats.ppp;
         if (stats.total_base >= 5) stats.status_base = "Cumprida";
-
         window.membrosDataArray.push(stats);
     });
 
@@ -318,28 +326,93 @@ window.renderMemberDetails = function() {
     document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${safeNick}&action=std&direction=2&head_direction=2&gesture=sml&size=b&time=${ts}`;
     
     document.getElementById('det-total').innerHTML = `<span>${window.formatarNumeroDecimal(tCalc)}</span>` + (ptsExtra > 0 ? `<span style="font-size:16px; color:#4caf50; font-weight:normal;">(+${window.formatarNumeroDecimal(ptsExtra)} bônus)</span>` : '');
-    document.getElementById('det-convite').innerText = window.formatarNumeroDecimal(m.convite * window.eventoMult);
-    document.getElementById('det-ppp').innerText = window.formatarNumeroDecimal(m.ppp * window.eventoMult);
-    document.getElementById('det-rels').innerText = window.formatarNumeroDecimal(m.rels * window.eventoMult);
-    document.getElementById('det-relcg').innerText = window.formatarNumeroDecimal(m.relcg * window.eventoMult);
-    document.getElementById('det-avisos').innerText = window.formatarNumeroDecimal(m.avisos * window.eventoMult);
     
     let stEl = document.getElementById('det-status');
     stEl.innerText = m.status_base;
     stEl.style.color = m.status_base.toLowerCase().includes('não') ? '#ef4444' : '#4caf50';
+
+    let cardsContainer = document.getElementById('dynamic-stats-cards');
+    if (cardsContainer) {
+        cardsContainer.innerHTML = '';
+        window.configAtividades.forEach(cfg => {
+            let pontosDaCaixa = m.atividades_dinamicas[cfg.nome] || 0;
+            let pontosAposEvento = pontosDaCaixa * window.eventoMult;
+            cardsContainer.innerHTML += `<div class="stat-card"><h4>${cfg.nome}</h4><div class="val">${window.formatarNumeroDecimal(pontosAposEvento)}</div></div>`;
+        });
+    }
 }
 
 window.abrirDashboard = function() {
     document.getElementById('modal-dashboard').style.display = 'flex';
+    window.renderAdminAtividadesList();
+    window.renderAdminSponsorsList();
     window.renderAdminEventosList();
 }
 
 window.fecharDashboard = function() { document.getElementById('modal-dashboard').style.display = 'none'; }
 
-window.formatarDataBR = function(dataStr) {
-    if (!dataStr) return "";
-    let parsed = window.parseQualquerData(dataStr);
-    return parsed.formatada !== "Não localizada" ? parsed.formatada : dataStr;
+// HUB DE ATIVIDADES
+window.adicionarNovaAtividadeBox = function() {
+    window.configAtividades.push({ nome: '', pontos: 1, multiplica: false });
+    window.renderAdminAtividadesList();
+}
+window.removerAtividadeBox = function(index) {
+    window.configAtividades.splice(index, 1);
+    window.renderAdminAtividadesList();
+}
+window.renderAdminAtividadesList = function() {
+    let container = document.getElementById('dash-atividades-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if(window.configAtividades.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub); font-style:italic; font-size:14px; margin-bottom:20px;">Nenhuma atividade configurada. O sistema não pontuará nada.</p>';
+        return;
+    }
+    window.configAtividades.forEach((atv, i) => {
+        container.innerHTML += `
+        <div style="display:flex; gap:10px; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);" class="admin-atividade-item">
+            <div style="flex:2;"><label class="tech-label">Nome da Aba (Planilha)</label><input type="text" class="admin-input atv-nome" value="${atv.nome}" placeholder="Ex: Grupos"></div>
+            <div style="flex:1;"><label class="tech-label">Pontos</label><input type="number" step="0.1" class="admin-input atv-pontos" value="${atv.pontos}"></div>
+            <div style="flex:1; display:flex; align-items:center; padding-top:20px;">
+                <label style="color:#fff; font-size:12px; cursor:pointer;"><input type="checkbox" class="atv-multiplica" ${atv.multiplica ? 'checked' : ''}> Vezes a Qtd?</label>
+            </div>
+            <div style="padding-top:20px;">
+                <button type="button" onclick="window.removerAtividadeBox(${i})" style="background:rgba(255,42,42,0.1); border:none; color:#ef4444; width:30px; height:30px; border-radius:4px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    });
+}
+
+// HUB DE PATROCINADORES
+window.adicionarNovoSponsor = function() {
+    let inp = document.getElementById('dash-novo-sponsor');
+    let nick = inp.value.trim();
+    if (!nick) return;
+    if (!window.dashboardSponsorsData.includes(nick)) {
+        window.dashboardSponsorsData.push(nick);
+    }
+    inp.value = '';
+    window.renderAdminSponsorsList();
+}
+window.removerSponsor = function(index) {
+    window.dashboardSponsorsData.splice(index, 1);
+    window.renderAdminSponsorsList();
+}
+window.renderAdminSponsorsList = function() {
+    let container = document.getElementById('dash-sponsors-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if(window.dashboardSponsorsData.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub); font-style:italic; font-size:14px; margin:0;">Nenhum patrocinador manual cadastrado.</p>';
+        return;
+    }
+    window.dashboardSponsorsData.forEach((nick, i) => {
+        container.innerHTML += `
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(251,191,36,0.1); border:1px solid var(--sup-neon); padding:5px 10px; border-radius:20px; color:#fff; font-size:13px; font-weight:600;">
+            ${nick}
+            <button type="button" onclick="window.removerSponsor(${i})" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>`;
+    });
 }
 
 window.adicionarNovoEventoBox = function() {
@@ -354,6 +427,7 @@ window.removerEventoBox = function(index) {
 
 window.renderAdminEventosList = function() {
     let container = document.getElementById('dash-eventos-container');
+    if (!container) return;
     container.innerHTML = '';
     
     if (window.dashboardEventosData.length === 0) {
@@ -398,11 +472,24 @@ window.salvarDashboard = function() {
             moedas: el.querySelector('.ev-moedas').checked
         });
     });
+
+    let atvs = [];
+    document.querySelectorAll('.admin-atividade-item').forEach(el => {
+        let valPontos = String(el.querySelector('.atv-pontos').value).replace(',', '.');
+        atvs.push({
+            nome: el.querySelector('.atv-nome').value,
+            pontos: parseFloat(valPontos) || 0,
+            multiplica: el.querySelector('.atv-multiplica').checked
+        });
+    });
+
     window.db.collection("sistema").doc("config_metas").set({
         eventoAtivo: document.getElementById('dash-toggle-evento').checked,
         eventoMult: parseInt(document.getElementById('dash-mult-evento').value, 10) || 1,
         textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
-        eventos: evs
+        eventos: evs,
+        atividades: atvs,
+        sponsors: window.dashboardSponsorsData // Salva a nova lista de patrocinadores
     }, { merge: true }).then(() => {
         if (window.mostrarToast) window.mostrarToast("Painel Atualizado!", "success");
         window.fecharDashboard();
@@ -414,9 +501,21 @@ window.escutarConfigDashboard = function() {
         if (doc.exists) {
             let d = doc.data();
             window.eventoAtivo = d.eventoAtivo || false;
-            window.eventoMult = parseInt(d.eventoMult, 10) || 1;
+            window.eventoMult = window.eventoAtivo ? (parseInt(d.eventoMult, 10) || 1) : 1;
             window.pontosExtrasMap = d.pontosExtras || {};
             window.dashboardEventosData = d.eventos || [];
+            
+            // Lê os Patrocinadores
+            window.dashboardSponsorsData = d.sponsors || [];
+            window.renderSponsors(window.dashboardSponsorsData);
+            
+            let defaultAtividades = [
+                { nome: 'Grupos', pontos: 0.5, multiplica: true },
+                { nome: 'Soldados', pontos: 0.5, multiplica: true },
+                { nome: 'Convites', pontos: 1, multiplica: false },
+                { nome: 'PPP', pontos: 1, multiplica: false }
+            ];
+            window.configAtividades = d.atividades || defaultAtividades;
             
             let btnPE = document.getElementById('btn-pontos-extras');
             if (btnPE && ['LIDER', 'VICE-LIDER', 'SUB-LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
@@ -424,7 +523,7 @@ window.escutarConfigDashboard = function() {
             }
 
             let banner = document.getElementById('evento-banner');
-            banner.style.display = (window.eventoAtivo && window.eventoMult > 1) ? 'flex' : 'none';
+            if(banner) banner.style.display = (window.eventoAtivo && window.eventoMult > 1) ? 'flex' : 'none';
             
             let tSpon = document.getElementById('ui-txt-patrocinio');
             if (tSpon) tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
@@ -436,7 +535,7 @@ window.escutarConfigDashboard = function() {
                     uiLista.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid var(--sup-neon); margin-bottom: 15px;"><div style="color: #fff; font-size: 14px;">Fique atento aos anúncios no grupo!</div></div>`;
                 } else {
                     window.dashboardEventosData.forEach((ev, i) => {
-                        let dtTxt = (ev.dataInicio && ev.dataFim) ? `${window.formatarDataBR(ev.dataInicio)} a ${window.formatarDataBR(ev.dataFim)}` : (ev.dataInicio ? window.formatarDataBR(ev.dataInicio) : "");
+                        let dtTxt = (ev.dataInicio && ev.dataFim) ? `${window.parseQualquerData(ev.dataInicio).formatada} a ${window.parseQualquerData(ev.dataFim).formatada}` : (ev.dataInicio ? window.parseQualquerData(ev.dataInicio).formatada : "");
                         
                         let pUI = '';
                         if (ev.premiosTexto || ev.hc || ev.moedas) {
@@ -462,11 +561,7 @@ window.escutarConfigDashboard = function() {
                     });
                 }
             }
-            if (window.membrosDataArray && window.membrosDataArray.length > 0) {
-                window.processarPodio();
-                if (document.getElementById('select-membro').value) window.renderMemberDetails();
-                window.renderTabelaPontosExtras();
-            }
+            window.processarPontuacoesSemanais();
         }
     });
 }
@@ -514,10 +609,6 @@ window.renderTabelaPontosExtras = function() {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-sub);">Nenhum ponto extra.</td></tr>';
     }
 }
-
-// ==========================================
-// LÓGICA DO BUSCADOR DE HISTÓRICO E METAS
-// ==========================================
 
 window.toggleFiltrosHistorico = function() {
     let tipo = document.getElementById('hist-tipo-consulta').value;
@@ -598,20 +689,16 @@ window.buscarHistoricoMetas = async function() {
 
         let filtradas = window.logsHistoricoGeral.filter(a => {
             if (window.normalizeNick(a.nick) !== nick) return false;
-            
             let aDate = window.parseQualquerData(a.data).dateObj;
             if (!aDate) return false;
-            
             if (dAdm && aDate < dAdm) return false;
             return aDate >= dI && aDate <= dF;
         });
 
         let totalAcompanhamentos = window.acompanhamentosGeral.filter(acc => {
             if (window.normalizeNick(acc.nick) !== nick) return false;
-            
             let accDate = window.parseQualquerData(acc.data).dateObj;
             if (!accDate) return false;
-            
             if (dAdm && accDate < dAdm) return false;
             return accDate >= dI && accDate <= dF;
         }).length;
@@ -641,15 +728,27 @@ window.buscarHistoricoMetas = async function() {
                     
                     let valido = st.startsWith('v'); 
                     if (valido) { 
-                        let qtdNum = parseFloat(String(a.qtd || "0").replace(',', '.'));
-                        if (isNaN(qtdNum)) qtdNum = 0;
-                        let descNum = parseFloat(String(a.descontos || "0").replace(',', '.'));
-                        if (isNaN(descNum)) descNum = 0;
+                        let abaLimpa = a.aba ? String(a.aba).toLowerCase().trim() : "";
+                        let cfgAtividade = window.configAtividades.find(c => abaLimpa.includes(String(c.nome).toLowerCase().trim()));
                         
-                        let abaClean = a.aba ? String(a.aba).toLowerCase().trim() : "";
-                        if (abaClean.includes('grupo') || abaClean.includes('soldado')) pts = (qtdNum * 0.5);
-                        if (abaClean.includes('convite') || abaClean.includes('ppp')) pts = (1 - descNum);
+                        if(cfgAtividade) {
+                            let valQtd = String(a.qtd || "").trim();
+                            let qtdNum = parseFloat(valQtd.replace(',', '.'));
+                            if (isNaN(qtdNum) || valQtd === "") qtdNum = 1;
+                            
+                            let valDesc = String(a.descontos || "0").trim();
+                            let descNum = parseFloat(valDesc.replace(',', '.'));
+                            if (isNaN(descNum)) descNum = 0;
+                            
+                            let basePts = parseFloat(cfgAtividade.pontos);
+                            if (isNaN(basePts)) basePts = 0;
+                            
+                            pts = cfgAtividade.multiplica ? (basePts * qtdNum) : basePts;
+                            pts -= descNum;
+                            if (pts < 0) pts = 0;
+                        }
                     }
+                    
                     let wk = window.getWeekRangeString(a.data);
                     if(!semanas[wk]) semanas[wk] = { pts: 0, log: [] };
                     semanas[wk].pts += pts;
