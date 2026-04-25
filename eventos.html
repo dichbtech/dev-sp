@@ -59,7 +59,7 @@
         #effect-layer {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 5; overflow: hidden;
+            pointer-events: none; z-index: 15; overflow: hidden;
         }
 
         #state-loading {
@@ -99,7 +99,6 @@
             display: none; 
             flex-direction: column;
             align-items: center;
-            z-index: 10;
         }
 
         header {
@@ -108,6 +107,8 @@
             border-bottom: 1px solid var(--glass-border);
             flex-shrink: 0;
             backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 20;
         }
 
         .header-frame {
@@ -125,6 +126,8 @@
         .event-container {
             width: 100%; max-width: 900px; display: flex; flex-direction: column; padding: 20px;
             height: calc(100vh - 70px); box-sizing: border-box;
+            position: relative;
+            z-index: 10;
         }
 
         .event-banner {
@@ -270,15 +273,12 @@
                     <div class="locutor-info">
                         <h3 id="view-title">Rádio Oficial</h3>
                         <p><i class="fas fa-microphone-alt"></i> Locutor: <span id="view-locutor">AutoDJ</span></p>
-                        <p class="song-info"><i class="fas fa-music"></i> <span id="view-song">Ao Vivo</span></p>
+                        <p class="song-info"><i class="fas fa-music"></i> <span id="view-song">Carregando...</span></p>
                     </div>
                 </div>
 
                 <div class="radio-controls">
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="btn-pedidos" onclick="abrirPopupPlayerAlt()" style="background: rgba(251,191,36,0.1); border-color: var(--sup-neon); color: var(--sup-neon);">
-                            <i class="fas fa-compact-disc"></i> Player Alternativo
-                        </button>
                         <button class="btn-pedidos" onclick="abrirModalPedidos()">
                             <i class="fas fa-envelope-open-text"></i> Pedidos
                         </button>
@@ -440,7 +440,6 @@
             }
         }
 
-        // ---------- EFEITOS SAZONAIS ----------
         let seasonalInterval;
         function renderizarEfeitos(tipo) {
             const layer = document.getElementById('effect-layer');
@@ -462,9 +461,12 @@
                     el.style.fontSize = (Math.random() * 10 + 10) + 'px';
                     el.style.opacity = Math.random() * 0.8 + 0.2;
                 } else if (tipo === 'stars') {
-                    el.innerText = '⭐';
+                    el.innerHTML = '<i class="fas fa-star"></i>';
+                    el.style.color = '#fff';
+                    el.style.textShadow = '0 0 15px #fbbf24, 0 0 30px #d97706';
                     el.style.fontSize = (Math.random() * 10 + 15) + 'px';
-                    duration = Math.random() * 2000 + 2000;
+                    startX = Math.random() * (window.innerWidth + 800);
+                    duration = Math.random() * 1500 + 1000;
                 } else if (tipo === 'bats') {
                     el.innerText = '🦇';
                     el.style.fontSize = '20px';
@@ -483,6 +485,11 @@
                         { transform: `translate(0, 0) scale(${Math.random() + 0.5})`, opacity: 1 },
                         { transform: `translate(-${window.innerWidth+100}px, ${Math.random()*200-100}px) scale(${Math.random() + 0.5})`, opacity: 0 }
                     ], { duration: duration, easing: 'linear' });
+                } else if (tipo === 'stars') {
+                    animation = el.animate([
+                        { transform: `translate(0, 0) scale(1)`, opacity: 1 },
+                        { transform: `translate(-${window.innerHeight + 300}px, ${window.innerHeight + 100}px) scale(0.5)`, opacity: 0 }
+                    ], { duration: duration, easing: 'ease-in' });
                 } else {
                     animation = el.animate([
                         { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
@@ -491,10 +498,9 @@
                 }
 
                 animation.onfinish = () => el.remove();
-            }, tipo === 'bats' ? 800 : 300);
+            }, tipo === 'bats' ? 800 : (tipo === 'stars' ? 150 : 300));
         }
 
-        // ---------- FUNÇÕES DA RÁDIO ----------
         let radioInterval;
         let userIntentionallyPaused = false; 
 
@@ -503,10 +509,11 @@
                 const response = await fetch('/api/ouvintes');
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('view-song').innerText = data.musica || "Ao Vivo";
+                    if (data.musica && data.musica.trim() !== "") {
+                        document.getElementById('view-song').innerText = data.musica;
+                    }
                 }
             } catch (error) {
-                console.error("Erro na API da Rádio.");
             }
         }
 
@@ -529,7 +536,7 @@
                 userIntentionallyPaused = false;
                 audioPlayer.play().then(() => {
                     iconPlay.classList.replace('fa-play', 'fa-pause');
-                }).catch(e => console.error("Erro no play manual", e));
+                }).catch(e => {});
             } else {
                 userIntentionallyPaused = true;
                 audioPlayer.pause();
@@ -549,7 +556,7 @@
                         if (audioPlayer.paused && !userIntentionallyPaused) {
                             audioPlayer.play().then(() => {
                                 iconPlay.classList.replace('fa-play', 'fa-pause');
-                            }).catch(err => console.log("Ainda bloqueado", err));
+                            }).catch(err => {});
                         }
                         document.removeEventListener('click', startAudioOnInteract);
                         document.removeEventListener('touchstart', startAudioOnInteract);
@@ -560,11 +567,6 @@
                     document.addEventListener('keydown', startAudioOnInteract);
                 });
             }
-        }
-
-        function abrirPopupPlayerAlt() {
-            if (!audioPlayer.paused) toggleRadio();
-            window.open('player.html', 'PlayerSupervisores', 'width=350,height=300,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no');
         }
 
         function formatDoc(command, value = null) {
@@ -613,7 +615,7 @@
                         autoPlayStandby(); 
                     }
 
-                    globalLocutorCode = data.locutorCodigo || "12345";
+                    globalLocutorCode = data.locutorCodigo || "";
 
                     document.getElementById('edit-status').checked = data.status || false;
                     document.getElementById('edit-codigo').value = globalLocutorCode;
@@ -645,7 +647,6 @@
             });
         });
 
-        // ---------- SISTEMA ANTI-QUEDA ----------
         setInterval(() => {
             if (!userIntentionallyPaused && audioPlayer.paused && document.getElementById('state-on').style.display === 'flex') {
                 let urlBanco = document.getElementById('stream-source').src.split('?')[0]; 
@@ -654,7 +655,7 @@
                 audioPlayer.load();
                 audioPlayer.play().then(() => {
                     iconPlay.classList.replace('fa-play', 'fa-pause');
-                }).catch(e => { console.log("Reconexão feita."); });
+                }).catch(e => {});
             }
         }, 10000);
 
