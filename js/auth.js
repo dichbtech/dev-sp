@@ -141,62 +141,6 @@ window.gerarMenusPorNivel = function() {
     }
 }
 
-    if (hub) hub.innerHTML = hubHtml;
-
-    // Dock
-    let dockHtml = `
-        <div class="dock-item active" data-label="Início" onclick="window.switchSection('view-home', this)"><i class="fas fa-home"></i></div>
-        <div class="dock-item" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
-        <div class="dock-item" data-label="Correções" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i></div>
-        <div class="dock-item" data-label="System DIC" onclick="window.abrirSystemDIC()"><i class="fas fa-external-link-alt"></i></div>
-    `;
-    
-    if (ehLideranca) {
-        dockHtml += `
-            <div class="dock-separator"></div>
-            <div class="dock-item dock-command" data-label="Liderança" onclick="window.toggleLideranca()"><i class="fas fa-bolt"></i></div>
-        `;
-    }
-    
-    if (dock) {
-        dock.innerHTML = dockHtml;
-        dock.classList.add('active');
-    }
-
-    // Overlay (Liderança)
-    if (ehLideranca && cmd) {
-        let cmdHtml = `
-            <div class="cmd-tile" onclick="window.switchSection('modulo-revisao'); window.toggleLideranca();">
-                <i class="fas fa-search"></i><span>Revisão</span>
-            </div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-estrelas'); window.toggleLideranca();">
-                <i class="fas fa-star"></i><span>Estrelas</span>
-            </div>
-        `;
-        if (ehSuperLideranca) {
-            cmdHtml += `
-                <div class="cmd-tile" onclick="window.switchSection('modulo-logs-atividades'); window.toggleLideranca();">
-                    <i class="fas fa-eye"></i><span>Auditoria</span>
-                </div>
-                <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleLideranca();">
-                    <i class="fas fa-history"></i><span>Logs Estrelas</span>
-                </div>
-                <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleLideranca();">
-                    <i class="fas fa-users-cog"></i><span>Acessos</span>
-                </div>
-                <div class="cmd-tile" onclick="window.switchSection('modulo-privacidade'); window.toggleLideranca();">
-                    <i class="fas fa-shield-alt"></i><span>Privacidade</span>
-                </div>
-            `;
-        }
-        cmd.innerHTML = cmdHtml;
-    }
-    
-    // Aplica restrições locais de módulos
-    if (window.aplicarRestricoesRequerimentos) {
-        window.aplicarRestricoesRequerimentos();
-    }
-}
 
 // MONITOR DE SESSÃO ESTABILIZADO
 auth.onAuthStateChanged((user) => {
