@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisores - Formulário de Atividades</title>
+    <link rel="icon" type="image/gif" href="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .form-tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .form-tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .input-block input, .input-block select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 5px;
+            font-family: 'Rajdhani', sans-serif;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .input-block input:focus, .input-block select:focus {
+            border-color: var(--sup-neon, #fbbf24);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        /* Corrigir icones com novo estilo de input-block */
+        .input-block {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            padding: 0 10px;
+            transition: border-color 0.3s;
+        }
+        .input-block:focus-within {
+            border-color: var(--sup-neon, #fbbf24);
+        }
+        .input-block i {
+            color: rgba(255,255,255,0.5);
+            margin-right: 10px;
+        }
+        .input-block input, .input-block select {
+            background: transparent;
+            border: none;
+            padding: 12px 0;
+        }
+        .input-block select option {
+            background: #1a1a1a;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+  
+  <div id="appWrapper">
+    <div class="top-controls">
+        <button class="btn-top" onclick="window.location.href='index.html'" title="Voltar para Central">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+    </div>
+    
+    <header>
+      <div class="header-frame">
+        <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo">
+        <div class="title-area">
+          <h1>SUPERVISORES - FORMULÁRIO DE ATIVIDADES</h1>
+        </div>
+      </div>
+    </header>
+
+    <div class="container" id="mainLayout" style="display: flex; justify-content: center;">
+      <div class="admin-main-content" style="max-width: 800px; width: 100%; margin-top: 20px;">
+        
+        <div class="admin-section active" style="padding: 30px;">
+            <p class="subtext" style="text-align: center; margin-bottom: 25px;">
+                Preencha as informações abaixo com atenção. Seus dados (Nick e Cargo) são incluídos automaticamente.
+            </p>
+
+            <div class="tabs-container" id="tabs-formulario" style="justify-content: center; margin-bottom: 30px;">
+                <button class="btn-tab active" data-target="tab-relatorios" onclick="switchTab('tab-relatorios', this)">Relatórios</button>
+                <button class="btn-tab" data-target="tab-soldados" onclick="switchTab('tab-soldados', this)">Soldados</button>
+                <button class="btn-tab" data-target="tab-grupos" onclick="switchTab('tab-grupos', this)">Grupos</button>
+                <button class="btn-tab" data-target="tab-convites" onclick="switchTab('tab-convites', this)">Convites</button>
+                <button class="btn-tab" data-target="tab-ppp" onclick="switchTab('tab-ppp', this)">PPP</button>
+            </div>
+
+            <form id="activityForm" onsubmit="submitForm(event)">
+                
+                <!-- ABA: Relatórios -->
+                <div id="tab-relatorios" class="form-tab-content active">
+                    <h3 style="margin-bottom: 20px; color: var(--sup-neon); border-bottom: 1px dashed rgba(251,191,36,0.3); padding-bottom: 10px;">
+                        <i class="fas fa-file-alt"></i> Relatórios (Auxiliares)
+                    </h3>
+                    
+                    <div class="input-group">
+                        <label class="tech-label">Link do Relatório (Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="relatorio_link" placeholder="https://docs.google.com/..." id="relatorio_link">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="tech-label">Natureza do Relatório</label>
+                        <div class="input-block">
+                            <i class="fas fa-list"></i>
+                            <select name="relatorio_natureza" id="relatorio_natureza" onchange="handleNaturezaChange()">
+                                <option value="" disabled selected>Selecione a natureza...</option>
+                                <option value="Grupo de Controle">Grupo de Controle</option>
+                                <option value="Grupo de Promoções">Grupo de Promoções</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="container_publico_alvo" style="display: none;">
+                        <label class="tech-label">Público-Alvo</label>
+                        <div class="input-block">
+                            <i class="fas fa-users"></i>
+                            <select name="relatorio_publico_alvo" id="relatorio_publico_alvo">
+                                <option value="" disabled selected>Selecione o público-alvo...</option>
+                                <option value="Corpo Executivo">Corpo Executivo</option>
+                                <option value="Cabos até Subtenentes">Cabos até Subtenentes</option>
+                                <option value="Aspirantes a Coronéis">Aspirantes a Coronéis</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="container_data_referencia" style="display: none;">
+                        <label class="tech-label">Data de Referência</label>
+                        <div class="input-block">
+                            <i class="far fa-calendar-alt"></i>
+                            <input type="date" name="relatorio_data_referencia" id="relatorio_data_referencia">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: Soldados -->
+                <div id="tab-soldados" class="form-tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--sup-neon); border-bottom: 1px dashed rgba(251,191,36,0.3); padding-bottom: 10px;">
+                        <i class="fas fa-user-shield"></i> Soldados (Supervisores)
+                    </h3>
+                    
+                    <div class="input-group">
+                        <label class="tech-label">Link do Relatório (Anotações Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="soldados_link" placeholder="https://docs.google.com/..." id="soldados_link">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: Grupos -->
+                <div id="tab-grupos" class="form-tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--sup-neon); border-bottom: 1px dashed rgba(251,191,36,0.3); padding-bottom: 10px;">
+                        <i class="fas fa-users-cog"></i> Grupos (Supervisores)
+                    </h3>
+                    
+                    <div class="input-group">
+                        <label class="tech-label">Link do Relatório (Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="grupos_link" placeholder="https://docs.google.com/..." id="grupos_link">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: Convites -->
+                <div id="tab-convites" class="form-tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--sup-neon); border-bottom: 1px dashed rgba(251,191,36,0.3); padding-bottom: 10px;">
+                        <i class="fas fa-envelope-open-text"></i> Convites
+                    </h3>
+                    
+                    <div class="input-group">
+                        <label class="tech-label">Nick do Convidado</label>
+                        <div class="input-block">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="convite_nick" placeholder="Digite o nick do convidado..." id="convite_nick">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <label class="tech-label">Data de Início</label>
+                            <div class="input-block">
+                                <i class="far fa-calendar-check"></i>
+                                <input type="date" name="convite_data_inicio" id="convite_data_inicio">
+                            </div>
+                        </div>
+
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <label class="tech-label">Data de Fim</label>
+                            <div class="input-block">
+                                <i class="far fa-calendar-times"></i>
+                                <input type="date" name="convite_data_fim" id="convite_data_fim">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="tech-label">Provas (Imgur)</label>
+                        <div class="input-block">
+                            <i class="fas fa-image"></i>
+                            <input type="url" name="convite_provas" placeholder="https://imgur.com/..." id="convite_provas">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="tech-label">Status do Convite</label>
+                        <div class="input-block">
+                            <i class="fas fa-info-circle"></i>
+                            <select name="convite_status" id="convite_status">
+                                <option value="" disabled selected>Selecione o status...</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Negado">Negado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: PPP -->
+                <div id="tab-ppp" class="form-tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--sup-neon); border-bottom: 1px dashed rgba(251,191,36,0.3); padding-bottom: 10px;">
+                        <i class="fas fa-chart-line"></i> Plano de Promoções e Progressão (PPP)
+                    </h3>
+                    
+                    <div class="input-group">
+                        <label class="tech-label">Nick do Promovido</label>
+                        <div class="input-block">
+                            <i class="fas fa-user-graduate"></i>
+                            <input type="text" name="ppp_promovido" placeholder="Digite o nick do promovido..." id="ppp_promovido">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="tech-label">Nick do Promotor</label>
+                        <div class="input-block">
+                            <i class="fas fa-user-tie"></i>
+                            <input type="text" name="ppp_promotor" placeholder="Digite o nick do promotor..." id="ppp_promotor">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="tech-label">ID da Promoção</label>
+                        <div class="input-block">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="number" name="ppp_id" placeholder="Digite o ID da promoção..." id="ppp_id">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="tech-label">Provas (Imgur)</label>
+                        <div class="input-block">
+                            <i class="fas fa-image"></i>
+                            <input type="url" name="ppp_provas" placeholder="https://imgur.com/..." id="ppp_provas">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <button type="submit" class="btn-tech btn-save" style="width: 100%; max-width: 300px; padding: 15px; font-size: 16px;">
+                        <i class="fas fa-paper-plane"></i> Enviar Formulário
+                    </button>
+                </div>
+
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Desenvolvido com <i class="fa-solid fa-heart" style="color: #808080;"></i> por MegaMetall 
+    <span style="margin: 0 10px; color: rgba(255,255,255,0.2);">|</span> 
+    <a href="privacy.html" target="_blank" style="color: #888; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--sup-neon)'" onmouseout="this.style.color='#888'">Política de Privacidade</a>
+  </footer>
+
+  <script>
+      // Assumindo que esses dados estão na sessão (ou var global) para integração futura
+      window.sessionData = {
+          nick_usuario: "Admin", // Exemplo, deve vir do firebase auth ou sistema atual
+          cargo_usuario: "Supervisor" // Exemplo
+      };
+
+      // Função para alternar abas
+      function switchTab(tabId, btnElement) {
+          // Remove active de todos os botões e abas
+          document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.form-tab-content').forEach(c => c.classList.remove('active'));
+
+          // Adiciona active no selecionado
+          btnElement.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+          
+          // Limpa selects condicionais se mudar de aba
+          resetConditionalFields();
+      }
+
+      // Função para lógica condicional da aba Relatórios
+      function handleNaturezaChange() {
+          const natureza = document.getElementById('relatorio_natureza').value;
+          const containerPublicoAlvo = document.getElementById('container_publico_alvo');
+          const containerDataRef = document.getElementById('container_data_referencia');
+          
+          const inputPublicoAlvo = document.getElementById('relatorio_publico_alvo');
+          const inputDataRef = document.getElementById('relatorio_data_referencia');
+
+          if (natureza === "Grupo de Controle") {
+              containerPublicoAlvo.style.display = 'block';
+              inputPublicoAlvo.required = true;
+
+              containerDataRef.style.display = 'none';
+              inputDataRef.required = false;
+              inputDataRef.value = '';
+          } else if (natureza === "Grupo de Promoções") {
+              containerDataRef.style.display = 'block';
+              inputDataRef.required = true;
+
+              containerPublicoAlvo.style.display = 'none';
+              inputPublicoAlvo.required = false;
+              inputPublicoAlvo.value = '';
+          } else {
+              containerPublicoAlvo.style.display = 'none';
+              inputPublicoAlvo.required = false;
+              containerDataRef.style.display = 'none';
+              inputDataRef.required = false;
+          }
+      }
+
+      function resetConditionalFields() {
+          // Reseta a lógica se necessário ao trocar abas
+          const natureza = document.getElementById('relatorio_natureza');
+          if (natureza) {
+              natureza.value = "";
+              handleNaturezaChange();
+          }
+      }
+
+      // Função simulada de envio
+      function submitForm(event) {
+          event.preventDefault();
+
+          // Identifica a aba ativa para pegar os dados corretos
+          const abaAtivaId = document.querySelector('.form-tab-content.active').id;
+          
+          // Helper para pegar valor dos campos
+          const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
+
+          // Obter data/hora atual no formato DD/MM/AAAA HH:MM
+          const dataAtual = new Date();
+          const dia = String(dataAtual.getDate()).padStart(2, '0');
+          const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+          const ano = dataAtual.getFullYear();
+          const horas = String(dataAtual.getHours()).padStart(2, '0');
+          const minutos = String(dataAtual.getMinutes()).padStart(2, '0');
+          const dataHoraEnvio = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+
+          // Objeto base
+          let formData = {
+              nick_autor: window.sessionData.nick_usuario,
+              cargo_autor: window.sessionData.cargo_usuario,
+              data_hora_envio: dataHoraEnvio,
+              aba_submetida: abaAtivaId
+          };
+
+          // Coleta de dados com base na aba
+          let hasError = false;
+
+          if (abaAtivaId === 'tab-relatorios') {
+              formData.link = getVal('relatorio_link');
+              formData.natureza = getVal('relatorio_natureza');
+              
+              if (!formData.link || !formData.natureza) hasError = true;
+
+              if (formData.natureza === 'Grupo de Controle') {
+                  formData.publico_alvo = getVal('relatorio_publico_alvo');
+                  if (!formData.publico_alvo) hasError = true;
+              } else if (formData.natureza === 'Grupo de Promoções') {
+                  formData.data_referencia = getVal('relatorio_data_referencia');
+                  if (!formData.data_referencia) hasError = true;
+              }
+          } 
+          else if (abaAtivaId === 'tab-soldados') {
+              formData.link = getVal('soldados_link');
+              if (!formData.link) hasError = true;
+          }
+          else if (abaAtivaId === 'tab-grupos') {
+              formData.link = getVal('grupos_link');
+              if (!formData.link) hasError = true;
+          }
+          else if (abaAtivaId === 'tab-convites') {
+              formData.nick_convidado = getVal('convite_nick');
+              formData.data_inicio = getVal('convite_data_inicio');
+              formData.data_fim = getVal('convite_data_fim');
+              formData.provas = getVal('convite_provas');
+              formData.status = getVal('convite_status');
+
+              if (!formData.nick_convidado || !formData.data_inicio || !formData.data_fim || !formData.provas || !formData.status) {
+                  hasError = true;
+              }
+          }
+          else if (abaAtivaId === 'tab-ppp') {
+              formData.nick_promovido = getVal('ppp_promovido');
+              formData.nick_promotor = getVal('ppp_promotor');
+              formData.id_promocao = getVal('ppp_id');
+              formData.provas = getVal('ppp_provas');
+
+              if (!formData.nick_promovido || !formData.nick_promotor || !formData.id_promocao || !formData.provas) {
+                  hasError = true;
+              }
+          }
+
+          if (hasError) {
+              alert('Por favor, preencha todos os campos obrigatórios da aba ativa.');
+              return;
+          }
+
+          // Exibe no console
+          console.log('=== DADOS DO FORMULÁRIO ENVIADO ===');
+          console.log(JSON.stringify(formData, null, 2));
+          console.log('===================================');
+
+          alert('Formulário enviado com sucesso! Verifique o console.log (F12) para ver os dados gerados.');
+          
+          // Limpa o form (apenas os inputs visíveis na aba atual)
+          document.getElementById('activityForm').reset();
+          resetConditionalFields();
+      }
+  </script>
+</body>
+</html>
