@@ -1,10 +1,10 @@
 const firebaseConfig = {
-    apiKey: "AIzaSyCvyt0IyruvPqZPb6OqX5yiGuvIjUWpktA",
-    authDomain: "central-supervisores.firebaseapp.com",
-    projectId: "central-supervisores",
-    storageBucket: "central-supervisores.firebasestorage.app",
-    messagingSenderId: "882541677437",
-    appId: "1:882541677437:web:ed25d1e7aa273ca40cda14"
+    apiKey: "AIzaSyBm_RTyytsToUJFSa4Qwbmr2pWjAbE7V3M",
+    authDomain: "developer-supervisores.firebaseapp.com",
+    projectId: "developer-supervisores",
+    storageBucket: "developer-supervisores.firebasestorage.app",
+    messagingSenderId: "38038012491",
+    appId: "1:38038012491:web:6d735211e466c44ca083ce"
 };
 
 if (!firebase.apps.length) {
