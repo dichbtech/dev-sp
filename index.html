@@ -124,7 +124,7 @@
 
                     <div class="avatar-container">
 
-                        <div id="leader-bubble" class="thought-bubble">
+                        <div id="hub-bubble" class="thought-bubble">
 
                             <!-- Texto Injetado Dinamicamente via JS -->
 
@@ -595,17 +595,10 @@
                     <div id="tab-soldados" class="form-tab-content">
                         <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Soldados</h4>
                         <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nome do Soldado</label>
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório / Print (Soldados)</label>
                             <div class="input-block">
-                                <i class="fas fa-user"></i>
-                                <input type="text" name="soldado_nome" id="soldado_nome" placeholder="Nick do soldado aprovado" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Sua Patente</label>
-                            <div class="input-block">
-                                <i class="fas fa-id-badge"></i>
-                                <input type="text" name="soldado_patente" id="soldado_patente" placeholder="Seu cargo/patente atual" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <i class="fas fa-link"></i>
+                                <input type="url" name="soldados_link" id="soldados_link" placeholder="https://..." style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                             </div>
                         </div>
                     </div>
@@ -614,22 +607,10 @@
                     <div id="tab-grupos" class="form-tab-content">
                         <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-users"></i> Grupos de Controle</h4>
                         <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Grupo</label>
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório / Print (Grupos)</label>
                             <div class="input-block">
-                                <i class="fas fa-layer-group"></i>
-                                <select name="grupo_nome" id="grupo_nome" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                                    <option value="" disabled selected style="color:#000;">Selecione o GC...</option>
-                                    <option value="CFA" style="color:#000;">CFA</option>
-                                    <option value="CFS" style="color:#000;">CFS</option>
-                                    <option value="CFO" style="color:#000;">CFO</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Quantidade de Promovidos</label>
-                            <div class="input-block">
-                                <i class="fas fa-sort-numeric-up"></i>
-                                <input type="number" name="grupo_quantidade" id="grupo_quantidade" min="0" placeholder="Ex: 5" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <i class="fas fa-link"></i>
+                                <input type="url" name="grupos_link" id="grupos_link" placeholder="https://..." style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                             </div>
                         </div>
                     </div>
@@ -638,17 +619,44 @@
                     <div id="tab-convites" class="form-tab-content">
                         <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> Convites</h4>
                         <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Convidado</label>
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Convidado</label>
                             <div class="input-block">
                                 <i class="fas fa-user-tag"></i>
-                                <input type="text" name="convite_nome" id="convite_nome" placeholder="Nick de quem foi convidado" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <input type="text" name="convite_nick" id="convite_nick" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap: 15px; margin-bottom:20px; flex-wrap:wrap;">
+                            <div class="input-group" style="flex:1;">
+                                <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Início</label>
+                                <div class="input-block">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <input type="date" name="convite_data_inicio" id="convite_data_inicio" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                </div>
+                            </div>
+                            <div class="input-group" style="flex:1;">
+                                <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Fim</label>
+                                <div class="input-block">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <input type="date" name="convite_data_fim" id="convite_data_fim" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                </div>
                             </div>
                         </div>
                         <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Motivo/Observação</label>
-                            <div class="input-block" style="height:auto; padding: 10px;">
-                                <i class="fas fa-comment-dots" style="position:relative; top:-25px;"></i>
-                                <textarea name="convite_motivo" id="convite_motivo" rows="3" placeholder="Motivo do convite" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif; resize:vertical;"></textarea>
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Provas</label>
+                            <div class="input-block">
+                                <i class="fas fa-link"></i>
+                                <input type="url" name="convite_provas" id="convite_provas" placeholder="Links (Imgur, Lightshot...)" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Status do Convite</label>
+                            <div class="input-block">
+                                <i class="fas fa-tasks"></i>
+                                <select name="convite_status" id="convite_status" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                    <option value="" disabled selected>Selecione...</option>
+                                    <option value="Aprovado">Aprovado</option>
+                                    <option value="Reprovado">Reprovado</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -657,11 +665,34 @@
                     <div id="tab-ppp" class="form-tab-content">
                         <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Fiscalização Pós-Promoção</h4>
                         <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Membro Fiscalizado</label>
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promovido</label>
                             <div class="input-block">
-                                <i class="fas fa-user-check"></i>
-                                <input type="text" name="ppp_nome" id="ppp_nome" placeholder="Nick de quem foi promovido" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <i class="fas fa-user"></i>
+                                <input type="text" name="ppp_promovido" id="ppp_promovido" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                             </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promotor</label>
+                            <div class="input-block">
+                                <i class="fas fa-user-shield"></i>
+                                <input type="text" name="ppp_promotor" id="ppp_promotor" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">ID da Promoção</label>
+                            <div class="input-block">
+                                <i class="fas fa-hashtag"></i>
+                                <input type="text" name="ppp_id" id="ppp_id" placeholder="Ex: 502" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Provas</label>
+                            <div class="input-block">
+                                <i class="fas fa-link"></i>
+                                <input type="url" name="ppp_provas" id="ppp_provas" placeholder="Links (Imgur, Lightshot...)" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+                    </div>
                         </div>
                         <div class="input-group" style="margin-bottom: 20px;">
                             <label class="tech-label" style="display:block; margin-bottom:5px;">Patente Adquirida</label>
