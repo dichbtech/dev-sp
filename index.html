@@ -23,6 +23,7 @@
         <button class="btn-sidebar" id="menu-estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i> Estrelas Promocionais</button>
         <button class="btn-sidebar" id="menu-grupos" onclick="window.switchSection('modulo-grupos', this)"><i class="fas fa-users"></i> Controle de Grupos</button>
         <button class="btn-sidebar" id="menu-correcoes" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i> Correção de Atividades</button>
+        <button class="btn-sidebar" id="menu-requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i> Formulário de Atividades</button>
         <button class="btn-sidebar" id="menu-system" onclick="window.abrirSystemDIC()"><i class="fas fa-external-link-alt"></i> System DIC</button>
         
         <div id="admin-only-menus" style="display: none; flex-direction: column; gap: 10px;">
@@ -172,6 +173,194 @@
         <div id="modulo-privacidade" class="admin-section"><h3><i class="fas fa-shield-alt"></i> Editar Política de Privacidade</h3><p class="subtext">O texto abaixo é refletido instantaneamente na página pública de privacidade.</p><div style="margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.3); color: #fff; min-height: 200px; outline: none; font-family: 'Rajdhani', sans-serif;" id="editor-privacidade" contenteditable="true"></div><button class="btn-tech btn-save" onclick="window.salvarPrivacidade()"><i class="fas fa-save"></i> Salvar Política</button></div>
         <div id="modulo-acessos" class="admin-section"><h3><i class="fas fa-users-cog"></i> Gerenciar Acessos</h3><div class="admin-table-wrapper"><table class="admin-table" id="tbAcessos"><thead><tr><th style="width:35%">E-mail Google</th><th style="width:25%">Nick no Habbo</th><th style="width:25%">Nível de Acesso</th><th style="width:15%">Ações</th></tr></thead><tbody></tbody></table></div><div class="admin-controls-bottom"><button class="btn-tech btn-add" onclick="window.addLinhaAcesso()"><i class="fas fa-plus"></i> Novo Acesso Manual</button><button class="btn-tech btn-save" onclick="window.salvarAcessos()"><i class="fas fa-save"></i> Salvar Manuais</button></div></div>
 
+        <div id="modulo-requerimentos" class="admin-section">
+            <style>
+                .form-tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
+                .form-tab-content.active { display: block; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            </style>
+            <h3><i class="fas fa-file-signature"></i> Formulário de Atividades</h3>
+            <p class="subtext" style="margin-bottom: 25px;">Preencha as informações abaixo com atenção. Seus dados (Nick e Cargo) são incluídos automaticamente.</p>
+
+            <div class="tabs-container" id="tabs-formulario" style="margin-bottom: 30px;">
+                <button class="btn-tab active" data-target="tab-relatorios" onclick="window.switchTabRequerimentos('tab-relatorios', this)">Relatórios</button>
+                <button class="btn-tab" data-target="tab-soldados" onclick="window.switchTabRequerimentos('tab-soldados', this)">Soldados</button>
+                <button class="btn-tab" data-target="tab-grupos" onclick="window.switchTabRequerimentos('tab-grupos', this)">Grupos</button>
+                <button class="btn-tab" data-target="tab-convites" onclick="window.switchTabRequerimentos('tab-convites', this)">Convites</button>
+                <button class="btn-tab" data-target="tab-ppp" onclick="window.switchTabRequerimentos('tab-ppp', this)">PPP</button>
+            </div>
+
+            <form id="activityFormRequerimentos" onsubmit="window.submitFormRequerimentos(event)" style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
+                
+                <!-- ABA: Relatórios -->
+                <div id="tab-relatorios" class="form-tab-content active">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-file-alt"></i> Relatórios (Auxiliares)</h4>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório (Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="relatorio_link" placeholder="https://docs.google.com/..." id="relatorio_link" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Natureza do Relatório</label>
+                        <div class="input-block">
+                            <i class="fas fa-list"></i>
+                            <select name="relatorio_natureza" id="relatorio_natureza" onchange="window.handleNaturezaChangeRequerimentos()" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <option value="" disabled selected style="color:#000;">Selecione a natureza...</option>
+                                <option value="Grupo de Controle" style="color:#000;">Grupo de Controle</option>
+                                <option value="Grupo de Promoções" style="color:#000;">Grupo de Promoções</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="container_publico_alvo" style="display: none; margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Público-Alvo</label>
+                        <div class="input-block">
+                            <i class="fas fa-users"></i>
+                            <select name="relatorio_publico_alvo" id="relatorio_publico_alvo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <option value="" disabled selected style="color:#000;">Selecione o público-alvo...</option>
+                                <option value="Corpo Executivo" style="color:#000;">Corpo Executivo</option>
+                                <option value="Cabos até Subtenentes" style="color:#000;">Cabos até Subtenentes</option>
+                                <option value="Aspirantes a Coronéis" style="color:#000;">Aspirantes a Coronéis</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="container_data_referencia" style="display: none; margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Referência</label>
+                        <div class="input-block">
+                            <i class="far fa-calendar-alt"></i>
+                            <input type="date" name="relatorio_data_referencia" id="relatorio_data_referencia" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: Soldados -->
+                <div id="tab-soldados" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-user-shield"></i> Soldados (Supervisores)</h4>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório (Anotações Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="soldados_link" placeholder="https://docs.google.com/..." id="soldados_link" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: Grupos -->
+                <div id="tab-grupos" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-users-cog"></i> Grupos (Supervisores)</h4>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório (Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="grupos_link" placeholder="https://docs.google.com/..." id="grupos_link" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: Convites -->
+                <div id="tab-convites" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> Convites</h4>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Convidado</label>
+                        <div class="input-block">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="convite_nick" placeholder="Digite o nick do convidado..." id="convite_nick" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Início</label>
+                            <div class="input-block">
+                                <i class="far fa-calendar-check"></i>
+                                <input type="date" name="convite_data_inicio" id="convite_data_inicio" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Fim</label>
+                            <div class="input-block">
+                                <i class="far fa-calendar-times"></i>
+                                <input type="date" name="convite_data_fim" id="convite_data_fim" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Provas (Imgur)</label>
+                        <div class="input-block">
+                            <i class="fas fa-image"></i>
+                            <input type="url" name="convite_provas" placeholder="https://imgur.com/..." id="convite_provas" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Status do Convite</label>
+                        <div class="input-block">
+                            <i class="fas fa-info-circle"></i>
+                            <select name="convite_status" id="convite_status" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <option value="" disabled selected style="color:#000;">Selecione o status...</option>
+                                <option value="Aceito" style="color:#000;">Aceito</option>
+                                <option value="Negado" style="color:#000;">Negado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: PPP -->
+                <div id="tab-ppp" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Plano de Promoções e Progressão (PPP)</h4>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promovido</label>
+                        <div class="input-block">
+                            <i class="fas fa-user-graduate"></i>
+                            <input type="text" name="ppp_promovido" placeholder="Digite o nick do promovido..." id="ppp_promovido" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promotor</label>
+                        <div class="input-block">
+                            <i class="fas fa-user-tie"></i>
+                            <input type="text" name="ppp_promotor" placeholder="Digite o nick do promotor..." id="ppp_promotor" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">ID da Promoção</label>
+                        <div class="input-block">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="number" name="ppp_id" placeholder="Digite o ID da promoção..." id="ppp_id" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Provas (Imgur)</label>
+                        <div class="input-block">
+                            <i class="fas fa-image"></i>
+                            <input type="url" name="ppp_provas" placeholder="https://imgur.com/..." id="ppp_provas" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <button type="submit" class="btn-tech btn-save" style="width: 100%; max-width: 300px; padding: 15px; font-size: 16px;">
+                        <i class="fas fa-paper-plane"></i> Enviar Formulário
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
       </div>
     </div>
   </div>
@@ -257,6 +446,7 @@
   <script src="js/modulo-admin.js"></script>
   <script src="js/modulo-correcoes.js"></script>
   <script src="js/modulo-revisao.js"></script>
+  <script src="js/modulo-requerimentos.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>
