@@ -33,6 +33,135 @@ window.liberarPainel = function() {
     
     window.setupAllDraggables();
     if(window.registrarLogAtividade) window.registrarLogAtividade("Login Efetuado", "Acessou a Central de Sistemas.");
+    
+    // Injeção visual na nova UI
+    const nick = window.usuarioLogadoNick || "Usuário";
+    const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+    
+    const loggedNickEl = document.getElementById('loggedNick');
+    if(loggedNickEl) loggedNickEl.innerText = nick;
+    
+    const loggedRoleEl = document.getElementById('loggedRole');
+    if(loggedRoleEl) loggedRoleEl.innerText = window.nivelUsuarioGlobal;
+    
+    const loggedAvatarEl = document.getElementById('loggedAvatarImg');
+    if(loggedAvatarEl) loggedAvatarEl.src = avatarUrl;
+    
+    const hubAvatarEl = document.getElementById('hub-avatar');
+    if(hubAvatarEl) hubAvatarEl.src = avatarUrl;
+    
+    const userProfileEl = document.getElementById('userProfile');
+    if(userProfileEl) userProfileEl.style.display = 'flex';
+    
+    // Gera menu baseado na hierarquia
+    if (window.gerarMenusPorNivel) window.gerarMenusPorNivel();
+}
+
+window.gerarMenusPorNivel = function() {
+    const dock = document.getElementById('dockNav');
+    const hub = document.getElementById('central-tools-grid');
+    const cmd = document.getElementById('cmd-tools-grid');
+    
+    let lvl = window.nivelUsuarioGlobal;
+    const ehLideranca = ['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
+    const ehSuperLideranca = ['VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
+    
+    // Hub
+    let hubHtml = `
+        <div class="tool-card" onclick="window.switchSection('modulo-metas')">
+            <div class="tool-icon"><i class="fas fa-bullseye"></i></div>
+            <div class="tool-info"><h4>Metas</h4><p>Consulta Semanal</p></div>
+        </div>
+        <div class="tool-card" onclick="window.switchSection('modulo-avais')">
+            <div class="tool-icon"><i class="fas fa-calculator"></i></div>
+            <div class="tool-info"><h4>Licenças</h4><p>Cálculo de dias</p></div>
+        </div>
+        <div class="tool-card" onclick="window.switchSection('modulo-feedbacks')">
+            <div class="tool-icon"><i class="fas fa-comments"></i></div>
+            <div class="tool-info"><h4>Feedbacks</h4><p>Painel oficial</p></div>
+        </div>
+        <div class="tool-card" onclick="window.switchSection('modulo-grupos')">
+            <div class="tool-icon"><i class="fas fa-users"></i></div>
+            <div class="tool-info"><h4>Grupos</h4><p>Controle geral</p></div>
+        </div>
+        <div class="tool-card" onclick="window.switchSection('modulo-correcoes')">
+            <div class="tool-icon"><i class="fas fa-check-double"></i></div>
+            <div class="tool-info"><h4>Correções</h4><p>Atividades pendentes</p></div>
+        </div>
+        <div class="tool-card" onclick="window.switchSection('modulo-requerimentos')">
+            <div class="tool-icon"><i class="fas fa-file-signature"></i></div>
+            <div class="tool-info"><h4>Requerimentos</h4><p>Formulários DIC</p></div>
+        </div>
+        <div class="tool-card" onclick="window.abrirSystemDIC()">
+            <div class="tool-icon"><i class="fas fa-external-link-alt"></i></div>
+            <div class="tool-info"><h4>System DIC</h4><p>Acesso externo</p></div>
+        </div>
+    `;
+    
+    if (ehLideranca) {
+        hubHtml += `
+            <div class="tool-card" onclick="window.switchSection('modulo-estrelas')">
+                <div class="tool-icon"><i class="fas fa-star"></i></div>
+                <div class="tool-info"><h4>Estrelas</h4><p>Gerenciamento</p></div>
+            </div>
+        `;
+    }
+    
+    if (hub) hub.innerHTML = hubHtml;
+
+    // Dock
+    let dockHtml = `
+        <div class="dock-item active" data-label="Início" onclick="window.switchSection('view-home', this)"><i class="fas fa-home"></i></div>
+        <div class="dock-item" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
+        <div class="dock-item" data-label="Correções" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i></div>
+        <div class="dock-item" data-label="System DIC" onclick="window.abrirSystemDIC()"><i class="fas fa-external-link-alt"></i></div>
+    `;
+    
+    if (ehLideranca) {
+        dockHtml += `
+            <div class="dock-separator"></div>
+            <div class="dock-item dock-command" data-label="Liderança" onclick="window.toggleLideranca()"><i class="fas fa-bolt"></i></div>
+        `;
+    }
+    
+    if (dock) {
+        dock.innerHTML = dockHtml;
+        dock.classList.add('active');
+    }
+
+    // Overlay (Liderança)
+    if (ehLideranca && cmd) {
+        let cmdHtml = `
+            <div class="cmd-tile" onclick="window.switchSection('modulo-revisao'); window.toggleLideranca();">
+                <i class="fas fa-search"></i><span>Revisão</span>
+            </div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-estrelas'); window.toggleLideranca();">
+                <i class="fas fa-star"></i><span>Estrelas</span>
+            </div>
+        `;
+        if (ehSuperLideranca) {
+            cmdHtml += `
+                <div class="cmd-tile" onclick="window.switchSection('modulo-logs-atividades'); window.toggleLideranca();">
+                    <i class="fas fa-eye"></i><span>Auditoria</span>
+                </div>
+                <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleLideranca();">
+                    <i class="fas fa-history"></i><span>Logs Estrelas</span>
+                </div>
+                <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleLideranca();">
+                    <i class="fas fa-users-cog"></i><span>Acessos</span>
+                </div>
+                <div class="cmd-tile" onclick="window.switchSection('modulo-privacidade'); window.toggleLideranca();">
+                    <i class="fas fa-shield-alt"></i><span>Privacidade</span>
+                </div>
+            `;
+        }
+        cmd.innerHTML = cmdHtml;
+    }
+    
+    // Aplica restrições locais de módulos
+    if (window.aplicarRestricoesRequerimentos) {
+        window.aplicarRestricoesRequerimentos();
+    }
 }
 
 // MONITOR DE SESSÃO ESTABILIZADO
@@ -94,14 +223,7 @@ window.verificarAcessoBD = async function(email) {
                 return;
             }
 
-            // Exibe botões de ferramentas (Dashboard, Layout) para a Liderança
-            if (['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
-                if(document.getElementById('admin-drag-controls')) document.getElementById('admin-drag-controls').style.display = 'flex';
-            }
-
-            // Exibe menus restritos da Liderança
             if (['VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
-                if(document.getElementById('admin-only-menus')) document.getElementById('admin-only-menus').style.display = 'flex';
                 window.renderTabelaAcessos();
             }
             

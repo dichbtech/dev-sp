@@ -131,3 +131,34 @@ window.submitFormRequerimentos = function(event) {
     document.getElementById('activityFormRequerimentos').reset();
     window.resetConditionalFieldsRequerimentos();
 };
+
+window.aplicarRestricoesRequerimentos = function() {
+    let lvl = window.nivelUsuarioGlobal;
+    
+    // Restrição para Supervisor
+    if (lvl === 'SUPERVISOR') {
+        const tabRelatoriosBtn = document.querySelector('button[data-target="tab-relatorios"]');
+        const tabRelatoriosContent = document.getElementById('tab-relatorios');
+        
+        if (tabRelatoriosBtn) tabRelatoriosBtn.style.display = 'none';
+        if (tabRelatoriosContent) tabRelatoriosContent.style.display = 'none';
+        
+        // Força a mudança de aba se a atual for a bloqueada
+        if (tabRelatoriosBtn && tabRelatoriosBtn.classList.contains('active')) {
+            const btnSoldados = document.querySelector('button[data-target="tab-soldados"]');
+            if (btnSoldados) {
+                window.switchTabRequerimentos('tab-soldados', btnSoldados);
+            }
+        }
+    }
+    
+    // Altera nome da aba PPP
+    const btnPPP = document.querySelector('button[data-target="tab-ppp"]');
+    if (btnPPP) {
+        btnPPP.innerText = 'Fiscalização do Procedimento Pós-Promoção';
+    }
+    const h4PPP = document.querySelector('#tab-ppp h4');
+    if (h4PPP) {
+        h4PPP.innerHTML = '<i class="fas fa-chart-line"></i> Fiscalização do Procedimento Pós-Promoção (PPP)';
+    }
+};
