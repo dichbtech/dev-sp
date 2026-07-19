@@ -123,11 +123,10 @@ window.gerarMenusPorNivel = function() {
     }
     
     if (cmd && ehSuperLideranca) {
-        cmd.innerHTML = `
+                cmd.innerHTML = `
             <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleCommand();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleCommand();"><i class="fas fa-clipboard-list"></i><span>Logs Gerais</span></div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-patrocinadores'); window.toggleCommand();"><i class="fas fa-crown"></i><span>Patrocinadores</span></div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-eventos'); window.toggleCommand();"><i class="fas fa-calendar-alt"></i><span>Eventos</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleCommand();"><i class="fas fa-history"></i><span>Logs Estrelas</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-privacidade'); window.toggleCommand();"><i class="fas fa-shield-alt"></i><span>Privacidade</span></div>
         `;
     }
 }

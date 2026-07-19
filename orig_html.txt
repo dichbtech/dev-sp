@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Sistemas - DIC</title>
+    <link rel="icon" type="image/gif" href="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="appWrapper" style="display:none; flex-direction:column; min-height:100vh; width:100%;">
+
+    <!-- TOP BAR -->
+    <header class="top-bar">
+        <div class="brand">
+            <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo DIC">
+            <div class="brand-text">
+                <h1>Supervisores</h1>
+                <h2>Departamento de Informação</h2>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <!-- Mock select para testes, o auth.js que vai injetar o cargo real no user-card -->
+            <button class="theme-btn" id="theme-toggle" onclick="window.toggleTheme()" title="Trocar Tema"><i class="fas fa-moon"></i></button>
+            <div class="user-card" id="userProfile" style="display:none;">
+                <div class="user-details">
+                    <strong id="loggedNick">Carregando...</strong>
+                    <span id="loggedRole">...</span>
+                </div>
+                <div class="avatar-mini">
+                    <img id="loggedAvatarImg" src="" alt="Avatar">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- HOME / CENTRAL HUB -->
+        <main class="spa-view active" id="view-home">
+            <div class="home-layout">
+                
+                <!-- Scene com Avatar Dinâmico -->
+                <div class="avatar-scene">
+                    <div class="notice-board">
+                        <h2 class="section-title"><i class="fas fa-compass"></i> Central de Sistemas</h2>
+                        <p style="color: var(--text-muted); margin-bottom: 25px;">Selecione uma ferramenta oficial abaixo ou utilize o Dock para acesso rápido.</p>
+                        
+                        <!-- HUB DE FERRAMENTAS (Injetado dinamicamente via JS) -->
+                        <div class="tools-grid" id="central-tools-grid">
+                            <!-- JS vai preencher baseado no Nível -->
+                        </div>
+                    </div>
+                    
+                    <div class="avatar-container">
+                        <!-- Balão Pensamento -->
+                        <div class="thought-bubble" id="hub-bubble">Conectando aos servidores do Firebase...</div>
+                        <!-- Avatar Walking -->
+                        <img id="hub-avatar" class="habbo-avatar" src="" alt="Habbo Avatar">
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- MÓDULOS DE SISTEMA -->
+        <main class="spa-view card" id="modulo-metas"><div id="evento-banner"><span><i class="fas fa-star" style="color: var(--sup-neon); font-size: 20px;"></i> <span id="evento-banner-txt">EVENTO ATIVO</span></span><span style="font-size: 13px; color: var(--sup-neon);"><i class="fas fa-info-circle"></i> Bônus Multiplicador Ativado</span></div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <h3 style="margin:0;"><i class="fas fa-bullseye"></i> Consulta de Metas</h3>
+                <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <label class="tech-label" style="margin:0; font-size: 11px;">Semana:</label>
+                    <input type="date" id="filtro-semana-inicio" onchange="window.mudarSemanaConsulta()" style="background: transparent; border: none; color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 13px; outline: none;">
+                    <span style="color: var(--sup-neon);">a</span>
+                    <input type="date" id="filtro-semana-fim" readonly style="background: transparent; border: none; color: rgba(255,255,255,0.5); font-family: 'Rajdhani', sans-serif; font-size: 13px; outline: none; width: 90px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button class="btn-tech" id="btn-pontos-extras" style="display:none; padding: 8px 15px; font-size: 13px; border-color: #4caf50; color: #4caf50;" onclick="window.abrirModalPontosExtras()"><i class="fas fa-star"></i> Pontos Extras</button>
+                <button class="btn-tech" onclick="window.abrirDashboard()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+            </div>
+          </div>
+
+          <div class="metas-top-layout">
+             <div class="podium-box" id="podium-container" style="position: relative; height: 350px;">
+                <div class="podium-glow"></div>
+                <img id="img-podio-base" src="https://i.imgur.com/sWg6BNh.png" draggable="false" style="z-index: 2; position: absolute; left: 87px; top: 203px; width: 252px; image-rendering: pixelated;">
+                <img id="avatar-1" src="" draggable="false" style="z-index: 3; display:none; position: absolute; left: 114px; top: 34px; width: 124px; image-rendering: pixelated;">
+                <img id="medal-1" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgk1prBqI84-KMlRtMxa_d7zVr-rqtK98qCwWnW_mFOZt_kDyhbSOKp6WgbwGyhuPR2Cej0BDvaFHTgOzWRb13qQ5glBYnTO-WLVmD2Mc7GBy5_eeycsqI1xeYIyZuqGK0IKmU-QUi0y8M/s1600/ITC21.gif" draggable="false" class="medal-float" style="z-index: 4; display:none; position: absolute; left: 156px; top: 32px; width: auto; image-rendering: pixelated;">
+                <div id="nick-1" class="podium-nick" style="z-index: 6; display:none; position: absolute; left: 25px; top: 154px; width: auto; text-align: center;"></div>
+                <img id="avatar-2" src="" draggable="false" style="z-index: 3; display:none; position: absolute; left: 176px; top: 100px; width: 124px; image-rendering: pixelated;">
+                <img id="medal-2" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuP4oSwMUvEeMDglW96CfvqrDASdaiQIHPsO6hx3CDFgBKZINyAX3dqlQrOJgGLsBDafGL_vVqS-9su5ijkKP87T-yQHM4YCe3zaHcYXPhBas5RjG12vh_6RPuoQemKimWHAhV-bQEVBc/s1600/ITC20.gif" draggable="false" class="medal-float" style="z-index: 4; display:none; position: absolute; left: 219px; top: 98px; width: auto; image-rendering: pixelated;">
+                <div id="nick-2" class="podium-nick" style="z-index: 6; display:none; position: absolute; left: 304px; top: 201px; width: auto; text-align: center;"></div>
+                <img id="avatar-empate-1" src="" draggable="false" style="z-index: 3; display:none; position: absolute; left: 175px; top: 50px; width: auto; image-rendering: pixelated;">
+                <div id="txt-empate-1" class="empate-text" style="display:none; position: absolute; left: 139px; top: 49px; width: auto;">EMPATE</div>
+                <img id="avatar-empate-2" src="" draggable="false" style="z-index: 3; display:none; position: absolute; left: 80px; top: 100px; width: auto; image-rendering: pixelated;">
+                <div id="txt-empate-2" class="empate-text" style="display:none; position: absolute; left: 204px; top: 124px; width: auto;">EMPATE</div>
+             </div>
+             <div class="events-box" id="events-container">
+                <div class="events-title"><span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span><span id="mes-atual" style="color:#fff; font-size:14px;"></span></div>
+                <div id="ui-lista-eventos" style="flex:1;"></div>
+                <div class="events-title" style="font-size: 15px; margin-top:10px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
+                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px; position:relative; flex-wrap:wrap;" id="sponsors-container" class="sponsor-list"></div>
+                <div class="sponsor-text">"<span id="ui-txt-patrocinio"></span>"<br><br><span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span></div>
+             </div>
+          </div>
+          <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;"><div class="input-block" style="max-width: 300px; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div></div>
+          
+          <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
+             <div class="member-stage-box" id="stage-container" style="position: relative; height: 350px;">
+                 <div class="stage-glow"></div>
+                 <img id="img-palco-base" src="https://i.imgur.com/7XXAuf4.png" draggable="false" style="z-index: 2; position: absolute; left: 102px; top: 255px; width: 170px; image-rendering: pixelated;">
+                 <img id="img-brasao" src="https://i.imgur.com/aOXCYBj.png" draggable="false" style="z-index: 3; position: absolute; left: -7px; top: 47px; width: 181px; image-rendering: pixelated;">
+                 <img id="img-emblema-sup" src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" draggable="false" style="z-index: 4; position: absolute; left: 38px; top: 93px; width: 84px; image-rendering: pixelated;">
+                 <img id="avatar-selecionado" src="" draggable="false" style="z-index: 5; position: absolute; left: 104px; top: 59px; width: 154px; image-rendering: pixelated;">
+             </div>
+             
+             <div class="stats-grid-box">
+                <div class="stat-total" style="grid-column: 1 / -1; margin-bottom: 10px;">
+                    <div><h4 style="color:var(--text-sub); margin-bottom:0;">Total de Pontos</h4><div class="val" id="det-total" style="display:flex; align-items:baseline; gap:10px;">-</div></div>
+                    <div style="text-align: right;"><h4 style="color:var(--text-sub); margin-bottom:0;">Status da Meta</h4><div id="det-status" style="font-size: 20px; font-weight: 700; text-transform: uppercase; margin-top:5px;">-</div></div>
+                </div>
+                <div id="dynamic-stats-cards" style="display: contents;"></div>
+             </div>
+          </div>
+
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3);">
+              <h3 style="margin-bottom: 15px;"><i class="fas fa-search-plus"></i> Buscador de Histórico e Metas</h3>
+              <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
+                  <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+                      <div style="flex:1; min-width:200px;">
+                          <label class="tech-label">Policial / Auxiliar</label>
+                          <div class="input-block" style="margin:0;">
+                              <i class="fas fa-user"></i>
+                              <input type="text" id="hist-input-membro" list="hist-nicks-list" placeholder="Digite o nick exato..." style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+                              <datalist id="hist-nicks-list"></datalist>
+                          </div>
+                      </div>
+                      <div style="flex:1; min-width:180px;">
+                          <label class="tech-label">Tipo de Consulta</label>
+                          <div class="input-block" style="margin:0;">
+                              <i class="fas fa-filter"></i>
+                              <select id="hist-tipo-consulta" onchange="window.toggleFiltrosHistorico()" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+                                  <option value="semanal">Semanal (Intervalo)</option>
+                                  <option value="mensal">Mensal</option>
+                              </select>
+                          </div>
+                      </div>
+                      <div style="flex:1; min-width:180px;" class="hist-filtro-semanal">
+                          <label class="tech-label">Data Início</label>
+                          <div class="input-block" style="margin:0;">
+                              <i class="far fa-calendar-alt"></i>
+                              <input type="date" id="hist-data-inicio" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+                          </div>
+                      </div>
+                      <div style="flex:1; min-width:180px;" class="hist-filtro-semanal">
+                          <label class="tech-label">Data Fim</label>
+                          <div class="input-block" style="margin:0;">
+                              <i class="far fa-calendar-alt"></i>
+                              <input type="date" id="hist-data-fim" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+                          </div>
+                      </div>
+                      <div style="flex:1; min-width:180px; display:none;" id="hist-filtro-mensal">
+                          <label class="tech-label">Mês/Ano</label>
+                          <div class="input-block" style="margin:0;">
+                              <i class="far fa-calendar-alt"></i>
+                              <input type="month" id="hist-mes" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+                          </div>
+                      </div>
+                      <div style="flex:1; min-width:180px;">
+                          <label class="tech-label">Detalhamento</label>
+                          <div class="input-block" style="margin:0;">
+                              <i class="fas fa-list"></i>
+                              <select id="hist-detalhamento" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+                                  <option value="resumo">Apenas Resumo Semanal</option>
+                                  <option value="completo">Resumo + Atividades</option>
+                              </select>
+                          </div>
+                      </div>
+                      <button class="btn-tech" onclick="window.buscarHistoricoMetas()" style="padding:15px; width:100%; margin-top:10px;">
+                          <i class="fas fa-search"></i> Buscar Histórico
+                      </button>
+                  </div>
+              </div>
+              <div id="hist-resultados" style="display:none; background: rgba(0,0,0,0.5); padding: 25px; border-radius: 8px; border: 1px solid var(--glass-border); color: #fff; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; max-height: 500px; overflow-y: auto; line-height: 1.5;"></div>
+          </div></main>
+        <main class="spa-view card" id="modulo-estrelas"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; flex-wrap:wrap; gap:15px;"><div style="display:flex; align-items:center;"><h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3><button id="btn-dashboard-correcao" class="btn-tech" style="display:none; padding: 6px 12px; margin-left: 15px; font-size: 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'" title="Painel de Correção de Ciclos"><i class="fas fa-tachometer-alt"></i></button><button id="btn-limpar-rank" class="btn-tech" style="display:none; margin-left: 10px; background:#ff9800; border-color:#ff9800; color:#fff; padding: 6px 12px; font-size: 15px;" onclick="window.abrirModalLimparRank()"><i class="fas fa-user-slash"></i> Limpar Rank</button></div></div><p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p><div class="row" style="gap: 20px; align-items: flex-start;"><div style="flex: 2; min-width: 300px;"><h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-list"></i> Ranking e Status Atual</h4><div class="admin-table-wrapper" style="max-height: 400px; overflow-y: auto;"><table class="admin-table" id="tb-militares-estrelas"><thead><tr><th>Policial</th><th style="text-align:center;">Promoções Validadas</th><th>Estrelas</th><th style="text-align:center;">Status</th></tr></thead><tbody></tbody></table></div></div><div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;"><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);"><h4 style="color:var(--sup-neon); margin-bottom:10px; font-size:15px;"><i class="fas fa-layer-group"></i> Validação em Lote</h4><label class="tech-label">Data das Promoções</label><div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="lote-data"></div><label class="tech-label">IDs Excluídos / Incorretos</label><div class="input-block"><i class="fas fa-ban"></i><input type="text" id="lote-excluidos" placeholder="Ex: 502, 508 (Opcional)"></div><button class="btn-tech" onclick="window.buscarPromocoesLote()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Buscar Promoções</button><div id="resultado-lote" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);"></div></div></div></div></main>
+        <main class="spa-view card" id="modulo-grupos"><h3 style="margin-bottom: 15px;"><i class="fas fa-users"></i> Controle de Grupos</h3><div style="width: 100%; height: calc(100vh - 230px); background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://script.google.com/macros/s/AKfycbxRpzWNrcjbQMV4cgYpAUTPQVBhB2he6ft2Kvk0EA7eXdQuLzq-NUmu_24lP9wQokfP/exec" style="width: 100%; height: 100%; border: none;"></iframe></div></main>
+        <main class="spa-view card" id="modulo-correcoes"><h3><i class="fas fa-check-double"></i> Correção de Atividades</h3><p class="subtext">Selecione o tipo de atividade que irá corrigir e após preencher os campos, clique em <span style="color: var(--sup-neon); font-weight: bold;">Finalizar Avaliação</span> para salvar.</p><div class="tabs-container" id="tabs-correcoes"><button class="btn-tab active" id="tab-Relatórios" onclick="window.carregarAtividadesPendentes('Relatórios', this)">Relatórios</button><button class="btn-tab" id="tab-Grupos" onclick="window.carregarAtividadesPendentes('Grupos', this)">Grupos</button><button class="btn-tab" id="tab-Soldados" onclick="window.carregarAtividadesPendentes('Soldados', this)">Soldados</button><button class="btn-tab" id="tab-Convites" onclick="window.carregarAtividadesPendentes('Convites', this)">Convites</button><button class="btn-tab" id="tab-PPP" onclick="window.carregarAtividadesPendentes('PPP', this)">PPP</button></div><div id="lista-atividades-pendentes" style="display:flex; flex-direction:column; gap:15px;"></div></main>
+        <main class="spa-view card" id="modulo-revisao"><h3><i class="fas fa-search"></i> Revisão de Correções</h3><p class="subtext">Fiscalize as correções realizadas pela Liderança em um período específico.</p><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;"><div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;"><div style="flex:1; min-width:180px;"><label class="tech-label">Data de Início</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-inicio"></div></div><div style="flex:1; min-width:180px;"><label class="tech-label">Data de Fim</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-fim"></div></div><button class="btn-tech" onclick="window.solicitarLevantamento()" style="padding:15px;"><i class="fas fa-cloud-download-alt"></i> Buscar na Planilha</button></div></div><div id="rev-status-area" style="text-align:center; padding:20px; display:none;"></div><div id="rev-results-area" style="display:none; flex-direction:column; gap:20px;"><div class="tabs-container" id="tabs-revisao" style="justify-content:center; margin-bottom:10px;"><button class="btn-tab active" onclick="window.filtrarRevisao('Relatórios', this)">Relatórios</button><button class="btn-tab" onclick="window.filtrarRevisao('Grupos', this)">Grupos</button><button class="btn-tab" onclick="window.filtrarRevisao('Soldados', this)">Soldados</button><button class="btn-tab" onclick="window.filtrarRevisao('Convites', this)">Convites</button><button class="btn-tab" onclick="window.filtrarRevisao('PPP', this)">PPP</button></div><div id="rev-lista"></div><button class="btn-tech btn-save" onclick="window.concluirRevisao()" style="padding:15px; width:100%; background:#ef4444; color:#fff; border:none; box-shadow:0 0 15px rgba(239,68,68,0.3);"><i class="fas fa-trash-alt"></i> Concluir Revisão (Apagar Dados)</button></div></main>
+        <main class="spa-view card" id="modulo-logs-atividades"><h3><i class="fas fa-eye"></i> Auditoria Global (Logs de Atividades)</h3><p class="subtext">Monitoramento em tempo real de todas as ações e cliques realizados na Central.</p><div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;"><table class="admin-table" id="tb-logs-atividades"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody></tbody></table></div></main>
+        <main class="spa-view card" id="modulo-logs"><h3><i class="fas fa-history"></i> Logs de Auditoria (Estrelas)</h3><p class="subtext">Acompanhamento das promoções e sanções validadas e registradas.</p><div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;"><table class="admin-table" id="tb-logs"><thead><tr><th>Data/Hora</th><th>Autor</th><th>Beneficiado</th><th>Ação</th><th>ID/Detalhes</th></tr></thead><tbody></tbody></table></div></main>
+        <main class="spa-view card" id="modulo-avais"><h3><i class="fas fa-calculator"></i> Cálculo Automático de Licenças</h3><p class="subtext" style="margin-bottom:15px;">Adicione múltiplas licenças se necessário. O sistema calculará os exatos intervalos descobertos.</p><div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;"><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Último Login Oficial</label><div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="data-login"></div></div><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Data da Consulta</label><div class="input-block"><i class="far fa-calendar-check"></i><input type="date" id="data-consulta"></div></div></div><div id="lista-avais-container"><div class="row aval-item" style="display:flex; gap:20px; flex-wrap:wrap;"><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Início da Licença 1</label><div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" class="data-aval-input"></div></div><div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Dias de Licença</label><div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" class="dias-aval-input" min="1" placeholder="Ex: 7"></div></div></div></div><div style="display:flex; gap:15px; margin-top: 10px; flex-wrap:wrap;"><button class="btn-tech btn-add" onclick="window.adicionarAval()"><i class="fas fa-plus"></i> Adicionar Outra Licença</button><button class="btn-tech btn-save" onclick="window.processarCalculo()" style="flex:1;"><i class="fas fa-sync-alt"></i> Processar Cálculo Definitivo</button></div><div id="resultado-aval" style="display: none; margin-top: 25px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.3);"><h4 style="color: var(--sup-neon); margin-bottom: 15px; text-transform:uppercase; font-size:16px;"><i class="fas fa-poll-h"></i> Resultado da Análise</h4><p id="texto-resultado" style="line-height: 1.6; font-size: 15px; margin:0;"></p></div></main>
+        <main class="spa-view card" id="modulo-feedbacks"><h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3><div style="width: 100%; height: 75vh; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://dichbtech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe></div></main>
+        <main class="spa-view card" id="modulo-privacidade"><h3><i class="fas fa-shield-alt"></i> Editar Política de Privacidade</h3><p class="subtext">O texto abaixo é refletido instantaneamente na página pública de privacidade.</p><div style="margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.3); color: #fff; min-height: 200px; outline: none; font-family: 'Rajdhani', sans-serif;" id="editor-privacidade" contenteditable="true"></div><button class="btn-tech btn-save" onclick="window.salvarPrivacidade()"><i class="fas fa-save"></i> Salvar Política</button></main>
+        <main class="spa-view card" id="modulo-acessos"><h3><i class="fas fa-users-cog"></i> Gerenciar Acessos</h3><div class="admin-table-wrapper"><table class="admin-table" id="tbAcessos"><thead><tr><th style="width:35%">E-mail Google</th><th style="width:25%">Nick no Habbo</th><th style="width:25%">Nível de Acesso</th><th style="width:15%">Ações</th></tr></thead><tbody></tbody></table></div><div class="admin-controls-bottom"><button class="btn-tech btn-add" onclick="window.addLinhaAcesso()"><i class="fas fa-plus"></i> Novo Acesso Manual</button><button class="btn-tech btn-save" onclick="window.salvarAcessos()"><i class="fas fa-save"></i> Salvar Manuais</button></div></main>
+        <main class="spa-view card" id="modulo-requerimentos"><style>
+                .form-tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
+                .form-tab-content.active { display: block; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            </style>
+            <h3><i class="fas fa-file-signature"></i> Formulário de Atividades</h3>
+            <p class="subtext" style="margin-bottom: 25px;">Preencha as informações abaixo com atenção. Seus dados (Nick e Cargo) são incluídos automaticamente.</p>
+
+            <div class="tabs-container" id="tabs-formulario" style="margin-bottom: 30px;">
+                <button class="btn-tab active" data-target="tab-relatorios" onclick="window.switchTabRequerimentos('tab-relatorios', this)">Relatórios</button>
+                <button class="btn-tab" data-target="tab-soldados" onclick="window.switchTabRequerimentos('tab-soldados', this)">Soldados</button>
+                <button class="btn-tab" data-target="tab-grupos" onclick="window.switchTabRequerimentos('tab-grupos', this)">Grupos</button>
+                <button class="btn-tab" data-target="tab-convites" onclick="window.switchTabRequerimentos('tab-convites', this)">Convites</button>
+                <button class="btn-tab" data-target="tab-ppp" onclick="window.switchTabRequerimentos('tab-ppp', this)">PPP</button>
+            </div>
+
+            <form id="activityFormRequerimentos" onsubmit="window.submitFormRequerimentos(event)" style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
+                
+                <!-- ABA: Relatórios -->
+                <div id="tab-relatorios" class="form-tab-content active">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-file-alt"></i> Relatórios (Auxiliares)</h4>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório (Google Docs)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="relatorio_link" placeholder="https://docs.google.com/..." id="relatorio_link" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Natureza do Relatório</label>
+                        <div class="input-block">
+                            <i class="fas fa-list"></i>
+                            <select name="relatorio_natureza" id="relatorio_natureza" onchange="window.handleNaturezaChangeRequerimentos()" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <option value="" disabled selected style="color:#000;">Selecione a natureza...</option>
+                                <option value="Grupo de Controle" style="color:#000;">Grupo de Controle</option>
+                                <option value="Grupo de Promoções" style="color:#000;">Grupo de Promoções</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="container_publico_alvo" style="display: none; margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Público-Alvo</label>
+                        <div class="input-block">
+                            <i class="fas fa-users"></i>
+                            <select name="relatorio_publico_alvo" id="relatorio_publico_alvo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <option value="" disabled selected style="color:#000;">Selecione o público-alvo...</option>
+                                <option value="Corpo Executivo" style="color:#000;">Corpo Executivo</option>
+                                <option value="Cabos até Subtenentes" style="color:#000;">Cabos até Subtenentes</option>
+                                <option value="Aspirantes a Coronéis" style="color:#000;">Aspirantes a Coronéis</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="container_data_referencia" style="display: none; margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Referência</label>
+                        <div class="input-block">
+                            <i class="far fa-calendar-alt"></i>
+                            <input type="date" name="relatorio_data_referencia" id="relatorio_data_referencia" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;"></main>
+        
+    </div>
+
+    <!-- DOCK FLUTUANTE INFERIOR -->
+    <nav class="dock-container" id="dockNav">
+        <!-- Preenchido via auth.js baseado no Nível -->
+    </nav>
+
+    <!-- OVERLAY LIDERANÇA -->
+    <div class="cmd-overlay" id="cmdOverlay">
+        <div class="cmd-panel">
+            <div class="page-header" style="margin-bottom: 10px;">
+                <h3 class="section-title" style="margin:0;"><i class="fas fa-bolt"></i> Gestão</h3>
+                <button class="btn-action btn-secondary" onclick="window.toggleLideranca()"><i class="fas fa-times"></i> Fechar</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 11px; margin-bottom: 25px;">Ferramentas exclusivas do Corpo Executivo</p>
+            
+            <div class="cmd-grid" id="cmd-tools-grid">
+                <!-- Preenchido via auth.js -->
+            </div>
+        </div>
+    </div>
+    
+    </div> <!-- End of appWrapper -->
+
+    <!-- MODALS ORIGINAIS MANTIDOS -->
+    <div id="loginScreen" style="display:flex;">
+        <div id="loginCard" class="login-card">
+            <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" width="70" style="margin-bottom:15px; filter: drop-shadow(0 0 10px var(--sup-neon));">
+            <h2 style="color:var(--sup-neon); margin-bottom: 10px; font-weight:700; text-transform:uppercase;">Identificação Restrita</h2>
+            <p style="color:var(--text-sub); margin-bottom: 25px; font-size: 14px;">Você está acessando a Central de Sistemas de Supervisores. Faça login com a conta oficial vinculada.</p>
+            <button class="btn-tech" style="width: 100%; justify-content: center; padding: 15px; font-size:16px;" onclick="window.loginGoogle()"><i class="fab fa-google"></i> Login via Google</button>
+        </div>
+        <div id="loginLoader" style="display:none; text-align:center;">
+            <div class="spinner-ring" style="margin: 0 auto 20px auto;"></div>
+            <h3 style="color:#fff;">Autenticando...</h3>
+        </div>
+    </div>
+    
+    <div id="modal-correcao-lote" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
+      <div class="modal-content" style="max-width: 500px; width: 90%; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid var(--sup-neon); box-shadow: 0 0 20px rgba(251,191,36, 0.2);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="color:var(--sup-neon); margin:0; font-size:18px;"><i class="fas fa-tools"></i> CORREÇÃO DE CICLO</h2><button onclick="document.getElementById('modal-correcao-lote').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button></div>
+          <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">Use este painel para reverter ou substituir uma validação feita por erro.</p>
+          <div class="input-group" style="margin-bottom:15px;"><label class="tech-label" style="display:block; margin-bottom:5px;">Data do Ciclo Original</label><div class="input-block"><input type="date" id="correcao-data" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></div></div>
+          <div class="input-group" style="margin-bottom:15px;"><label class="tech-label" style="display:block; margin-bottom:5px;">IDs para EXCLUIR (Separados por vírgula)</label><div class="input-block"><input type="text" id="correcao-excluidos" placeholder="Ex: 1023, 1025" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></div></div>
+          <button class="btn-tech btn-add" style="width:100%; margin-bottom:15px; padding: 12px; font-size: 15px;" onclick="window.buscarCorrecaoLote()"><i class="fas fa-search"></i> ANALISAR CICLO</button>
+          <div id="resultado-correcao" style="display:none; max-height:300px; overflow-y:auto; margin-top:15px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;"></div>
+      </div>
+  </div>
+
+  <div id="modal-pontos-extras" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
+      <div class="modal-content" style="max-width: 500px; width: 90%; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #4caf50;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="color:#4caf50; margin:0; font-size:18px;"><i class="fas fa-star"></i> PONTOS EXTRAS</h2><button onclick="window.fecharModalPontosExtras()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button></div>
+          <div style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-end;"><div style="flex:1;"><label class="tech-label">Militar</label><select id="pe-select-membro" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;"></select></div><div style="width:100px;"><label class="tech-label">Pontos</label><input type="number" id="pe-input-pontos" step="0.5" placeholder="Ex: 1.5" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px; box-sizing:border-box;"></div><button class="btn-tech" style="background:#4caf50; color:#fff; border:none; padding:10px; border-radius:5px; cursor:pointer;" onclick="window.salvarPontoExtra()">Adicionar</button></div>
+          <div class="admin-table-wrapper" style="max-height: 250px; overflow-y: auto;"><table class="admin-table" id="tb-pontos-extras"><thead><tr><th>Policial</th><th style="text-align:center;">Bônus</th><th style="text-align:right;">Ação</th></tr></thead><tbody></tbody></table></div>
+      </div>
+  </div>
+
+  <div id="modal-dashboard" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
+      <div class="modal-content" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid var(--sup-neon);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h2 style="color:var(--sup-neon); margin:0; font-size:18px;"><i class="fas fa-tachometer-alt"></i> DASHBOARD DE METAS</h2>
+              <button onclick="window.fecharDashboard()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
+          </div>
+          
+          <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+              <h4 style="color:#fff; margin-bottom:10px; font-size:14px;">Configurações Globais</h4>
+              <div style="display:flex; gap:15px; align-items:center; margin-bottom:10px;">
+                  <label style="color:#fff; cursor:pointer;"><input type="checkbox" id="dash-toggle-evento"> Ativar Modo Evento (Banner)</label>
+                  <div style="display:flex; align-items:center; gap:5px;">
+                      <label class="tech-label" style="margin:0;">Multiplicador:</label>
+                      <input type="number" id="dash-mult-evento" min="1" step="1" style="width: 60px; padding: 5px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px;">
+                  </div>
+              </div>
+              <label class="tech-label">Frase dos Patrocinadores</label>
+              <input type="text" id="dash-txt-patrocinio" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px; box-sizing:border-box;">
+          </div>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.05);">
+              <h4 style="color:var(--sup-neon); margin:0; font-size:16px;"><i class="fas fa-cogs"></i> Hub de Atividades</h4>
+              <button class="btn-tech btn-add" style="padding: 5px 10px; font-size: 12px;" onclick="window.adicionarNovaAtividadeBox()"><i class="fas fa-plus"></i> Nova Atividade</button>
+          </div>
+          <div id="dash-atividades-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 25px;"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.05);">
+              <h4 style="color:var(--sup-neon); margin:0; font-size:16px;"><i class="fas fa-crown"></i> Hub de Patrocinadores</h4>
+              <div style="display:flex; gap:10px;">
+                  <input type="text" id="dash-novo-sponsor" placeholder="Nick do Patrocinador" class="admin-input" style="width: 150px; padding: 5px 10px;">
+                  <button class="btn-tech btn-add" style="padding: 5px 10px; font-size: 12px;" onclick="window.adicionarNovoSponsor()"><i class="fas fa-plus"></i> Adicionar</button>
+              </div>
+          </div>
+          <div id="dash-sponsors-container" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 25px;"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.05);">
+              <h4 style="color:#fff; margin:0; font-size:14px;">Mural de Eventos</h4>
+              <button class="btn-tech btn-add" style="padding: 5px 10px; font-size: 12px;" onclick="window.adicionarNovoEventoBox()"><i class="fas fa-plus"></i> Novo Evento</button>
+          </div>
+          <div id="dash-eventos-container" style="display:flex; flex-direction:column; gap:15px; margin-bottom: 20px;"></div>
+          
+          <button class="btn-tech btn-save" style="width:100%; padding: 12px; font-size: 15px;" onclick="window.salvarDashboard()"><i class="fas fa-save"></i> Salvar Alterações</button>
+      </div>
+  </div>
+
+  
+    
+    <!-- Toast Message Container -->
+    <div class="toast-container" id="toastBox"></div>
+
+    <script>
+        // Função Global de Troca de Tema
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            const icon = document.querySelector('#theme-toggle i');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-sun';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        // Função Global de Navegação (Views SPA)
+        window.switchSection = function(id, btnElement) {
+            // Oculta todas as views
+            document.querySelectorAll('.spa-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            // Gerencia ativação no Dock
+            document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            
+            // Se o overlay de liderança estiver aberto e o cara clicar num botão, fecha ele
+            if(document.getElementById('cmdOverlay').classList.contains('open')) {
+                window.toggleLideranca();
+            }
+        }
+
+        // Toggle Liderança Overlay
+        window.toggleLideranca = function() {
+            const overlay = document.getElementById('cmdOverlay');
+            if(overlay.classList.contains('open')) {
+                overlay.classList.remove('open');
+                setTimeout(() => overlay.style.display = 'none', 300); // match transition
+            } else {
+                overlay.style.display = 'flex';
+                // Trigger reflow
+                void overlay.offsetWidth;
+                overlay.classList.add('open');
+            }
+        }
+    </script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <script src="js/ui-tools.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/modulo-metas.js"></script>
+  <script src="js/modulo-estrelas.js"></script>
+  <script src="js/modulo-admin.js"></script>
+  <script src="js/modulo-correcoes.js"></script>
+  <script src="js/modulo-revisao.js"></script>
+  <script src="js/modulo-requerimentos.js"></script>
+  <script src="js/auth.js"></script>
+</body>
