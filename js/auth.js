@@ -113,7 +113,7 @@ window.gerarMenusPorNivel = function() {
             <div class="dock-separator"></div>
             <div class="dock-item" data-label="Revisão" onclick="window.switchSection('modulo-revisao', this)"><i class="fas fa-search"></i></div>
             <div class="dock-item" data-label="Estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i></div>
-            <div class="dock-item dock-command" data-label="Comando" onclick="window.toggleCommand()"><i class="fas fa-bolt"></i></div>
+            <div class="dock-item dock-command" data-label="Configurações da Liderança" onclick="window.toggleCommand()"><i class="fas fa-bolt"></i></div>
         `;
     }
     
@@ -123,9 +123,11 @@ window.gerarMenusPorNivel = function() {
     }
     
     if (cmd && ehSuperLideranca) {
-                cmd.innerHTML = `
-            <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleCommand();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>
+                        cmd.innerHTML = `
+            <div class="cmd-tile" onclick="window.switchSection('modulo-revisao'); window.toggleCommand();"><i class="fas fa-search"></i><span>Revisão</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-logs-atividades'); window.toggleCommand();"><i class="fas fa-eye"></i><span>Auditoria Global</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleCommand();"><i class="fas fa-history"></i><span>Logs Estrelas</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleCommand();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-privacidade'); window.toggleCommand();"><i class="fas fa-shield-alt"></i><span>Privacidade</span></div>
         `;
     }
