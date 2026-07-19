@@ -119,8 +119,8 @@ document.body.insertAdjacentHTML('afterbegin', modaisGlobaisHTML);
 // Função mestre de troca de telas
 window.switchSection = function(sectionId, btnElement) {
     // 1. Apaga a luz de todos os módulos
-    document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.spa-view').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
 
     // 2. Acende a luz do módulo correto
     let targetSection = document.getElementById(sectionId);

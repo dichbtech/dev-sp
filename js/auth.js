@@ -31,6 +31,7 @@ window.liberarPainel = function() {
         window.escutarLogsAtividades();
     }
     
+    window.initAvatarScene();
     window.setupAllDraggables();
     if(window.registrarLogAtividade) window.registrarLogAtividade("Login Efetuado", "Acessou a Central de Sistemas.");
     
@@ -57,6 +58,7 @@ window.liberarPainel = function() {
     if (window.gerarMenusPorNivel) window.gerarMenusPorNivel();
 }
 
+
 window.gerarMenusPorNivel = function() {
     const dock = document.getElementById('dockNav');
     const hub = document.getElementById('central-tools-grid');
@@ -66,7 +68,7 @@ window.gerarMenusPorNivel = function() {
     const ehLideranca = ['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
     const ehSuperLideranca = ['VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
     
-    // Hub
+    // Hub Central
     let hubHtml = `
         <div class="tool-card" onclick="window.switchSection('modulo-metas')">
             <div class="tool-icon"><i class="fas fa-bullseye"></i></div>
@@ -97,16 +99,48 @@ window.gerarMenusPorNivel = function() {
             <div class="tool-info"><h4>System DIC</h4><p>Acesso externo</p></div>
         </div>
     `;
-    
+    if (hub) hub.innerHTML = hubHtml;
+
+    // Dock Floating (New UI)
+    let dockHtml = `
+        <div class="dock-item" data-label="Home" onclick="window.switchSection('view-home', this)"><i class="fas fa-home"></i></div>
+        <div class="dock-separator"></div>
+        <div class="dock-item" data-label="Metas" onclick="window.switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i></div>
+        <div class="dock-item" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
+        <div class="dock-item" data-label="Correções" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i></div>
+    `;
     if (ehLideranca) {
-        hubHtml += `
-            <div class="tool-card" onclick="window.switchSection('modulo-estrelas')">
-                <div class="tool-icon"><i class="fas fa-star"></i></div>
-                <div class="tool-info"><h4>Estrelas</h4><p>Gerenciamento</p></div>
-            </div>
+        dockHtml += `
+            <div class="dock-separator"></div>
+            <div class="dock-item" data-label="Revisão" onclick="window.switchSection('modulo-revisao', this)"><i class="fas fa-search"></i></div>
+            <div class="dock-item" data-label="Estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i></div>
+            <div class="dock-item" data-label="Admin" onclick="window.switchSection('modulo-admin', this)"><i class="fas fa-cog"></i></div>
         `;
     }
     
+    // Command Overlay button
+    if (ehSuperLideranca) {
+        dockHtml += `
+            <div class="dock-separator"></div>
+            <div class="dock-item dock-command" data-label="Comando" onclick="window.toggleLideranca()"><i class="fas fa-bolt"></i></div>
+        `;
+    }
+    
+    if (dock) {
+        dock.innerHTML = dockHtml;
+        dock.classList.add('active'); // show dock
+    }
+    
+    if (cmd && ehSuperLideranca) {
+        cmd.innerHTML = `
+            <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleLideranca();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleLideranca();"><i class="fas fa-clipboard-list"></i><span>Logs Gerais</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-patrocinadores'); window.toggleLideranca();"><i class="fas fa-crown"></i><span>Patrocinadores</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-eventos'); window.toggleLideranca();"><i class="fas fa-calendar-alt"></i><span>Eventos</span></div>
+        `;
+    }
+}
+
     if (hub) hub.innerHTML = hubHtml;
 
     // Dock
@@ -268,3 +302,38 @@ window.fazerLogout = function() {
 window.abrirSystemDIC = function() {
     window.open('https://dic.systemhb.net/divisao/supervisores', '_blank');
 }
+
+window.getLiderNick = function() {
+    let liderNick = "Pachieri";
+    if (window.acessosData) {
+        let lider = window.acessosData.find(u => {
+            if(!u.nivel) return false;
+            let n = u.nivel.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return n === 'LIDER' || n === 'ADMIN' || n === 'LIDERANCA';
+        });
+        if(lider && lider.nick) liderNick = lider.nick;
+    }
+    return liderNick;
+};
+
+window.initAvatarScene = function() {
+    const nickLider = window.getLiderNick();
+    const av = document.getElementById('hub-avatar');
+    const bubble = document.getElementById('hub-bubble');
+    if(!av || !bubble) return;
+    
+    // direction 6 = Anda para a Esquerda
+    av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wlk&direction=6&head_direction=6&gesture=std&size=l`;
+    av.style.right = '-150px'; 
+    bubble.classList.remove('visible');
+
+    setTimeout(() => {
+        av.style.right = '20px'; // Caminha pro centro do espaço
+        setTimeout(() => {
+            // direction 4 = Vira para a tela/frente
+            av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=4&head_direction=4&gesture=sml&size=l`;
+            bubble.innerHTML = `Olá, seja bem-vindo aos Supervisores! Eu sou a Liderança de vocês, ${nickLider}. #SAGE`;
+            bubble.classList.add('visible');
+        }, 2000); 
+    }, 500);
+};

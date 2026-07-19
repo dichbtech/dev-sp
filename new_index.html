@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisores - System DIC</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* ==========================================
+           1. SISTEMA DE CORES OPERACIONAL
+           ========================================== */
+        :root {
+            /* DARK MODE (Sombrio / Premium) */
+            --bg-body: #080809;
+            --bg-surface: #111216;
+            --bg-elevated: #1a1b21;
+            --border: rgba(255, 255, 255, 0.05);
+            --border-strong: rgba(255, 255, 255, 0.12);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-inverse: #080809;
+            --bg-inverse: #f8fafc;
+            --accent: #facc15; 
+            --accent-glow: rgba(250, 204, 21, 0.15);
+            --dock-bg: rgba(17, 18, 22, 0.8);
+            --bubble-bg: #ffffff;
+            --bubble-text: #000000;
+            --btn-bg: #facc15;
+            --btn-text: #000000;
+        }
+
+        [data-theme="light"] {
+            /* LIGHT MODE (Branco e Amarelo, Cinza Chumbo) */
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-elevated: #f1f5f9;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --text-main: #0f172a; 
+            --text-muted: #64748b;
+            --text-inverse: #ffffff;
+            --bg-inverse: #ca8a04; 
+            --accent: #ca8a04; 
+            --accent-glow: rgba(202, 138, 4, 0.1);
+            --dock-bg: rgba(255, 255, 255, 0.9);
+            --bubble-bg: #1e293b;
+            --bubble-text: #ffffff;
+            --btn-bg: #ca8a04; /* Amarelo Forçado no Light Mode */
+            --btn-text: #ffffff;
+        }
+
+        /* ==========================================
+           2. BASE & TIPOGRAFIA
+           ========================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); color: var(--text-main); transition: all 0.3s ease; overflow-x: hidden; padding-bottom: 120px; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 30px; }
+        a { text-decoration: none; color: inherit; cursor: pointer; }
+        input, select, textarea { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-strong); padding: 12px; border-radius: 6px; outline: none; width: 100%; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+        /* ==========================================
+           3. TOP BAR
+           ========================================== */
+        .top-bar { height: 75px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; position: sticky; top: 0; z-index: 1000; }
+        .brand { display: flex; align-items: center; gap: 15px; }
+        .brand img { width: 45px; image-rendering: pixelated; }
+        .brand-text h1 { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); line-height: 1; }
+        .brand-text h2 { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+
+        .top-actions { display: flex; align-items: center; gap: 20px; }
+        .role-selector { background: var(--bg-elevated); border: 1px solid var(--border-strong); color: var(--text-main); padding: 8px 15px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; outline: none; cursor: pointer; width: auto; }
+        .theme-btn { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        
+        .user-card { display: flex; align-items: center; gap: 12px; background: var(--bg-elevated); padding: 5px 15px 5px 5px; border-radius: 40px; border: 1px solid var(--border); }
+        .avatar-mini { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-body); overflow: hidden; position: relative; border: 1px solid var(--border-strong); }
+        .avatar-mini img { position: absolute; top: -10px; left: -5px; width: 42px; image-rendering: pixelated; }
+        .user-details { text-align: right; }
+        .user-details strong { display: block; font-size: 12px; line-height: 1; }
+        .user-details span { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+
+        /* ==========================================
+           4. SPA VIEWS & COMPONENTS
+           ========================================== */
+        .spa-view { display: none; animation: fadeIn 0.4s ease forwards; margin-top: 30px; }
+        .spa-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .section-title { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .section-title i { color: var(--accent); }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        .btn-action { background: var(--btn-bg); color: var(--btn-text); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; text-transform: uppercase; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .btn-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .btn-secondary { background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--border-strong); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; font-size: 11px; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        tr:hover td { background: var(--bg-elevated); }
+
+        /* HOME / BANNER COMPACTO (Sem Scroll) */
+        .home-layout { display: flex; flex-direction: column; gap: 15px; height: calc(100vh - 220px); justify-content: center; }
+        .banner-main { width: 100%; height: 260px; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: transparent; }
+        .banner-main img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* AVATAR ANIMAÇÃO CORRIGIDA */
+        .avatar-scene { display: flex; gap: 20px; align-items: stretch; }
+        .notice-board { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .avatar-container { position: relative; width: 200px; height: 160px; overflow: visible; flex-shrink: 0; }
+        .habbo-avatar { position: absolute; bottom: 0; right: -150px; transition: right 2s linear; image-rendering: pixelated; z-index: 2; width: 90px; }
+        .thought-bubble { position: absolute; top: -75px; left: -30px; background: var(--bubble-bg); color: var(--bubble-text); border-radius: 12px; padding: 12px; font-size: 12px; font-weight: 600; width: 230px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: all 0.5s ease; z-index: 10; line-height: 1.4; border: 1px solid var(--border); text-align: center; }
+        .thought-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 8px 8px 0; border-style: solid; border-color: var(--bubble-bg) transparent transparent transparent; }
+        .thought-bubble.visible { opacity: 1; transform: translateY(0); }
+
+        /* DOCUMENTOS GRID LIMPO */
+        .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .doc-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .doc-card:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-5px); }
+        .doc-preview { font-size: 45px; color: var(--text-muted); margin-bottom: 20px; transition: 0.3s; }
+        .doc-card:hover .doc-preview { color: var(--accent); }
+        .doc-card h4 { font-size: 15px; font-weight: 700; line-height: 1.4; }
+
+        /* FERRAMENTAS GRID */
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .tool-card { display: flex; align-items: center; gap: 15px; background: var(--bg-surface); border: 1px solid var(--border); padding: 20px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .tool-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 20px var(--accent-glow); }
+        .tool-icon { font-size: 24px; color: var(--accent); width: 40px; text-align: center; }
+        .tool-info h4 { font-size: 14px; font-weight: 700; text-transform: uppercase; }
+        .tool-info p { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* MEMBROS GRID - AVATARES MAIORES */
+        .hierarchy-group { margin-bottom: 30px; }
+        .hierarchy-title { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .hierarchy-title::after { content: ""; height: 1px; background: var(--border-strong); flex: 1; }
+        .hierarchy-title h3 { font-size: 16px; font-weight: 800; text-transform: uppercase; color: var(--text-main); letter-spacing: 0.5px; }
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .member-card { background: var(--bg-elevated); border-radius: 12px; padding: 25px 20px; text-align: center; border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .member-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent); border-radius: 12px 12px 0 0; }
+        .member-card img { height: 140px; image-rendering: pixelated; margin-bottom: 15px; display: block; }
+        .member-card h4 { font-size: 16px; font-weight: 800; }
+        .member-card p { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-top: 4px; background: var(--bg-body); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); }
+
+        /* FORMS */
+        .form-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; flex: 1; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+
+        /* ==========================================
+           5. DOCK FLUTUANTE
+           ========================================== */
+        .dock-container {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            display: none; gap: 12px; padding: 12px 20px;
+            background: var(--dock-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-strong); border-radius: 100px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 2000;
+        }
+        .dock-container.active { display: flex; animation: slideUpDock 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUpDock { from { bottom: -100px; } to { bottom: 25px; } }
+
+        .dock-item {
+            width: 48px; height: 48px; border-radius: 14px; background: var(--bg-elevated);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: var(--text-muted); cursor: pointer;
+            position: relative; border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .dock-item:hover { transform: translateY(-10px) scale(1.15); color: var(--accent); background: var(--bg-surface); border-color: var(--accent); box-shadow: 0 10px 20px var(--accent-glow); }
+        .dock-item.active { color: var(--bg-inverse); background: var(--accent); border-color: var(--accent); }
+        [data-theme="light"] .dock-item.active { color: var(--text-inverse); background: var(--accent); border-color: var(--accent); }
+
+        .dock-item::after {
+            content: attr(data-label); position: absolute; top: -45px; background: var(--bg-inverse); color: var(--text-inverse);
+            font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 8px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .dock-item:hover::after { opacity: 1; transform: translateY(-5px); }
+
+        .dock-separator { width: 1px; height: 30px; background: var(--border-strong); margin: auto 5px; }
+        .dock-command { background: var(--text-main) !important; color: var(--bg-body) !important; border-color: var(--text-main) !important; }
+
+        /* ==========================================
+           6. CONFIGURAÇÕES (OVERLAY LIDERANÇA)
+           ========================================== */
+        .cmd-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2500; display: none; opacity: 0; transition: opacity 0.3s; justify-content: flex-end; }
+        .cmd-overlay.open { display: flex; opacity: 1; }
+        .cmd-panel { width: 420px; height: 100%; background: var(--bg-body); border-left: 1px solid var(--border); padding: 40px; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto; }
+        .cmd-overlay.open .cmd-panel { transform: translateX(0); }
+        .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
+        .cmd-tile { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .cmd-tile i { font-size: 24px; color: var(--text-muted); }
+        .cmd-tile span { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .cmd-tile:hover { border-color: var(--accent); background: var(--bg-elevated); transform: translateY(-3px); }
+        .cmd-tile:hover i { color: var(--accent); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="cmd-overlay" id="mask" onclick="toggleCommand()"></div>
+
+    <!-- CABEÇALHO -->
+    <header class="top-bar">
+        <div class="brand">
+            <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif">
+            <div class="brand-text">
+                <h1>Supervisores</h1>
+                <h2>DEPARTAMENTO DE INVESTIGAÇÃO CRIMINAL</h2>
+            </div>
+        </div>
+        <div class="top-actions">
+            <!-- Seletor de Cargos (Mockup Visualização) -->
+            <select id="roleSelector" class="role-selector" onchange="changeRole(this.value)">
+                <option value="lideranca">VISÃO: LIDERANÇA</option>
+                <option value="supervisor">VISÃO: SUPERVISOR</option>
+                <option value="auxiliar">VISÃO: AUXILIAR</option>
+            </select>
+            
+            <button class="theme-btn" onclick="toggleTheme()" title="Alterar Tema"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+            <div class="user-card">
+                <div class="user-details">
+                    <strong id="loggedNick">Pachieri</strong>
+                    <span id="loggedRole">Líder</span>
+                </div>
+                <div class="avatar-mini"><img id="loggedAvatar" src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=Pachieri&action=std&direction=4&head_direction=4&gesture=sml&size=m"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- =====================================
+             1. HOME (Sem Scroll, Avatar Adaptado) 
+             ===================================== -->
+        <main id="view-home" class="spa-view active">
+            <div class="home-layout">
+                <div class="banner-main">
+                    <img src="https://i.imgur.com/886puf9.png" alt="Banner Oficial">
+                </div>
+                
+                <div class="avatar-scene">
+                    <div class="notice-board card" style="margin:0;">
+                        <div class="section-title"><i class="fa-solid fa-bullhorn"></i> Quadro de Avisos</div>
+                        <p style="color:var(--text-muted); font-size:16px; line-height:1.6; font-weight:500;">
+                            O Regimento Interno e os demais documentos foram atualizados. <a href="javascript:void(0)" onclick="switchTab('view-documentos')" style="color:var(--accent); font-weight:700; text-decoration:underline;">Clique aqui para ver.</a>
+                        </p>
+                    </div>
+                    <div class="avatar-container">
+                        <div id="leader-bubble" class="thought-bubble">
+                            <!-- Texto Injetado Dinamicamente via JS -->
+                        </div>
+                        <img id="leader-avatar" class="habbo-avatar" src="">
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================= MÓDULOS ANTIGOS INJETADOS ================= -->
+
+
+        <!-- =====================================
+             2. MEMBROS (Ordem exata e Avatares Grandes) 
+             ===================================== -->
+        <main id="view-membros" class="spa-view">
+            <div class="page-header">
+                <div class="section-title"><i class="fa-solid fa-users"></i> Membros</div>
+            </div>
+            <div id="grid-membros-render">
+                <!-- Renderizado via JS -->
+            </div>
+        </main>
+
+        <!-- =====================================
+             3. NOTIFICAÇÕES & APLICAR
+             ===================================== -->
+        <main id="view-notificacoes" class="spa-view">
+            <div class="page-header">
+                <div class="section-title"><i class="fa-solid fa-bell"></i> Notificações Disciplinares</div>
+                <button class="btn-action" onclick="switchTab('view-notif-aplicar')"><i class="fa-solid fa-plus"></i> Aplicar Notificação</button>
+            </div>
+            <div class="card" style="padding: 0; overflow:hidden;">
+                <table>
+                    <thead>
+                        <tr><th>Policial Envolvido</th><th>Nº Notificações</th><th style="text-align:right;">Ações</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>,Preen,</strong></td><td><span style="background:var(--bg-elevated); color:var(--text-main); border:1px solid var(--border-strong); padding:3px 8px; border-radius:4px; font-weight:700; font-size:11px;">0/1</span></td><td style="text-align:right;"><button class="btn-action btn-secondary" style="padding: 6px 12px; font-size:10px;">Visualizar</button></td></tr>
+                        <tr><td><strong>Lyftz</strong></td><td><span style="background:var(--bg-elevated); color:var(--text-main); border:1px solid var(--border-strong); padding:3px 8px; border-radius:4px; font-weight:700; font-size:11px;">0/1</span></td><td style="text-align:right;"><button class="btn-action btn-secondary" style="padding: 6px 12px; font-size:10px;">Visualizar</button></td></tr>
+                        <tr><td><strong>matheus00537</strong></td><td><span style="background:var(--bg-elevated); color:var(--text-main); border:1px solid var(--border-strong); padding:3px 8px; border-radius:4px; font-weight:700; font-size:11px;">0/1</span></td><td style="text-align:right;"><button class="btn-action btn-secondary" style="padding: 6px 12px; font-size:10px;">Visualizar</button></td></tr>
+                        <tr><td><strong>..Gabz</strong></td><td><span style="background:var(--bg-elevated); color:var(--text-main); border:1px solid var(--border-strong); padding:3px 8px; border-radius:4px; font-weight:700; font-size:11px;">1/1</span></td><td style="text-align:right;"><button class="btn-action btn-secondary" style="padding: 6px 12px; font-size:10px;">Visualizar</button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <main id="view-notif-aplicar" class="spa-view">
+            <div class="page-header">
+                <div class="section-title"><i class="fa-solid fa-plus"></i> Aplicar Notificação</div>
+                <button class="btn-action btn-secondary" onclick="switchTab('view-notificacoes')"><i class="fa-solid fa-reply"></i> Voltar</button>
+            </div>
+            <div class="card">
+                <form onsubmit="event.preventDefault(); alert('Notificação Salva!'); switchTab('view-notificacoes');">
+                    <div class="form-group"><label>Aplicador *</label><input type="text" id="formAplicador" value="Pachieri" readonly style="opacity:0.6;"></div>
+                    <div class="form-group" style="display:flex; gap:10px; align-items:flex-end;">
+                        <div style="flex:1;"><label>Nick do Envolvido *</label><input type="text" placeholder="Digite o nick do envolvido e clique em Verificar"></div>
+                        <button type="button" class="btn-action" style="padding: 13px 20px;"><i class="fa-solid fa-eye"></i> Verificar</button>
+                    </div>
+                    <div class="form-group"><label>Observação/Motivo *</label><textarea rows="4" placeholder="Digite a sua observação"></textarea></div>
+                    <div style="text-align:center;"><button type="submit" class="btn-action"><i class="fa-solid fa-save"></i> Salvar</button></div>
+                </form>
+            </div>
+        </main>
+
+        <!-- =====================================
+             4. JUSTIFICATIVAS & ENVIAR
+             ===================================== -->
+        <main id="view-justificativas" class="spa-view">
+            <div class="page-header">
+                <div class="section-title"><i class="fa-solid fa-clipboard-check"></i> Justificativas</div>
+                <button class="btn-action" onclick="switchTab('view-justif-enviar')"><i class="fa-solid fa-plus"></i> Enviar Justificativa</button>
+            </div>
+            <div class="card" style="text-align:center; padding: 50px;">
+                <i class="fa-solid fa-inbox" style="font-size:40px; color:var(--border-strong); margin-bottom:15px;"></i>
+                <p style="color:var(--text-muted); font-size:14px;">Nenhuma justificativa aguardando análise no momento.</p>
+            </div>
+        </main>
+
+        <main id="view-justif-enviar" class="spa-view">
+            <div class="page-header">
+                <div class="section-title"><i class="fa-solid fa-plus"></i> Enviar Justificativa</div>
+                <button class="btn-action btn-secondary" onclick="switchTab('view-justificativas')"><i class="fa-solid fa-reply"></i> Voltar</button>
+            </div>
+            <div class="card">
+                <form onsubmit="event.preventDefault(); alert('Justificativa Enviada!'); switchTab('view-justificativas');">
+                    <div class="form-group"><label>Motivo Geral</label><select><option>Falta em Reunião</option><option>Atraso de Relatório</option><option>Ausência Excepcional</option></select></div>
+                    <div class="form-group"><label>Explicação Detalhada</label><textarea rows="4" placeholder="Explique os detalhes de sua justificativa..."></textarea></div>
+                    <div style="text-align:center;"><button type="submit" class="btn-action"><i class="fa-solid fa-paper-plane"></i> Enviar</button></div>
+                </form>
+            </div>
+        </main>
+
+        <!-- =====================================
+             5. DOCUMENTOS (Cards Limpos)
+             ===================================== -->
+        <main id="view-documentos" class="spa-view">
+            <div class="section-header">
+                <div class="section-title"><i class="fa-solid fa-file-lines"></i> Acervo de Documentos</div>
+            </div>
+            <div class="doc-grid">
+                <div class="doc-card" onclick="alert('Lendo Documento: [Sp] Regimento Interno')">
+                    <div class="doc-preview"><i class="fa-regular fa-file-lines"></i></div>
+                    <h4>[Sp] Regimento Interno</h4>
+                </div>
+                <div class="doc-card" onclick="alert('Lendo Documento: Sistema de Patrocinadores')">
+                    <div class="doc-preview"><i class="fa-regular fa-file-lines"></i></div>
+                    <h4>Sistema de Patrocinadores</h4>
+                </div>
+                <div class="doc-card" onclick="alert('Lendo Documento: Cartilha de Formação')">
+                    <div class="doc-preview"><i class="fa-regular fa-file-lines"></i></div>
+                    <h4>Cartilha de Formação</h4>
+                </div>
+            </div>
+        </main>
+
+        <!-- =====================================
+             6. FERRAMENTAS / CENTRAL
+             ===================================== -->
+        <main id="view-central" class="spa-view">
+            <div class="section-header">
+                <div class="section-title"><i class="fa-solid fa-shield"></i> Ferramentas da Divisão</div>
+            </div>
+            <div class="tools-grid" id="tools-render">
+                <!-- Injetado dinamicamente via JS com base no cargo -->
+            </div>
+        </main>
+
+        <!-- VIEWS INTERNAS DAS FERRAMENTAS -->
+        <main id="view-tool-metas" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-bullseye"></i> Consulta de Metas</div><button class="btn-action btn-secondary" onclick="switchTab('view-central')"><i class="fa-solid fa-reply"></i> Voltar</button></div><div class="card"><p style="color:var(--text-muted)">Interface de metas e pódio carregaria aqui.</p></div></main>
+        
+        <main id="view-tool-licencas" class="spa-view">
+            <div class="page-header"><div class="section-title"><i class="fa-solid fa-calculator"></i> Cálculo de Licenças</div><button class="btn-action btn-secondary" onclick="switchTab('view-central')"><i class="fa-solid fa-reply"></i> Voltar</button></div>
+            <div class="card">
+                <div style="display:flex; gap:20px; margin-bottom:15px;">
+                    <div class="form-group" style="flex:1;"><label>Último Login Oficial</label><input type="date"></div>
+                    <div class="form-group" style="flex:1;"><label>Data da Consulta</label><input type="date"></div>
+                </div>
+                <div style="display:flex; gap:20px; margin-bottom:20px;">
+                    <div class="form-group" style="flex:1;"><label>Início da Licença 1</label><input type="date"></div>
+                    <div class="form-group" style="flex:1;"><label>Dias de Licença</label><input type="number" placeholder="Ex: 7"></div>
+                </div>
+                <button class="btn-action"><i class="fa-solid fa-sync"></i> Processar Cálculo Definitivo</button>
+            </div>
+        </main>
+        
+        <main id="view-tool-feedbacks" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-comment-dots"></i> Painel de Feedbacks</div><button class="btn-action btn-secondary" onclick="switchTab('view-central')"><i class="fa-solid fa-reply"></i> Voltar</button></div><div class="card"><p style="color:var(--text-muted)">Iframe do Painel de Feedbacks carregaria aqui.</p></div></main>
+        <main id="view-tool-grupos" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-users-rectangle"></i> Controle de Grupos</div><button class="btn-action btn-secondary" onclick="switchTab('view-central')"><i class="fa-solid fa-reply"></i> Voltar</button></div><div class="card"><p style="color:var(--text-muted)">Controle de relatórios de grupos carregaria aqui.</p></div></main>
+        <main id="view-tool-estrelas" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-star"></i> Estrelas Promocionais</div><button class="btn-action btn-secondary" onclick="switchTab('view-central')"><i class="fa-solid fa-reply"></i> Voltar</button></div><div class="card"><p style="color:var(--text-muted)">Tabela de gerenciamento de estrelas carregaria aqui.</p></div></main>
+
+        <!-- =====================================
+             7. VIEWS DE GESTÃO LIDERANÇA
+             ===================================== -->
+        <!-- Gestão de Membros -->
+        <main id="view-admin-membros" class="spa-view">
+            <div class="page-header"><div class="section-title"><i class="fa-solid fa-user-gear"></i> GESTÃO DE MEMBROS</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-house"></i> Home</button></div>
+            <div class="card">
+                <form onsubmit="event.preventDefault();">
+                    <div class="form-row">
+                        <div class="form-group"><label>Nickname</label><input type="text" placeholder="Digite o nick do usuário"></div>
+                        <div class="form-group">
+                            <label>Função</label>
+                            <select>
+                                <option>Líder</option><option>Vice-Líder</option><option>Sub-Líder</option>
+                                <option>Supervisor</option><option>Auxiliar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Data e Hora de Ingresso</label><input type="datetime-local"></div>
+                    <div style="text-align:center;"><button type="submit" class="btn-action"><i class="fa-solid fa-save"></i> Salvar</button></div>
+                </form>
+            </div>
+        </main>
+        
+        <!-- Publicar Feed -->
+        <main id="view-admin-publicar" class="spa-view">
+            <div class="page-header"><div class="section-title"><i class="fa-solid fa-newspaper"></i> Publicação</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-house"></i> Home</button></div>
+            <div class="card">
+                <form onsubmit="event.preventDefault();">
+                    <div class="form-group"><label>Título</label><input type="text" placeholder="Digite o título"></div>
+                    <div class="form-group"><label>Conteúdo</label><textarea rows="5"></textarea></div>
+                    <div class="form-group"><label>Imagem em Destaque</label><input type="text" placeholder="Link da imagem"></div>
+                    <div class="form-group"><label>Status</label><select><option>Visível</option><option>Oculto</option></select></div>
+                    <div style="text-align:center;"><button type="submit" class="btn-action"><i class="fa-solid fa-save"></i> Salvar</button></div>
+                </form>
+            </div>
+        </main>
+
+        <!-- Portarias -->
+        <main id="view-admin-portarias" class="spa-view">
+            <div class="page-header"><div class="section-title"><i class="fa-solid fa-file-contract"></i> Portaria</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-house"></i> Home</button></div>
+            <div class="card">
+                <form onsubmit="event.preventDefault();">
+                    <div class="form-group"><label>Titulo</label><input type="text" value="PORTARIA Nº 166, DE 10 DE MAIO DE 2026"></div>
+                    <div class="form-group"><label>Conteúdo (Editor)</label><textarea rows="8">O LÍDER DOS SUPERVISORES... Resolve: ...</textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Status*</label><select><option>Visível</option><option>Oculto</option></select></div>
+                        <div class="form-group"><label>Data</label><input type="datetime-local" value="2026-05-10T19:18"></div>
+                    </div>
+                    <div style="text-align:center;"><button type="submit" class="btn-action"><i class="fa-solid fa-save"></i> Salvar</button></div>
+                </form>
+            </div>
+        </main>
+
+        <!-- Transparências -->
+        <main id="view-admin-transparencia" class="spa-view">
+            <div class="page-header"><div class="section-title"><i class="fa-solid fa-magnifying-glass-chart"></i> Transparência</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-house"></i> Home</button></div>
+            <div class="card" style="padding:0; overflow:hidden;">
+                <table>
+                    <thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>Ações</th></tr></thead>
+                    <tbody><tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Nenhuma transparência encontrada</td></tr></tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Outras Ferramentas (Placeholders Estruturais) -->
+        <main id="view-admin-canvas" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-palette"></i> Canvas</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-reply"></i></button></div><div class="card"><p style="color:var(--text-muted)">Editor Canvas carregaria aqui.</p></div></main>
+        <main id="view-admin-menus" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-bars-staggered"></i> Configuração de Menus</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-reply"></i></button></div><div class="card"><p style="color:var(--text-muted)">Construtor de menus carregaria aqui.</p></div></main>
+        <main id="view-admin-massa" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-layer-group"></i> Atividade em Massa</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-reply"></i></button></div><div class="card"><p style="color:var(--text-muted)">Ações em lote carregariam aqui.</p></div></main>
+        <main id="view-admin-docs" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-file-signature"></i> Editor de Documentos</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-reply"></i></button></div><div class="card"><p style="color:var(--text-muted)">Criação e edição do regimento/cartilha.</p></div></main>
+    </div>
+
+    <!-- =====================================
+         DOCKS DE NAVEGAÇÃO DINÂMICOS
+         ===================================== -->
+    <nav class="dock-container" id="dockNav">
+        <!-- Injetado via JS -->
+    </nav>
+
+    <!-- =====================================
+         CENTRO DE COMANDO (CONFIGURAÇÕES)
+         ===================================== -->
+    <div class="cmd-overlay" id="cmdPanel">
+        <div class="cmd-panel" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-family:'Rajdhani'; font-size:24px; font-weight:800; text-transform:uppercase;">Configuração da Divisão</h2>
+                <button style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;" onclick="toggleCommand()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.5;">Acesso às páginas de configurações da Liderança.</p>
+            
+            <div class="cmd-grid">
+                <div class="cmd-tile" onclick="cmdToView('view-admin-membros')"><i class="fa-solid fa-user-gear"></i><span>GESTÃO DE MEMBROS</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-publicar')"><i class="fa-solid fa-newspaper"></i><span>Publicação</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-docs')"><i class="fa-solid fa-file-signature"></i><span>Documento</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-portarias')"><i class="fa-solid fa-file-contract"></i><span>Portaria</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-canvas')"><i class="fa-solid fa-palette"></i><span>Canvas</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-transparencia')"><i class="fa-solid fa-magnifying-glass-chart"></i><span>Transparência</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-menus')"><i class="fa-solid fa-bars-progress"></i><span>Menu</span></div>
+                <div class="cmd-tile" onclick="cmdToView('view-admin-massa')"><i class="fa-solid fa-layer-group"></i><span>Atividade em Massa</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <script src="js/ui-tools.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/modulo-metas.js"></script>
+  <script src="js/modulo-estrelas.js"></script>
+  <script src="js/modulo-admin.js"></script>
+  <script src="js/modulo-correcoes.js"></script>
+  <script src="js/modulo-revisao.js"></script>
+  <script src="js/modulo-requerimentos.js"></script>
+  <script src="js/auth.js"></script>
+
+</body>
+</html>
