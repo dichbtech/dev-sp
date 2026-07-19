@@ -404,3 +404,15 @@ window.setupAllDraggables = function() {
         }, { passive: false });
     });
 }
+window.toggleCommand = function() {
+    const overlay = document.getElementById('cmdPanel');
+    if(overlay) {
+        if(overlay.classList.contains('open')) overlay.classList.remove('open');
+        else overlay.classList.add('open');
+    }
+};
+
+window.cmdToView = function(viewId) {
+    window.toggleCommand();
+    window.switchSection(viewId);
+};

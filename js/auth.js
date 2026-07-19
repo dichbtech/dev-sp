@@ -45,11 +45,10 @@ window.liberarPainel = function() {
     const loggedRoleEl = document.getElementById('loggedRole');
     if(loggedRoleEl) loggedRoleEl.innerText = window.nivelUsuarioGlobal;
     
-    const loggedAvatarEl = document.getElementById('loggedAvatarImg');
+    const loggedAvatarEl = document.getElementById('loggedAvatar');
     if(loggedAvatarEl) loggedAvatarEl.src = avatarUrl;
     
-    const hubAvatarEl = document.getElementById('hub-avatar');
-    if(hubAvatarEl) hubAvatarEl.src = avatarUrl;
+    
     
     const userProfileEl = document.getElementById('userProfile');
     if(userProfileEl) userProfileEl.style.display = 'flex';
@@ -114,15 +113,7 @@ window.gerarMenusPorNivel = function() {
             <div class="dock-separator"></div>
             <div class="dock-item" data-label="Revisão" onclick="window.switchSection('modulo-revisao', this)"><i class="fas fa-search"></i></div>
             <div class="dock-item" data-label="Estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i></div>
-            <div class="dock-item" data-label="Admin" onclick="window.switchSection('modulo-admin', this)"><i class="fas fa-cog"></i></div>
-        `;
-    }
-    
-    // Command Overlay button
-    if (ehSuperLideranca) {
-        dockHtml += `
-            <div class="dock-separator"></div>
-            <div class="dock-item dock-command" data-label="Comando" onclick="window.toggleLideranca()"><i class="fas fa-bolt"></i></div>
+            <div class="dock-item dock-command" data-label="Comando" onclick="window.toggleCommand()"><i class="fas fa-bolt"></i></div>
         `;
     }
     
@@ -133,10 +124,10 @@ window.gerarMenusPorNivel = function() {
     
     if (cmd && ehSuperLideranca) {
         cmd.innerHTML = `
-            <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleLideranca();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleLideranca();"><i class="fas fa-clipboard-list"></i><span>Logs Gerais</span></div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-patrocinadores'); window.toggleLideranca();"><i class="fas fa-crown"></i><span>Patrocinadores</span></div>
-            <div class="cmd-tile" onclick="window.switchSection('modulo-eventos'); window.toggleLideranca();"><i class="fas fa-calendar-alt"></i><span>Eventos</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleCommand();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleCommand();"><i class="fas fa-clipboard-list"></i><span>Logs Gerais</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-patrocinadores'); window.toggleCommand();"><i class="fas fa-crown"></i><span>Patrocinadores</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-eventos'); window.toggleCommand();"><i class="fas fa-calendar-alt"></i><span>Eventos</span></div>
         `;
     }
 }
