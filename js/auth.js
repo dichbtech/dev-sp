@@ -270,9 +270,14 @@ window.initAvatarScene = function() {
     setTimeout(() => {
         av.style.right = '20px'; // Caminha pro centro do espaço
         setTimeout(() => {
-            // direction 4 = Vira para a tela/frente
-            av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=4&head_direction=4&gesture=sml&size=l`;
-            bubble.innerHTML = `Olá, seja bem-vindo aos Supervisores! Eu sou a Líder de vocês, ${nickLider}. #SAGE`;
+            // direction 3 = Frente, gesture sml = Sorrindo, action wav = Acenando
+            av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=3&head_direction=3&gesture=sml&size=l`;
+            
+            // Define o pronome baseado no nick (Adicione outros se necessário)
+            const nicksFemininos = ['pachieri', 'luiza41418', 'syby'];
+            const pronome = nicksFemininos.includes(nickLider.toLowerCase()) ? 'a' : 'o';
+            
+            bubble.innerHTML = `Olá, seja bem-vindo aos Supervisores! Eu sou ${pronome} Líder de vocês, ${nickLider}. #SAGE`;
             bubble.classList.add('visible');
         }, 2000); 
     }, 500);
