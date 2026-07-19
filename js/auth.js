@@ -272,7 +272,7 @@ window.initAvatarScene = function() {
         setTimeout(() => {
             // direction 4 = Vira para a tela/frente
             av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=4&head_direction=4&gesture=sml&size=l`;
-            bubble.innerHTML = `Olá, seja bem-vindo aos Supervisores! Eu sou a Liderança de vocês, ${nickLider}. #SAGE`;
+            bubble.innerHTML = `Olá, seja bem-vindo aos Supervisores! Eu sou a Líder de vocês, ${nickLider}. #SAGE`;
             bubble.classList.add('visible');
         }, 2000); 
     }, 500);

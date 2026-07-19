@@ -399,7 +399,7 @@
 
         <main id="modulo-grupos" class="spa-view card">
 
-            <h3 style="margin-bottom: 15px;"><i class="fas fa-users"></i> Controle de Grupos</h3><div style="width: 100%; height: calc(100vh - 230px); background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://script.google.com/macros/s/AKfycbxRpzWNrcjbQMV4cgYpAUTPQVBhB2he6ft2Kvk0EA7eXdQuLzq-NUmu_24lP9wQokfP/exec" style="width: 100%; height: 100%; border: none;"></iframe></div>
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-users"></i> Controle de Grupos</h3><div style="width: 100%; height: 80vh; margin-bottom: 80px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://script.google.com/macros/s/AKfycbxRpzWNrcjbQMV4cgYpAUTPQVBhB2he6ft2Kvk0EA7eXdQuLzq-NUmu_24lP9wQokfP/exec" style="width: 100%; height: 100%; border: none;"></iframe></div>
 
         </main>
 
@@ -447,7 +447,7 @@
 
         <main id="modulo-feedbacks" class="spa-view card">
 
-            <h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3><div style="width: 100%; height: 75vh; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://dichbtech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe></div>
+            <h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3><div style="width: 100%; height: 80vh; margin-bottom: 80px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://dichbtech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe></div>
 
         </main>
 
@@ -469,245 +469,179 @@
 
 
 
-                <main class="spa-view card" id="modulo-requerimentos"><style>
-
+                <main class="spa-view card" id="modulo-requerimentos">
+            <style>
                 .form-tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
-
                 .form-tab-content.active { display: block; }
-
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-            select option { color: #000; background: #fff; }
+                select option { color: #000; background: #fff; }
             </style>
-
             <h3><i class="fas fa-file-signature"></i> Formulário de Atividades</h3>
-
             <p class="subtext" style="margin-bottom: 25px;">Preencha as informações abaixo com atenção. Seus dados (Nick e Cargo) são incluídos automaticamente.</p>
 
-
-
             <div class="tabs-container" id="tabs-formulario" style="margin-bottom: 30px;">
-
                 <button class="btn-tab active" data-target="tab-relatorios" onclick="window.switchTabRequerimentos('tab-relatorios', this)">Relatórios</button>
-
                 <button class="btn-tab" data-target="tab-soldados" onclick="window.switchTabRequerimentos('tab-soldados', this)">Soldados</button>
-
                 <button class="btn-tab" data-target="tab-grupos" onclick="window.switchTabRequerimentos('tab-grupos', this)">Grupos</button>
-
                 <button class="btn-tab" data-target="tab-convites" onclick="window.switchTabRequerimentos('tab-convites', this)">Convites</button>
-
                 <button class="btn-tab" data-target="tab-ppp" onclick="window.switchTabRequerimentos('tab-ppp', this)">PPP</button>
-
             </div>
-
-
 
             <form id="activityFormRequerimentos" onsubmit="window.submitFormRequerimentos(event)" style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
-
                 
-
                 <!-- ABA: Relatórios -->
-
                 <div id="tab-relatorios" class="form-tab-content active">
-
                     <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-file-alt"></i> Relatórios (Auxiliares)</h4>
-
                     
-
                     <div class="input-group" style="margin-bottom: 20px;">
-
                         <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório (Google Docs)</label>
-
                         <div class="input-block">
-
                             <i class="fas fa-link"></i>
-
                             <input type="url" name="relatorio_link" placeholder="https://docs.google.com/..." id="relatorio_link" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-
                         </div>
-
                     </div>
-
-
 
                     <div class="input-group" style="margin-bottom: 20px;">
-
                         <label class="tech-label" style="display:block; margin-bottom:5px;">Natureza do Relatório</label>
-
                         <div class="input-block">
-
                             <i class="fas fa-list"></i>
-
                             <select name="relatorio_natureza" id="relatorio_natureza" onchange="window.handleNaturezaChangeRequerimentos()" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-
-                                <option value="" disabled selected style="color:#000;">Selecione a natureza...</option>
-
-                                <option value="Grupo de Controle" style="color:#000;">Grupo de Controle</option>
-
-                                <option value="Grupo de Promoções" style="color:#000;">Grupo de Promoções</option>
-
+                                <option value="" disabled selected>Selecione a natureza...</option>
+                                <option value="Grupo de Controle">Grupo de Controle</option>
+                                <option value="Grupo de Promoções">Grupo de Promoções</option>
                             </select>
-
                         </div>
-
                     </div>
-
-
 
                     <div class="input-group" id="container_publico_alvo" style="display: none; margin-bottom: 20px;">
-
                         <label class="tech-label" style="display:block; margin-bottom:5px;">Público-Alvo</label>
-
                         <div class="input-block">
-
                             <i class="fas fa-users"></i>
-
                             <select name="relatorio_publico_alvo" id="relatorio_publico_alvo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-
-                                <option value="" disabled selected style="color:#000;">Selecione o público-alvo...</option>
-
-                                <option value="Corpo Executivo" style="color:#000;">Corpo Executivo</option>
-
-                                <option value="Cabos até Subtenentes" style="color:#000;">Cabos até Subtenentes</option>
-
-                                <option value="Aspirantes a Coronéis" style="color:#000;">Aspirantes a Coronéis</option>
-
+                                <option value="" disabled selected>Selecione o público-alvo...</option>
+                                <option value="Corpo Executivo">Corpo Executivo</option>
+                                <option value="Cabos até Subtenentes">Cabos até Subtenentes</option>
+                                <option value="Aspirantes a Coronéis">Aspirantes a Coronéis</option>
                             </select>
-
                         </div>
-
                     </div>
-
-
 
                     <div class="input-group" id="container_data_referencia" style="display: none; margin-bottom: 20px;">
-
                         <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Referência</label>
-
                         <div class="input-block">
-
                             <i class="far fa-calendar-alt"></i>
+                            <input type="date" name="relatorio_data_referencia" id="relatorio_data_referencia" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                </div>
 
-                            <input type="date" name="relatorio_data_referencia" id="relatorio_data_referencia" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:\'Rajdhani\', sans-serif;">
-</div>
-</div>
-                    <!-- ABA: Soldados -->
-                    <div id="tab-soldados" class="form-tab-content">
-                        <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Soldados</h4>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório / Print (Soldados)</label>
-                            <div class="input-block">
-                                <i class="fas fa-link"></i>
-                                <input type="url" name="soldados_link" id="soldados_link" placeholder="https://..." style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
+                <!-- ABA: Soldados -->
+                <div id="tab-soldados" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Soldados</h4>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório / Print (Soldados)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="soldados_link" id="soldados_link" placeholder="https://..." style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                         </div>
                     </div>
+                </div>
 
-                    <!-- ABA: Grupos -->
-                    <div id="tab-grupos" class="form-tab-content">
-                        <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-users"></i> Grupos de Controle</h4>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório / Print (Grupos)</label>
-                            <div class="input-block">
-                                <i class="fas fa-link"></i>
-                                <input type="url" name="grupos_link" id="grupos_link" placeholder="https://..." style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
+                <!-- ABA: Grupos -->
+                <div id="tab-grupos" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-users"></i> Grupos de Controle</h4>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório / Print (Grupos)</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="grupos_link" id="grupos_link" placeholder="https://..." style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                         </div>
                     </div>
+                </div>
 
-                    <!-- ABA: Convites -->
-                    <div id="tab-convites" class="form-tab-content">
-                        <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> Convites</h4>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Convidado</label>
+                <!-- ABA: Convites -->
+                <div id="tab-convites" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> Convites</h4>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Convidado</label>
+                        <div class="input-block">
+                            <i class="fas fa-user-tag"></i>
+                            <input type="text" name="convite_nick" id="convite_nick" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap: 15px; margin-bottom:20px; flex-wrap:wrap;">
+                        <div class="input-group" style="flex:1;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Início</label>
                             <div class="input-block">
-                                <i class="fas fa-user-tag"></i>
-                                <input type="text" name="convite_nick" id="convite_nick" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <i class="far fa-calendar-alt"></i>
+                                <input type="date" name="convite_data_inicio" id="convite_data_inicio" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                             </div>
                         </div>
-                        <div style="display:flex; gap: 15px; margin-bottom:20px; flex-wrap:wrap;">
-                            <div class="input-group" style="flex:1;">
-                                <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Início</label>
-                                <div class="input-block">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <input type="date" name="convite_data_inicio" id="convite_data_inicio" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                                </div>
-                            </div>
-                            <div class="input-group" style="flex:1;">
-                                <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Fim</label>
-                                <div class="input-block">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <input type="date" name="convite_data_fim" id="convite_data_fim" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Provas</label>
+                        <div class="input-group" style="flex:1;">
+                            <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Fim</label>
                             <div class="input-block">
-                                <i class="fas fa-link"></i>
-                                <input type="url" name="convite_provas" id="convite_provas" placeholder="Links (Imgur, Lightshot...)" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Status do Convite</label>
-                            <div class="input-block">
-                                <i class="fas fa-tasks"></i>
-                                <select name="convite_status" id="convite_status" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                                    <option value="" disabled selected>Selecione...</option>
-                                    <option value="Aprovado">Aprovado</option>
-                                    <option value="Reprovado">Reprovado</option>
-                                </select>
+                                <i class="far fa-calendar-alt"></i>
+                                <input type="date" name="convite_data_fim" id="convite_data_fim" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                             </div>
                         </div>
                     </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Provas</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="convite_provas" id="convite_provas" placeholder="Links (Imgur, Lightshot...)" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Status do Convite</label>
+                        <div class="input-block">
+                            <i class="fas fa-tasks"></i>
+                            <select name="convite_status" id="convite_status" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                                <option value="" disabled selected>Selecione...</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Negado">Negado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- ABA: PPP -->
-                    <div id="tab-ppp" class="form-tab-content">
-                        <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Fiscalização Pós-Promoção</h4>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promovido</label>
-                            <div class="input-block">
-                                <i class="fas fa-user"></i>
-                                <input type="text" name="ppp_promovido" id="ppp_promovido" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promotor</label>
-                            <div class="input-block">
-                                <i class="fas fa-user-shield"></i>
-                                <input type="text" name="ppp_promotor" id="ppp_promotor" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">ID da Promoção</label>
-                            <div class="input-block">
-                                <i class="fas fa-hashtag"></i>
-                                <input type="text" name="ppp_id" id="ppp_id" placeholder="Ex: 502" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Provas</label>
-                            <div class="input-block">
-                                <i class="fas fa-link"></i>
-                                <input type="url" name="ppp_provas" id="ppp_provas" placeholder="Links (Imgur, Lightshot...)" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
+                <!-- ABA: PPP -->
+                <div id="tab-ppp" class="form-tab-content">
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Fiscalização Pós-Promoção</h4>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promovido</label>
+                        <div class="input-block">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="ppp_promovido" id="ppp_promovido" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                         </div>
                     </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 20px;">
-                            <label class="tech-label" style="display:block; margin-bottom:5px;">Patente Adquirida</label>
-                            <div class="input-block">
-                                <i class="fas fa-medal"></i>
-                                <input type="text" name="ppp_patente" id="ppp_patente" placeholder="Ex: Sargento" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
-                            </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Nick do Promotor</label>
+                        <div class="input-block">
+                            <i class="fas fa-user-shield"></i>
+                            <input type="text" name="ppp_promotor" id="ppp_promotor" placeholder="Nick Habbo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
                         </div>
                     </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">ID da Promoção</label>
+                        <div class="input-block">
+                            <i class="fas fa-hashtag"></i>
+                            <input type="text" name="ppp_id" id="ppp_id" placeholder="Ex: 502" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link de Provas</label>
+                        <div class="input-block">
+                            <i class="fas fa-link"></i>
+                            <input type="url" name="ppp_provas" id="ppp_provas" placeholder="Links (Imgur, Lightshot...)" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+                        </div>
+                    </div>
+                </div>
 
-                    <div style="text-align:center; margin-top:20px;">
-                        <button type="submit" class="btn-tech btn-save" style="width:100%; padding: 15px;"><i class="fas fa-paper-plane"></i> Enviar Formulário</button>
-                    </div>
-                </form>
-            </div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button type="submit" class="btn-tech btn-save" style="width:100%; padding: 15px;"><i class="fas fa-paper-plane"></i> Enviar Formulário</button>
+                </div>
+            </form>
         </main>
 
 
