@@ -53,6 +53,26 @@
             height: 100% !important;
             width: 100% !important;
         }
+
+        /* Estilos do Carrossel de Banners */
+        .banner-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 0.8s ease-in-out;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .banner-slide img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+        }
+        .banner-slide.active { opacity: 1; z-index: 1; }
+        
+        /* Layout Grid para Avisos e Acompanhamentos */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
     </style>
 
 
@@ -429,7 +449,27 @@
 
 
                 <main class="spa-view card" id="modulo-estrelas"><style>#modulo-estrelas { width: 100%; } .admin-table-wrapper { padding: 0; }select option { color: #000; background: #fff; }
-            </style><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; flex-wrap:wrap; gap:15px;"><div style="display:flex; align-items:center;"><h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3><button id="btn-dashboard-correcao" class="btn-tech" style="display:none; padding: 6px 12px; margin-left: 15px; font-size: 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'" title="Painel de Correção de Ciclos"><i class="fas fa-tachometer-alt"></i></button><button id="btn-limpar-rank" class="btn-tech" style="display:none; margin-left: 10px; background:#ff9800; border-color:#ff9800; color:#fff; padding: 6px 12px; font-size: 15px;" onclick="window.abrirModalLimparRank()"><i class="fas fa-user-slash"></i> Limpar Rank</button></div></div><p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p><div class="row" style="gap: 20px; align-items: flex-start;"><div style="flex: 2; min-width: 300px;"><h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-list"></i> Ranking e Status Atual</h4><div class="admin-table-wrapper" style="max-height: 400px; overflow-y: auto;"><table class="admin-table" id="tb-militares-estrelas"><thead><tr><th>Policial</th><th style="text-align:center;">Promoções Validadas</th><th>Estrelas</th><th style="text-align:center;">Status</th></tr></thead><tbody></tbody></table></div></div><div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;"><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);"><h4 style="color:var(--sup-neon); margin-bottom:10px; font-size:15px;"><i class="fas fa-layer-group"></i> Validação em Lote</h4><label class="tech-label">Data das Promoções</label><div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="lote-data"></div><label class="tech-label">IDs Excluídos / Incorretos</label><div class="input-block"><i class="fas fa-ban"></i><input type="text" id="lote-excluidos" placeholder="Ex: 502, 508 (Opcional)"></div><button class="btn-tech" onclick="window.buscarPromocoesLote()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Buscar Promoções</button><div id="resultado-lote" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);"></div></div></div></div></main>
+        
+        /* Estilos do Carrossel de Banners */
+        .banner-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 0.8s ease-in-out;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .banner-slide img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+        }
+        .banner-slide.active { opacity: 1; z-index: 1; }
+        
+        /* Layout Grid para Avisos e Acompanhamentos */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+    </style><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; flex-wrap:wrap; gap:15px;"><div style="display:flex; align-items:center;"><h3 style="margin:0;"><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3><button id="btn-dashboard-correcao" class="btn-tech" style="display:none; padding: 6px 12px; margin-left: 15px; font-size: 15px;" onclick="document.getElementById('modal-correcao-lote').style.display='flex'" title="Painel de Correção de Ciclos"><i class="fas fa-tachometer-alt"></i></button><button id="btn-limpar-rank" class="btn-tech" style="display:none; margin-left: 10px; background:#ff9800; border-color:#ff9800; color:#fff; padding: 6px 12px; font-size: 15px;" onclick="window.abrirModalLimparRank()"><i class="fas fa-user-slash"></i> Limpar Rank</button></div></div><p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p><div class="row" style="gap: 20px; align-items: flex-start;"><div style="flex: 2; min-width: 300px;"><h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-list"></i> Ranking e Status Atual</h4><div class="admin-table-wrapper" style="max-height: 400px; overflow-y: auto;"><table class="admin-table" id="tb-militares-estrelas"><thead><tr><th>Policial</th><th style="text-align:center;">Promoções Validadas</th><th>Estrelas</th><th style="text-align:center;">Status</th></tr></thead><tbody></tbody></table></div></div><div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;"><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);"><h4 style="color:var(--sup-neon); margin-bottom:10px; font-size:15px;"><i class="fas fa-layer-group"></i> Validação em Lote</h4><label class="tech-label">Data das Promoções</label><div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="lote-data"></div><label class="tech-label">IDs Excluídos / Incorretos</label><div class="input-block"><i class="fas fa-ban"></i><input type="text" id="lote-excluidos" placeholder="Ex: 502, 508 (Opcional)"></div><button class="btn-tech" onclick="window.buscarPromocoesLote()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Buscar Promoções</button><div id="resultado-lote" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);"></div></div></div></div></main>
 
 
 
@@ -511,7 +551,27 @@
                 .form-tab-content.active { display: block; }
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 select option { color: #000; background: #fff; }
-            </style>
+        
+        /* Estilos do Carrossel de Banners */
+        .banner-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 0.8s ease-in-out;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .banner-slide img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+        }
+        .banner-slide.active { opacity: 1; z-index: 1; }
+        
+        /* Layout Grid para Avisos e Acompanhamentos */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+    </style>
             <h3><i class="fas fa-file-signature"></i> Formulário de Atividades</h3>
             <p class="subtext" style="margin-bottom: 25px;">Preencha as informações abaixo com atenção. Seus dados (Nick e Cargo) são incluídos automaticamente.</p>
 
@@ -1235,7 +1295,7 @@
 
   
 
-  <script src="js/ui-tools.js?v=1784560103"></script>
+  <script src="js/ui-tools.js?v=1784561296"></script>
 
   <script src="js/firebase-init.js?v=2"></script>
 
@@ -1244,7 +1304,7 @@
   <script src="js/modulo-estrelas.js?v=1784522438"></script>
 
 
-  <script src="js/modulo-acompanhamentos.js?v=1784560780"></script>
+  <script src="js/modulo-acompanhamentos.js?v=1784561296"></script>
   <script src="js/modulo-avisos.js?v=3"></script>
   <script src="js/modulo-admin.js?v=1784559015"></script>
 
