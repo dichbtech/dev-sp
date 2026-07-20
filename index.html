@@ -1143,6 +1143,28 @@
 
         <main id="view-admin-docs" class="spa-view"><div class="page-header"><div class="section-title"><i class="fa-solid fa-file-signature"></i> Editor de Documentos</div><button class="btn-action btn-secondary" onclick="switchTab('view-home')"><i class="fa-solid fa-reply"></i></button></div><div class="card"><p style="color:var(--text-muted)">Criação e edição do regimento/cartilha.</p></div></main>
 
+        <!-- ==========================================
+             MÓDULO DE CONFIGURAÇÃO DE AVISOS
+             ========================================== -->
+        <main class="spa-view card" id="modulo-config-avisos">
+            <h3><i class="fas fa-edit"></i> Editor de Templates (Avisos)</h3>
+            <p class="subtext">Configure as mensagens padrão enviadas no Telegram.</p>
+            <div id="avisos-templates-container"></div>
+            <button class="btn-tech" style="width:100%; margin-top:20px;" onclick="window.salvarTemplatesAvisos()"><i class="fas fa-save"></i> Salvar Textos</button>
+        </main>
+
+        <!-- ==========================================
+             MÓDULO DE CONFIGURAÇÃO DE BANNERS
+             ========================================== -->
+        <main class="spa-view card" id="modulo-config-banners">
+            <h3><i class="fas fa-images"></i> Gerenciador de Banners da Home</h3>
+            <p class="subtext">Adicione links de imagens (Imgur, etc) para compor o carrossel.</p>
+            <div id="lista-banners-container"></div>
+            <button class="btn-tech" style="width:100%; margin-top:20px; background:rgba(255,255,255,0.1); border-color:#fff;" onclick="window.adicionarLinhaBanner()"><i class="fas fa-plus"></i> Adicionar Banner</button>
+            <button class="btn-tech" style="width:100%; margin-top:10px;" onclick="window.salvarBannersHome()"><i class="fas fa-save"></i> Salvar Carrossel</button>
+        </main>
+
+
     </div>
 
 
@@ -1223,6 +1245,9 @@
 
   <script src="js/modulo-estrelas.js?v=1784522438"></script>
 
+
+  <script src="js/modulo-acompanhamentos.js?v=3"></script>
+  <script src="js/modulo-avisos.js?v=3"></script>
   <script src="js/modulo-admin.js?v=1784559015"></script>
 
   <script src="js/modulo-correcoes.js?v=2"></script>
