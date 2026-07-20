@@ -173,57 +173,122 @@ function renderizarMembrosAtivos() {
         return;
     }
     
+    // Funo auxiliar para converter data da API para Date object
+    function parseDate(dataStr) {
+        if(!dataStr || !dataStr.includes('/')) return new Date(9999, 11, 31); // Se no tiver, joga pro final
+        try {
+            let dataS = dataStr.split(' ')[0];
+            let partes = dataS.split('/');
+            return new Date(partes[2], partes[1] - 1, partes[0]);
+        } catch(e) {
+            return new Date(9999, 11, 31);
+        }
+    }
+
+    let lideranca = [];
+    let auxiliares = [];
+    let supervisores = [];
+
+    const mapaFuncoes = {
+        "L.Sp": "Líder",
+        "V.Sp": "Vice-Líder",
+        "S.Sp": "Sub-Líder",
+        "A.Sp": "Auxiliar",
+        "Sp": "Supervisor"
+    };
+
     membros.forEach(m => {
         let rawNick = (m.Nickname || m.Nick || 'N/A').replace('[', '');
         let nickLower = rawNick.toLowerCase();
-        
         let dadosPatente = window.dadosGeraisRH.patentes.get(nickLower) || {};
         let patente = dadosPatente['Posto/Grad'] || 'Desconhecida';
-        
         let dadosLicenca = window.dadosGeraisRH.licencas.get(nickLower);
-        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dadosLicenca['Data de Início'] || '?'} a ${dadosLicenca['Data de Término'] || '?'}</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
-        
+        let dtI = dadosLicenca ? (dadosLicenca['Data de Início'] || dadosLicenca['Data Início'] || dadosLicenca['Início'] || dadosLicenca['Data Inicial'] || dadosLicenca['Data'] || '?') : '?';
+        let dtT = dadosLicenca ? (dadosLicenca['Data de Término'] || dadosLicenca['Data Término'] || dadosLicenca['Término'] || dadosLicenca['Data Final'] || dadosLicenca['Vencimento'] || '?') : '?';
+        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dtI} a ${dtT}</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
         let email = window.dadosGeraisRH.emails.get(nickLower) || '';
         let funcaoRaw = m.Cargos || m.Cargo || 'Sp';
-        
-        const mapaFuncoes = {
-            "L.Sp": "Líder",
-            "V.Sp": "Vice-Líder",
-            "S.Sp": "Sub-Líder",
-            "A.Sp": "Auxiliar",
-            "Sp": "Supervisor"
-        };
         let funcaoInterna = mapaFuncoes[funcaoRaw] || funcaoRaw;
         
         let dataAsc = m['Data e Hora'] || '';
         let textoDias = '';
+        let dataObj = parseDate(dataAsc);
         if(dataAsc.includes('/')) {
-            try {
-                let dataS = dataAsc.split(' ')[0];
-                let partes = dataS.split('/');
-                let dataObj = new Date(partes[2], partes[1] - 1, partes[0]);
-                let diffTime = Math.abs(new Date() - dataObj);
-                let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                textoDias = `<br><span style="font-size: 10px; color: #aaa;">Há ${diffDays} dias atrás</span>`;
-            } catch(e){}
+            let diffTime = Math.abs(new Date() - dataObj);
+            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            textoDias = `<br><span style="font-size: 10px; color: #aaa;">Há ${diffDays} dias atrás</span>`;
         }
 
+        let membroData = {
+            rawNick, nickLower, patente, status, email, funcaoInterna, dataAsc, textoDias, dataObj, funcaoRaw
+        };
+
+        if (['L.Sp', 'V.Sp', 'S.Sp'].includes(funcaoRaw) || ['Líder', 'Vice-Líder', 'Sub-Líder'].includes(funcaoInterna)) {
+            lideranca.push(membroData);
+        } else if (funcaoRaw === 'A.Sp' || funcaoInterna === 'Auxiliar') {
+            auxiliares.push(membroData);
+        } else {
+            supervisores.push(membroData);
+        }
+    });
+
+    const hierarquiaLider = {
+        'Líder': 1, 'L.Sp': 1,
+        'Vice-Líder': 2, 'V.Sp': 2,
+        'Sub-Líder': 3, 'S.Sp': 3
+    };
+
+    lideranca.sort((a, b) => {
+        let pA = hierarquiaLider[a.funcaoInterna] || hierarquiaLider[a.funcaoRaw] || 99;
+        let pB = hierarquiaLider[b.funcaoInterna] || hierarquiaLider[b.funcaoRaw] || 99;
+        if (pA !== pB) return pA - pB;
+        return a.dataObj - b.dataObj;
+    });
+
+    auxiliares.sort((a, b) => a.dataObj - b.dataObj);
+    supervisores.sort((a, b) => a.dataObj - b.dataObj);
+
+    function appendMembro(m, isLastInBlock = false) {
         let tr = document.createElement('tr');
+        if(isLastInBlock) {
+            tr.style.borderBottom = '3px solid rgba(255,255,255,0.1)';
+        }
         tr.innerHTML = `
-            <td><b>${rawNick}</b></td>
-            <td>${patente}</td>
-            <td>${funcaoInterna}</td>
-            <td>${dataAsc} ${textoDias}</td>
+            <td><b>${m.rawNick}</b></td>
+            <td>${m.patente}</td>
+            <td>${m.funcaoInterna}</td>
+            <td>${m.dataAsc} ${m.textoDias}</td>
             <td>
                 <div style="display:flex; align-items:center; gap:5px;">
-                    <input type="email" id="email-${nickLower}" class="form-input" style="padding:2px 5px; height:24px; font-size:12px; width:120px;" placeholder="Sem e-mail" value="${email}">
-                    <button onclick="salvarEmailRH('${nickLower}')" style="background:transparent; color:var(--accent); border:none; cursor:pointer;" title="Salvar Email"><i class="fas fa-edit"></i></button>
+                    <input type="email" id="email-${m.nickLower}" class="form-input" style="padding:2px 5px; height:24px; font-size:12px; width:120px;" placeholder="Sem e-mail" value="${m.email}">
+                    <button onclick="salvarEmailRH('${m.nickLower}')" style="background:transparent; color:var(--accent); border:none; cursor:pointer;" title="Salvar Email"><i class="fas fa-edit"></i></button>
                 </div>
             </td>
-            <td>${status}</td>
+            <td>${m.status}</td>
         `;
         tbody.appendChild(tr);
-    });
+    }
+
+    if(lideranca.length > 0) {
+        let sep = document.createElement('tr');
+        sep.innerHTML = '<td colspan="6" style="background:rgba(255,255,255,0.05); text-align:center; font-weight:bold; color:var(--accent); font-size:12px; padding:4px;">LIDERANÇA</td>';
+        tbody.appendChild(sep);
+        lideranca.forEach(m => appendMembro(m));
+    }
+    
+    if(auxiliares.length > 0) {
+        let sep = document.createElement('tr');
+        sep.innerHTML = '<td colspan="6" style="background:rgba(255,255,255,0.05); text-align:center; font-weight:bold; color:var(--accent); font-size:12px; padding:4px;">AUXILIARES</td>';
+        tbody.appendChild(sep);
+        auxiliares.forEach(m => appendMembro(m));
+    }
+    
+    if(supervisores.length > 0) {
+        let sep = document.createElement('tr');
+        sep.innerHTML = '<td colspan="6" style="background:rgba(255,255,255,0.05); text-align:center; font-weight:bold; color:var(--accent); font-size:12px; padding:4px;">SUPERVISORES</td>';
+        tbody.appendChild(sep);
+        supervisores.forEach(m => appendMembro(m));
+    }
 }
 
 window.salvarEmailRH = function(nickLower) {
@@ -411,7 +476,7 @@ function renderizarNotificacoes() {
     alertasContainer.innerHTML = '';
     
     if(notifs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma notificação registrada.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhuma notificação registrada.</td></tr>';
         return;
     }
     
@@ -448,13 +513,21 @@ function renderizarNotificacoes() {
         }
         
         let tr = document.createElement('tr');
-        if(isExpirada) tr.style.background = 'rgba(239, 68, 68, 0.1)';
+        
+        if (status.toLowerCase().includes('cancelad')) {
+            tr.style.background = 'rgba(239, 68, 68, 0.15)';
+        } else if (isExpirada) {
+            tr.style.background = 'rgba(239, 68, 68, 0.05)';
+        }
+        
+        let displayDias = !isNaN(dtNotif.getTime()) ? `${diffDias}/45` : '-';
         
         tr.innerHTML = `
             <td>#${n['# (ID)'] || n.ID || n['#'] || '-'}</td>
             <td>${n.Aplicador || '-'}</td>
             <td><b>${(n.Envolvido || '-').replace('[', '')}</b></td>
             <td>${n['Data e Hora'] || '-'}</td>
+            <td><span style="color:#aaa; font-size:12px;">${displayDias}</span></td>
             <td>
                 ${isExpirada ? '<span style="color:#ef4444; font-weight:bold; padding:2px 5px; background:rgba(239,68,68,0.2); border-radius:4px;"><i class="fas fa-exclamation-triangle"></i> EXPIRADA</span>' : status}
             </td>

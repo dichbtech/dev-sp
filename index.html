@@ -499,7 +499,7 @@
 
         <main id="modulo-logs-atividades" class="spa-view card">
 
-            <h3><i class="fas fa-eye"></i> Auditoria Global (Logs de Atividades)</h3><p class="subtext">Monitoramento em tempo real de todas as ações e cliques realizados na Central.</p><div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;"><table class="admin-table" id="tb-logs-atividades"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody></tbody></table></div>
+            <h3><i class="fas fa-eye"></i> Auditoria Global (Logs de Atividades)</h3><p class="subtext">Monitoramento em tempo real de todas as ações e cliques realizados na Central.</p><div class="admin-table-wrapper" style="overflow-x: auto;"><table class="admin-table" id="tb-logs-atividades"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody></tbody></table></div>
 
         </main>
 
@@ -507,7 +507,7 @@
 
         <main id="modulo-logs" class="spa-view card">
 
-            <h3><i class="fas fa-history"></i> Logs de Auditoria (Estrelas)</h3><p class="subtext">Acompanhamento das promoções e sanções validadas e registradas.</p><div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;"><table class="admin-table" id="tb-logs"><thead><tr><th>Data/Hora</th><th>Autor</th><th>Beneficiado</th><th>Ação</th><th>ID/Detalhes</th></tr></thead><tbody></tbody></table></div>
+            <h3><i class="fas fa-history"></i> Logs de Auditoria (Estrelas)</h3><p class="subtext">Acompanhamento das promoções e sanções validadas e registradas.</p><div class="admin-table-wrapper" style="overflow-x: auto;"><table class="admin-table" id="tb-logs"><thead><tr><th>Data/Hora</th><th>Autor</th><th>Beneficiado</th><th>Ação</th><th>ID/Detalhes</th></tr></thead><tbody></tbody></table></div>
 
         </main>
 
@@ -1260,7 +1260,7 @@
             </div>
 
             <h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-list"></i> Histórico de Verificações</h4>
-            <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+            <div class="admin-table-wrapper" style="overflow-x: auto;">
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -1298,7 +1298,7 @@
 
             <!-- View 1: Membros (SubLider+) -->
             <div id="rh-view-membros" class="rh-view">
-                <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                <div class="admin-table-wrapper" style="overflow-x: auto;">
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -1335,7 +1335,7 @@
                         <button class="btn-tech" onclick="window.cadastrarRetiradaManual()" style="padding:15px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;"><i class="fas fa-sign-out-alt"></i> Cadastrar</button>
                     </div>
                 </div>
-                <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                <div class="admin-table-wrapper" style="overflow-x: auto;">
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -1355,7 +1355,7 @@
             <!-- View 3: Notificacoes (SubLider+) -->
             <div id="rh-view-notificacoes" class="rh-view" style="display:none;">
                 <div id="rh-notificacoes-alertas"></div>
-                <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                <div class="admin-table-wrapper" style="overflow-x: auto;">
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -1363,6 +1363,7 @@
                                 <th>Aplicador</th>
                                 <th>Envolvido</th>
                                 <th>Data/Hora</th>
+                                <th>Dias</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -1389,7 +1390,7 @@
                     <div id="solic-cargo-feedback" style="margin-top:10px; font-size:12px; color:#10b981;"></div>
                 </div>
 
-                <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                <div class="admin-table-wrapper" style="overflow-x: auto;">
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -1492,7 +1493,7 @@
 
 
   <script src="js/modulo-acompanhamentos.js?v=1784561296"></script>
-  <script src="js/modulo-controle-geral.js?v=1784580989"></script>
+  <script src="js/modulo-controle-geral.js?v=1784581621"></script>
   <script src="js/modulo-verificacoes.js?v=1784570335"></script>
   <script src="js/modulo-avisos.js?v=3"></script>
   <script src="js/modulo-admin.js?v=1784559015"></script>
