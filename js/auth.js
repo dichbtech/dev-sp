@@ -248,10 +248,12 @@ window.getLiderNick = function() {
     if (window.acessosData) {
         let lider = window.acessosData.find(u => {
             if(!u.nivel) return false;
-            let n = u.nivel.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return n === 'LIDER' || n === 'ADMIN' || n === 'LIDERANCA';
+            let n = u.nivel.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+            return n === 'LIDER';
         });
-        if(lider && lider.nick) liderNick = lider.nick;
+        if(lider && lider.nick) {
+            liderNick = lider.nick;
+        }
     }
     return liderNick;
 };
@@ -268,7 +270,7 @@ window.initAvatarScene = function() {
     bubble.classList.remove('visible');
 
     setTimeout(() => {
-        av.style.right = '20px'; // Caminha pro centro do espaço
+        av.style.right = '0px'; // Caminha pro centro do espaço
         setTimeout(() => {
             // direction 3 = Frente, gesture sml = Sorrindo, action wav = Acenando
             av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=3&head_direction=3&gesture=sml&size=l`;

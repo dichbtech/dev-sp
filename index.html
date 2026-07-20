@@ -26,9 +26,7 @@
 
     <link href="css/style.css?v=6" rel="stylesheet">
 
-    <style>
-        #hub-bubble { z-index: 5 !important; top: -15px !important; }
-    </style>
+    
 
     
     
@@ -60,6 +58,34 @@
             width: 100% !important;
         }
     </style>
+
+    <style>
+        /* Ajuste do Avatar Container para ter ainda mais espaço lateral (evitando espremer o texto) */
+        .avatar-container { width: 320px !important; }
+        
+        /* Posicionando o balão perfeitamente acima e à esquerda do avatar, SEM sobrepor! */
+        #hub-bubble { 
+            z-index: 10 !important; 
+            top: -45px !important; 
+            left: 0px !important; 
+            width: 220px !important; 
+        }
+        
+        /* Ajustando a ponta (rabinho) do balão para apontar perfeitamente para o rosto do avatar */
+        #hub-bubble::after {
+            left: 90% !important;
+            transform: translateX(0) !important;
+            bottom: -8px !important;
+        }
+        
+        /* Colocando o avatar na ponta direita extrema do container */
+        #hub-avatar {
+            /* right is controlled by JS animation */
+            bottom: -5px !important;
+            z-index: 5 !important;
+        }
+    </style>
+
 </head>
 
 <body data-theme="dark">
@@ -1152,17 +1178,17 @@
 
         </div>
 
-    </div>
+    
 
 
 
     
 
-</div>
 
 
 
-</div>
+
+
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js?v=2"></script>
 
