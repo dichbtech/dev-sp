@@ -168,7 +168,8 @@ window.criarRowAcesso = function(item, origem) {
     let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : '';
     let sC = item.nivel === 'COMANDO' ? 'selected' : '';
     
-    let hideAcoes = (window.nivelUsuarioGlobal === 'VICE-LIDER' && (item.nivel === 'LIDER' || item.nivel === 'ADMIN')) ? 'display:none;' : '';
+    let hideAcoes = (window.nivelUsuarioGlobal !== 'ADMIN' && (item.nivel === 'LIDER' || item.nivel === 'ADMIN')) ? 'display:none;' : '';
+    let hideOption = (window.nivelUsuarioGlobal !== 'ADMIN') ? 'hidden style="display:none;"' : '';
     let tBadge = origem === 'planilha' ? '<span style="background:rgba(251,191,36,0.2); color:var(--sup-neon); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">PLANILHA</span>' : '<span style="background:rgba(76,175,80,0.2); color:#4caf50; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">MANUAL</span>';
     let acoes = origem === 'planilha' ? '<span style="color:#888; font-size:11px;">Via Planilha</span>' : `<button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button>`;
     
@@ -177,8 +178,8 @@ window.criarRowAcesso = function(item, origem) {
         <td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td>
         <td>
             <select class="admin-input inp-nivel" disabled>
-                <option value="ADMIN" ${sA}>Admin (Externa)</option>
-                <option value="LIDER" ${sL}>Líder</option>
+                <option value="ADMIN" ${sA} ${hideOption}>Admin (Externa)</option>
+                <option value="LIDER" ${sL} ${hideOption}>Líder</option>
                 <option value="VICE-LIDER" ${sV}>Vice-Líder</option>
                 <option value="SUB-LIDER" ${sS}>Sub-Líder</option>
                 <option value="AUXILIAR" ${sAux}>Auxiliar</option>

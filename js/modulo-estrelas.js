@@ -49,8 +49,8 @@ window.verificarPermissaoCorrecao = async function() {
         let btnLimpar = document.getElementById('btn-limpar-rank');
         if (btnLimpar) btnLimpar.style.display = 'none';
 
-        // O botão tachometer agora se torna o HUB ADMINISTRATIVO GERAL (Sub-Líderes+)
-        const cargosHub = ["COMANDO", "LIDER", "VICE-LIDER", "ADMIN", "SUB-LIDER"];
+        // O botão tachometer agora se torna o HUB ADMINISTRATIVO GERAL (Vice-Líderes+)
+        const cargosHub = ["COMANDO", "LIDER", "VICE-LIDER", "ADMIN"];
         let btnCorrecao = document.getElementById('btn-dashboard-correcao');
         if (btnCorrecao && cargosHub.includes(nivel)) {
             btnCorrecao.style.display = 'inline-block';
@@ -155,7 +155,7 @@ window.registrarLogEstrela = function(bene, acao, idProm, detalhes, dataRef = nu
 // ==========================================
 window.abrirPainelAdminEstrelas = async function() {
     let nivel = window.nivelUsuarioGlobal;
-    if (!["COMANDO", "LIDER", "VICE-LIDER", "SUB-LIDER", "ADMIN"].includes(nivel)) return;
+    if (!["COMANDO", "LIDER", "VICE-LIDER", "ADMIN"].includes(nivel)) return;
 
     let modal = document.getElementById('modal-hub-estrelas');
     if (!modal) {
