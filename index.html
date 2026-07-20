@@ -30,18 +30,10 @@
         #hub-bubble { z-index: 5 !important; top: -15px !important; }
     </style>
 
+    
     <style>
-        #modulo-feedbacks, #modulo-grupos {
-            width: 100vw !important;
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 100vw !important;
-            border-radius: 0 !important;
-            border-left: none !important;
-            border-right: none !important;
-            padding: 25px 5vw !important; /* Add some padding so the content doesn't touch the edges */
-        }
+        #modulo-feedbacks, #modulo-grupos { padding: 20px 0; border: none; background: transparent; box-shadow: none; }
+        #modulo-feedbacks h3, #modulo-grupos h3 { margin-left: 20px; }
     </style>
 </head>
 
@@ -416,7 +408,7 @@
 
         <main id="modulo-grupos" class="spa-view card">
 
-            <h3 style="margin-bottom: 15px;"><i class="fas fa-users"></i> Controle de Grupos</h3><div style="width: 100%; height: 80vh; margin-bottom: 80px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://script.google.com/macros/s/AKfycbxRpzWNrcjbQMV4cgYpAUTPQVBhB2he6ft2Kvk0EA7eXdQuLzq-NUmu_24lP9wQokfP/exec" style="width: 100%; height: 100%; border: none;"></iframe></div>
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-users"></i> Controle de Grupos</h3><div style="width: 100%; height: calc(100% - 60px); background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://script.google.com/macros/s/AKfycbxRpzWNrcjbQMV4cgYpAUTPQVBhB2he6ft2Kvk0EA7eXdQuLzq-NUmu_24lP9wQokfP/exec" style="width: 100%; height: 100%; border: none;"></iframe></div>
 
         </main>
 
@@ -464,7 +456,7 @@
 
         <main id="modulo-feedbacks" class="spa-view card">
 
-            <h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3><div style="width: 100%; height: 80vh; margin-bottom: 80px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://dichbtech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe></div>
+            <h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3><div style="width: 100%; height: calc(100% - 60px); background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;"><iframe src="https://dichbtech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe></div>
 
         </main>
 
