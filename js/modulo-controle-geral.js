@@ -6,8 +6,8 @@
 window.unsubSolicitacoes = null;
 window.unsubRetiradas = null;
 
-// Removemos proxy corsproxy caso não precise, ou mantemos como fallback.
-const CORS_PROXY = 'https://corsproxy.io/?url=';
+// Usar Vercel Serverless Function em /api/proxy para desviar do Cloudflare
+const CORS_PROXY = '/api/proxy?url=';
 const URL_MEMBROS_DIVISAO = 'https://policiadic.com/funcao/supervisores/tabela/membros';
 const URL_PATENTES = 'https://policiadic.com/lista/membros';
 const URL_LICENCAS = 'https://policiadic.com/lista/aval';
@@ -143,6 +143,11 @@ async function carregarAPIsGerais() {
         
         window.dadosGeraisRH.membrosDivisao = Array.isArray(membrosRes) ? membrosRes : [];
         window.dadosGeraisRH.notificacoes = Array.isArray(notificacoesRes) ? notificacoesRes : [];
+        
+        if (window.dadosGeraisRH.membrosDivisao.length === 0) {
+            console.error("A tabela de membros retornou vazia! Verifique as configurações de proxy e CORS.");
+            window.customAlert('Erro: Não foi possível obter os dados da API de membros. Pode haver bloqueio do Cloudflare ou falha no Proxy Vercel (/api/proxy).', 'Falha na Busca');
+        }
         
         renderizarMembrosAtivos();
         renderizarNotificacoes();
