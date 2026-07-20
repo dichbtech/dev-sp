@@ -74,11 +74,11 @@ window.gerarMenusPorNivel = function() {
             <div class="tool-icon"><i class="fas fa-bullseye"></i></div>
             <div class="tool-info"><h4>Metas</h4><p>Consulta Semanal</p></div>
         </div>
+        ${ehAuxiliar ? `
         <div class="tool-card" onclick="window.switchSection('modulo-avais')">
             <div class="tool-icon"><i class="fas fa-calculator"></i></div>
             <div class="tool-info"><h4>Licenças</h4><p>Cálculo de dias</p></div>
         </div>
-        ${ehAuxiliar ? `
         <div class="tool-card" onclick="window.switchSection('modulo-feedbacks')">
             <div class="tool-icon"><i class="fas fa-comments"></i></div>
             <div class="tool-info"><h4>Feedbacks</h4><p>Painel oficial</p></div>
@@ -110,8 +110,8 @@ window.gerarMenusPorNivel = function() {
         <div class="dock-separator"></div>
         <div class="dock-item" id="menu-modulo-metas" data-label="Metas" onclick="window.switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i></div>
         <div class="dock-item" id="menu-modulo-requerimentos" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
-        <div class="dock-item" id="menu-modulo-avais" data-label="Licenças" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i></div>
         ${ehAuxiliar ? `
+        <div class="dock-item" id="menu-modulo-avais" data-label="Licenças" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i></div>
         <div class="dock-item" id="menu-modulo-feedbacks" data-label="Feedbacks" onclick="window.switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i></div>
         ` : ''}
         <div class="dock-item" id="menu-modulo-grupos" data-label="Controle Grupos" onclick="window.switchSection('modulo-grupos', this)"><i class="fas fa-users"></i></div>
