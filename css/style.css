@@ -115,7 +115,7 @@ select option { background: var(--bg-surface); color: var(--text-main); }
 @media (max-width: 768px) { .home-columns { grid-template-columns: 1fr; } }
 .notice-board { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .avatar-container { position: relative; width: 200px; height: 160px; overflow: visible; flex-shrink: 0; }
-.habbo-avatar { position: absolute; bottom: 0; right: -150px; transition: right 2s linear; image-rendering: pixelated; z-index: 2; width: 90px; }
+.habbo-avatar { position: absolute; transition: transform 2s linear, opacity 1s ease-in; image-rendering: pixelated; z-index: 2; width: 90px; }
 .thought-bubble { position: absolute; top: -75px; left: -30px; background: var(--bubble-bg); color: var(--bubble-text); border-radius: 12px; padding: 12px; font-size: 12px; font-weight: 600; width: 230px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: all 0.5s ease; z-index: 10; line-height: 1.4; border: 1px solid var(--border); text-align: center; }
 .thought-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 8px 8px 0; border-style: solid; border-color: var(--bubble-bg) transparent transparent transparent; }
 .thought-bubble.visible { opacity: 1; transform: translateY(0); }

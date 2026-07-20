@@ -283,11 +283,13 @@ window.initAvatarScene = function() {
     
     // direction 6 = Anda para a Esquerda
     av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wlk&direction=6&head_direction=6&gesture=std&size=l`;
-    av.style.right = '-150px'; 
+    av.style.transform = 'translateX(150px)';
+    av.style.opacity = '0';
     bubble.classList.remove('visible');
 
     setTimeout(() => {
-        av.style.right = '165px'; // Caminha pro centro do espaço
+        av.style.transform = 'translateX(0)'; // Caminha para a posição final definida no CSS
+        av.style.opacity = '1';
         setTimeout(() => {
             // direction 3 = Frente, gesture sml = Sorrindo, action wav = Acenando
             av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=3&head_direction=3&gesture=sml&size=l`;
