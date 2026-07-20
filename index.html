@@ -1230,12 +1230,12 @@
         
         <div style="margin-bottom: 10px;">
             <label style="display:block; font-size: 11px;">Avatar Top: <span id="val-av-top">0</span>px</label>
-            <input type="range" id="adj-av-top" min="-100" max="200" value="0" style="width:100%;">
+            <input type="range" id="adj-av-top" min="-500" max="500" value="0" style="width:100%;">
         </div>
         
         <div style="margin-bottom: 10px;">
             <label style="display:block; font-size: 11px;">Avatar Left: <span id="val-av-left">0</span>px</label>
-            <input type="range" id="adj-av-left" min="-100" max="200" value="0" style="width:100%;">
+            <input type="range" id="adj-av-left" min="-500" max="500" value="0" style="width:100%;">
         </div>
         
         <div style="margin-bottom: 10px;">
@@ -1247,12 +1247,12 @@
 
         <div style="margin-bottom: 10px;">
             <label style="display:block; font-size: 11px;">Balão Top: <span id="val-bub-top">0</span>px</label>
-            <input type="range" id="adj-bub-top" min="-100" max="200" value="0" style="width:100%;">
+            <input type="range" id="adj-bub-top" min="-500" max="500" value="0" style="width:100%;">
         </div>
         
         <div style="margin-bottom: 10px;">
             <label style="display:block; font-size: 11px;">Balão Left: <span id="val-bub-left">0</span>px</label>
-            <input type="range" id="adj-bub-left" min="-100" max="300" value="0" style="width:100%;">
+            <input type="range" id="adj-bub-left" min="-500" max="500" value="0" style="width:100%;">
         </div>
         
         <div style="margin-bottom: 10px;">
@@ -1273,7 +1273,7 @@
                 const val = e.target.value + 'px';
                 valSpan.innerText = e.target.value;
                 targets.forEach(t => {
-                    t.style[prop] = val;
+                    t.style.setProperty(prop, val, "important");
                 });
             });
             
