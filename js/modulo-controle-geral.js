@@ -113,7 +113,7 @@ async function carregarAPIsGerais() {
         let snapEmails = await db.collection('membros_emails').get();
         window.dadosGeraisRH.emails.clear();
         snapEmails.forEach(doc => {
-            window.dadosGeraisRH.emails.set(doc.id.toLowerCase(), doc.data().email);
+            window.dadosGeraisRH.emails.set(doc.id.replace('[', '').toLowerCase(), doc.data().email);
         });
 
         const [membrosRes, patentesRes, licencasRes, notificacoesRes] = await Promise.all([
@@ -126,7 +126,7 @@ async function carregarAPIsGerais() {
         window.dadosGeraisRH.patentes.clear();
         if(Array.isArray(patentesRes)) {
             patentesRes.forEach(p => {
-                if(p.Nick) window.dadosGeraisRH.patentes.set(p.Nick.toLowerCase(), p);
+                if(p.Nick) window.dadosGeraisRH.patentes.set(p.Nick.replace('[', '').toLowerCase(), p);
             });
         }
         
@@ -134,7 +134,7 @@ async function carregarAPIsGerais() {
         if(Array.isArray(licencasRes)) {
             licencasRes.forEach(l => {
                 if(l.Envolvido && l.Status === 'Aprovado') {
-                    window.dadosGeraisRH.licencas.set(l.Envolvido.toLowerCase(), l);
+                    window.dadosGeraisRH.licencas.set(l.Envolvido.replace('[', '').toLowerCase(), l);
                 }
             });
         }
@@ -241,7 +241,7 @@ window.salvarEmailRH = function(nickLower) {
 
 window.demitirMembroRH = function(nick, cargo) {
     if(confirm(`Tem certeza que deseja DEMITIR e Retirar ${nick} da divisão? O membro será movido para a tabela de Retiradas.`)) {
-        let nickLower = nick.toLowerCase();
+        let nickLower = nick.replace('[', '').toLowerCase();
         let email = window.dadosGeraisRH.emails.get(nickLower) || 'Não informado';
         
         db.collection('retiradas').add({
@@ -353,7 +353,7 @@ window.toggleCheckRetirada = function(id, campo, valor) {
 window.autoFetchEmailRetirada = function(nick) {
     let emailInput = document.getElementById('ret-email');
     if(!nick || !emailInput) return;
-    let nickLower = nick.toLowerCase();
+    let nickLower = nick.replace('[', '').toLowerCase();
     
     if(window.dadosGeraisRH.emails.has(nickLower)) {
         emailInput.value = window.dadosGeraisRH.emails.get(nickLower);
@@ -442,7 +442,7 @@ function renderizarNotificacoes() {
             }
         }
         
-        let nickLower = (n.Envolvido || '').toLowerCase();
+        let nickLower = (n.Envolvido || '').replace('[', '').toLowerCase();
         if(status === 'Aprovado' || status === 'Ativo' || status === 'Válida') {
             contagemPorNick[nickLower] = (contagemPorNick[nickLower] || 0) + 1;
         }
@@ -453,7 +453,7 @@ function renderizarNotificacoes() {
         tr.innerHTML = `
             <td>#${n['# (ID)'] || n.ID || n['#'] || '-'}</td>
             <td>${n.Aplicador || '-'}</td>
-            <td><b>${n.Envolvido || '-'}</b></td>
+            <td><b>${(n.Envolvido || '-').replace('[', '')}</b></td>
             <td>${n['Data e Hora'] || '-'}</td>
             <td>
                 ${isExpirada ? '<span style="color:#ef4444; font-weight:bold; padding:2px 5px; background:rgba(239,68,68,0.2); border-radius:4px;"><i class="fas fa-exclamation-triangle"></i> EXPIRADA</span>' : status}
@@ -483,7 +483,7 @@ window.autoFetchCargo = function(nick) {
     let feed = document.getElementById('solic-cargo-feedback');
     if(!nick || !feed) return;
     
-    let nickLower = nick.toLowerCase();
+    let nickLower = nick.replace('[', '').toLowerCase();
     let dadosPatente = window.dadosGeraisRH.patentes.get(nickLower);
     if(dadosPatente && dadosPatente['Posto/Grad']) {
         feed.innerHTML = `Cargo/Posto/Graduação Encontrado: <b>${dadosPatente['Posto/Grad']}</b>`;
