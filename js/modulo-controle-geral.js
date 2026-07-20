@@ -303,7 +303,12 @@ function renderizarMembrosAtivos() {
             tr.style.borderBottom = '3px solid rgba(255,255,255,0.1)';
         }
         tr.innerHTML = `
-            <td><b>${m.rawNick}</b></td>
+            <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=${m.rawNick}&action=std&direction=3&head_direction=3&gesture=std&size=l" style="width:40px; height:40px; border-radius:8px; background:rgba(255,255,255,0.05); object-fit:cover; object-position: center -15px;" alt="">
+                    <b>${m.rawNick}</b>
+                </div>
+            </td>
             <td>${m.patente}</td>
             <td>${m.funcaoInterna}</td>
             <td>${m.dataAsc} ${m.textoDias}</td>
