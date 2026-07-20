@@ -66,6 +66,7 @@ window.gerarMenusPorNivel = function() {
     let lvl = window.nivelUsuarioGlobal;
     const ehLideranca = ['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
     const ehSuperLideranca = ['VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
+    const ehAuxiliar = ['AUXILIAR', 'SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
     
     // Hub Central
     let hubHtml = `
@@ -77,10 +78,12 @@ window.gerarMenusPorNivel = function() {
             <div class="tool-icon"><i class="fas fa-calculator"></i></div>
             <div class="tool-info"><h4>Licenças</h4><p>Cálculo de dias</p></div>
         </div>
+        ${ehAuxiliar ? `
         <div class="tool-card" onclick="window.switchSection('modulo-feedbacks')">
             <div class="tool-icon"><i class="fas fa-comments"></i></div>
             <div class="tool-info"><h4>Feedbacks</h4><p>Painel oficial</p></div>
         </div>
+        ` : ''}
         <div class="tool-card" onclick="window.switchSection('modulo-grupos')">
             <div class="tool-icon"><i class="fas fa-users"></i></div>
             <div class="tool-info"><h4>Grupos</h4><p>Controle geral</p></div>
@@ -108,7 +111,9 @@ window.gerarMenusPorNivel = function() {
         <div class="dock-item" id="menu-modulo-metas" data-label="Metas" onclick="window.switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i></div>
         <div class="dock-item" id="menu-modulo-requerimentos" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
         <div class="dock-item" id="menu-modulo-avais" data-label="Licenças" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i></div>
+        ${ehAuxiliar ? `
         <div class="dock-item" id="menu-modulo-feedbacks" data-label="Feedbacks" onclick="window.switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i></div>
+        ` : ''}
         <div class="dock-item" id="menu-modulo-grupos" data-label="Controle Grupos" onclick="window.switchSection('modulo-grupos', this)"><i class="fas fa-users"></i></div>
     `;
     if (ehLideranca) {
@@ -124,6 +129,12 @@ window.gerarMenusPorNivel = function() {
     if (dock) {
         dock.innerHTML = dockHtml;
         dock.classList.add('active'); // show dock
+    }
+    
+    // Controle de Requerimentos (Ocultar aba relatórios se for membro)
+    const btnRelatorios = document.querySelector('button[data-target="tab-relatorios"]');
+    if (btnRelatorios) {
+        btnRelatorios.style.display = ehAuxiliar ? 'inline-block' : 'none';
     }
     
     // ==========================================

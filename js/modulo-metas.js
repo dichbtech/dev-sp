@@ -518,8 +518,13 @@ window.escutarConfigDashboard = function() {
             window.configAtividades = d.atividades || defaultAtividades;
             
             let btnPE = document.getElementById('btn-pontos-extras');
-            if (btnPE && ['LIDER', 'VICE-LIDER', 'SUB-LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
-                btnPE.style.display = window.eventoAtivo ? 'inline-flex' : 'none';
+            let btnDash = document.getElementById('btn-dashboard-metas');
+            if (['LIDER', 'VICE-LIDER', 'SUB-LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
+                if (btnPE) btnPE.style.display = window.eventoAtivo ? 'inline-flex' : 'none';
+                if (btnDash) btnDash.style.display = 'inline-flex';
+            } else {
+                if (btnPE) btnPE.style.display = 'none';
+                if (btnDash) btnDash.style.display = 'none';
             }
 
             let banner = document.getElementById('evento-banner');

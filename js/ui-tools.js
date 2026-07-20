@@ -126,11 +126,16 @@ window.switchSection = function(sectionId, btnElement) {
     let targetSection = document.getElementById(sectionId);
     if (targetSection) targetSection.classList.add('active');
     
-    // Força o tab de relatórios ficar aceso quando entra em requerimentos
+    // Força o tab inicial correto ficar aceso quando entra em requerimentos
     if (sectionId === 'modulo-requerimentos') {
-        let firstTabBtn = document.querySelector('[data-target="tab-relatorios"]');
-        if (firstTabBtn && window.switchTabRequerimentos) {
-            window.switchTabRequerimentos('tab-relatorios', firstTabBtn);
+        const lvl = window.nivelUsuarioGlobal;
+        const ehAux = ['AUXILIAR', 'SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
+        
+        let targetTab = ehAux ? 'tab-relatorios' : 'tab-soldados';
+        let tabBtn = document.querySelector(`[data-target="${targetTab}"]`);
+        
+        if (tabBtn && window.switchTabRequerimentos) {
+            window.switchTabRequerimentos(targetTab, tabBtn);
         }
     }
 
