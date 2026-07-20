@@ -69,14 +69,14 @@ function parseHtmlTable(htmlStr) {
     let table = doc.querySelector('table');
     if(!table) return [];
     
-    let headers = Array.from(table.querySelectorAll('th')).map(th => th.innerText.trim());
+    let headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
     let rows = Array.from(table.querySelectorAll('tbody tr'));
     
     return rows.map(tr => {
         let obj = {};
         let tds = Array.from(tr.querySelectorAll('td'));
         tds.forEach((td, i) => {
-            if(headers[i]) obj[headers[i]] = td.innerText.trim();
+            if(headers[i]) obj[headers[i]] = td.textContent.trim();
         });
         return obj;
     });
