@@ -287,3 +287,17 @@ footer { text-align: center; padding: 30px 20px; font-size: 12px; color: var(--t
     .spa-view { height: auto; overflow-y: visible; }
     .container { padding: 0 15px; }
 }
+
+/* AJUSTES DO AVATAR E BALAO DA HOME */
+#hub-avatar {
+    top: -59px !important;
+    left: 101px !important;
+    width: 127px !important;
+}
+
+#hub-bubble {
+    top: -126px !important;
+    left: 55px !important;
+    max-width: 325px !important;
+    width: auto !important; /* ensures max-width dictates behavior */
+}
