@@ -399,6 +399,8 @@ function iniciarListenersFirebaseRH() {
                 return;
             }
             
+            
+            let isVicePlus = ['VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal);
             snap.forEach(doc => {
                 let d = doc.data();
                 let isAllChecked = (d.checks && d.checks.system && d.checks.groups && d.checks.habbo);
@@ -421,6 +423,9 @@ function iniciarListenersFirebaseRH() {
                         </div>
                     </td>
                     <td>${isAllChecked ? '<span style="color:#10b981; font-weight:bold;"><i class="fas fa-check"></i> Acervo</span>' : '<span style="color:#fbbf24;"><i class="fas fa-clock"></i> Pendente</span>'}</td>
+                    <td style="text-align:center;">
+                        ${isVicePlus ? `<button class="btn-tech" style="padding:4px 8px; font-size:12px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;" onclick="window.excluirRetirada('${doc.id}')" title="Excluir Retirada"><i class="fas fa-trash"></i></button>` : `<button class="btn-tech" style="padding:4px 8px; font-size:12px; background:rgba(255,255,255,0.05); color:#555; border:none; cursor:not-allowed;" title="Apenas Vice-Líder+"><i class="fas fa-trash"></i></button>`}
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -438,7 +443,9 @@ function iniciarListenersFirebaseRH() {
             return;
         }
         
-        snap.forEach(doc => {
+        
+            let isVicePlus = ['VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal);
+            snap.forEach(doc => {
             let d = doc.data();
             if(d.status !== 'Pendente') return;
             
@@ -720,3 +727,15 @@ window.toggleCongelarMembro = function(nickLower, isChecked) {
         .catch(err => console.error("Erro ao descongelar:", err));
     }
 }
+
+window.excluirRetirada = function(id) {
+    if(!['VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
+        window.customAlert("Apenas Vice-Líderes ou acima podem excluir retiradas.", "Acesso Negado");
+        return;
+    }
+    if(confirm("Tem certeza que deseja apagar o registro desta retirada? Esta ação é irreversível.")) {
+        db.collection('retiradas').doc(id).delete()
+            .then(() => window.customAlert('Retirada deletada com sucesso!', 'Sucesso'))
+            .catch(err => window.customAlert('Erro ao deletar: ' + err.message, 'Erro'));
+    }
+};
