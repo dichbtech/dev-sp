@@ -416,3 +416,14 @@ window.cmdToView = function(viewId) {
     window.toggleCommand();
     window.switchSection(viewId);
 };
+
+window.toggleTheme = function() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    body.setAttribute('data-theme', newTheme);
+    const icon = document.getElementById('themeIcon');
+    if (icon) {
+        icon.className = newTheme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    }
+};

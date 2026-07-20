@@ -37,7 +37,7 @@ window.liberarPainel = function() {
     
     // Injeção visual na nova UI
     const nick = window.usuarioLogadoNick || "Usuário";
-    const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+    const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=3&head_direction=3&gesture=sml&size=l`;
     
     const loggedNickEl = document.getElementById('loggedNick');
     if(loggedNickEl) loggedNickEl.innerText = nick;
@@ -270,7 +270,7 @@ window.initAvatarScene = function() {
     bubble.classList.remove('visible');
 
     setTimeout(() => {
-        av.style.right = '0px'; // Caminha pro centro do espaço
+        av.style.right = '165px'; // Caminha pro centro do espaço
         setTimeout(() => {
             // direction 3 = Frente, gesture sml = Sorrindo, action wav = Acenando
             av.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nickLider}&action=wav&direction=3&head_direction=3&gesture=sml&size=l`;
