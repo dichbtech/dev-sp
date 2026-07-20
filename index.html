@@ -24,7 +24,7 @@
 
 
 
-    <link href="css/style.css?v=16" rel="stylesheet">
+    <link href="css/style.css?v=17" rel="stylesheet">
 
     
 
@@ -1227,115 +1227,7 @@
     
 
     
-    <!-- INÍCIO DO NOVO AJUSTADOR -->
-    <div id="avatar-adjuster" style="position: fixed; bottom: 20px; left: 20px; background: rgba(0,0,0,0.9); border: 2px solid var(--accent); padding: 15px; border-radius: 8px; z-index: 999999; color: #fff; font-family: monospace; width: 300px; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
-        <h4 style="margin-top:0; color: var(--accent); text-align: center;">🛠️ Ajustador Preciso</h4>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="display:block; font-size: 11px;">Avatar Top: <span id="val-av-top">0</span>px</label>
-            <input type="range" id="adj-av-top" min="-500" max="500" value="0" style="width:100%;">
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="display:block; font-size: 11px;">Avatar Left: <span id="val-av-left">0</span>px</label>
-            <input type="range" id="adj-av-left" min="-500" max="500" value="0" style="width:100%;">
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="display:block; font-size: 11px;">Avatar Width: <span id="val-av-width">150</span>px</label>
-            <input type="range" id="adj-av-width" min="50" max="300" value="150" style="width:100%;">
-        </div>
-
-        <hr style="border-color: #333; margin: 15px 0;">
-
-        <div style="margin-bottom: 10px;">
-            <label style="display:block; font-size: 11px;">Balão Top: <span id="val-bub-top">0</span>px</label>
-            <input type="range" id="adj-bub-top" min="-500" max="500" value="0" style="width:100%;">
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="display:block; font-size: 11px;">Balão Left: <span id="val-bub-left">0</span>px</label>
-            <input type="range" id="adj-bub-left" min="-500" max="500" value="0" style="width:100%;">
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="display:block; font-size: 11px;">Balão Max-Width: <span id="val-bub-width">300</span>px</label>
-            <input type="range" id="adj-bub-width" min="150" max="500" value="300" style="width:100%;">
-        </div>
-        
-        <button onclick="gerarCodigoAjustador2()" style="width:100%; padding: 8px; background: var(--accent); color: #000; border:none; font-weight:bold; cursor:pointer; border-radius: 4px; margin-top:10px;">Gerar Código Final</button>
-    </div>
-
-    <script>
-        function aplicarAjuste2(idInput, idVal, targetSelector, prop) {
-            const el = document.querySelector(idInput);
-            const valSpan = document.querySelector(idVal);
-            const targets = document.querySelectorAll(targetSelector);
-            
-            el.addEventListener('input', (e) => {
-                const val = e.target.value + 'px';
-                valSpan.innerText = e.target.value;
-                targets.forEach(t => {
-                    t.style.setProperty(prop, val, "important");
-                });
-            });
-            
-            // init
-            targets.forEach(t => {
-                const curr = window.getComputedStyle(t)[prop];
-                if (curr && curr !== 'auto') {
-                    const px = parseInt(curr);
-                    el.value = px;
-                    valSpan.innerText = px;
-                }
-            });
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                // Remove qualquer transform para o ajustador ser 100% fiel
-                document.getElementById('hub-avatar').style.setProperty('transform', 'none', 'important');
-                document.getElementById('hub-bubble').style.setProperty('transform', 'none', 'important');
-
-                aplicarAjuste2('#adj-av-top', '#val-av-top', '#hub-avatar', 'top');
-                aplicarAjuste2('#adj-av-left', '#val-av-left', '#hub-avatar', 'left');
-                aplicarAjuste2('#adj-av-width', '#val-av-width', '#hub-avatar', 'width');
-                
-                aplicarAjuste2('#adj-bub-top', '#val-bub-top', '#hub-bubble', 'top');
-                aplicarAjuste2('#adj-bub-left', '#val-bub-left', '#hub-bubble', 'left');
-                aplicarAjuste2('#adj-bub-width', '#val-bub-width', '#hub-bubble', 'maxWidth');
-            }, 3000); // aguarda animação terminar
-        });
-        
-        function gerarCodigoAjustador2() {
-            const avT = document.querySelector('#adj-av-top').value;
-            const avL = document.querySelector('#adj-av-left').value;
-            const avW = document.querySelector('#adj-av-width').value;
-            
-            const bubT = document.querySelector('#adj-bub-top').value;
-            const bubL = document.querySelector('#adj-bub-left').value;
-            const bubW = document.querySelector('#adj-bub-width').value;
-            
-            const code = `
-/* CSS GERADO PELO NOVO AJUSTADOR */
-#hub-avatar {
-    top: ${avT}px !important;
-    left: ${avL}px !important;
-    width: ${avW}px !important;
     
-}
-
-#hub-bubble {
-    top: ${bubT}px !important;
-    left: ${bubL}px !important;
-    max-width: ${bubW}px !important;
-    
-}
-            `;
-            prompt("Copie e cole isso no chat:", code);
-        }
-    </script>
-    <!-- FIM DO NOVO AJUSTADOR -->
 
     </body>
 
