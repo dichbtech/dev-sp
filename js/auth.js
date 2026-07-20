@@ -133,6 +133,7 @@ window.gerarMenusPorNivel = function() {
             <div class="dock-separator"></div>
             <div class="dock-item" id="menu-modulo-correcoes" data-label="Correções" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i></div>
             <div class="dock-item" id="menu-modulo-estrelas" data-label="Estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i></div>
+            ${ehSuperLideranca ? `<div class="dock-item" id="menu-modulo-verificacoes" data-label="Verificações" onclick="window.switchSection('modulo-verificacoes', this)"><i class="fas fa-gavel"></i></div>` : ''}
             ${ehSuperLideranca ? `<div class="dock-item dock-command" data-label="Configurações da Liderança" onclick="window.toggleCommand()"><i class="fas fa-bolt"></i></div>` : ''}
         `;
     }
