@@ -17,7 +17,7 @@ const modaisGlobaisHTML = `
 
   <div id="toastContainer" class="toast-container"></div>
 
-  <div id="custom-alert-modal" class="modal" style="z-index: 99999999;">
+  <div id="custom-alert-modal" class="modal" style="z-index: 99999999;" onclick="if(event.target === this) this.style.display=\'none\'">
       <div class="modal-content" style="max-width: 450px; text-align: center; border-color: var(--sup-neon);">
           <h3 id="custom-alert-title" style="color: var(--sup-neon); margin-bottom: 15px; display: flex; justify-content: center; align-items:center; gap: 10px;"></h3>
           <p id="custom-alert-msg" style="color: #fff; font-size: 15px; margin-bottom: 25px; line-height: 1.6;"></p>
@@ -25,7 +25,7 @@ const modaisGlobaisHTML = `
       </div>
   </div>
 
-  <div id="custom-prompt-modal" class="modal" style="z-index: 9999999;">
+  <div id="custom-prompt-modal" class="modal" style="z-index: 9999999;" onclick="if(event.target === this) this.style.display=\'none\'">
       <div class="modal-content" style="max-width: 400px; text-align: center;">
           <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-link"></i> Inserir Link</h3>
           <div class="input-block"><input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com"></div>
@@ -36,7 +36,7 @@ const modaisGlobaisHTML = `
       </div>
   </div>
 
-  <div id="modal-dashboard" class="modal">
+  <div id="modal-dashboard" class="modal" onclick="if(event.target === this) this.style.display=\'none\'">
      <div class="modal-content">
         <div class="close-btn" onclick="window.fecharDashboard()"><i class="fas fa-times"></i></div>
         <h3 style="color: var(--sup-neon); margin-bottom: 25px;"><i class="fas fa-tachometer-alt"></i> Dashboard de Metas e Eventos</h3>
@@ -58,7 +58,7 @@ const modaisGlobaisHTML = `
      </div>
   </div>
 
-  <div id="modal-pontos-extras" class="modal">
+  <div id="modal-pontos-extras" class="modal" onclick="if(event.target === this) this.style.display=\'none\'">
       <div class="modal-content" style="max-width: 500px;">
           <div class="close-btn" onclick="window.fecharModalPontosExtras()"><i class="fas fa-times"></i></div>
           <h3 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-star"></i> Gerenciar Pontos Extras</h3>
@@ -75,7 +75,7 @@ const modaisGlobaisHTML = `
       </div>
   </div>
 
-  <div id="modal-iframe-link" class="modal" style="z-index: 9999999;">
+  <div id="modal-iframe-link" class="modal" style="z-index: 9999999;" onclick="if(event.target === this) this.style.display=\'none\'">
       <div class="modal-content" style="max-width: 900px; width:95%; height:80vh; padding:20px; display:flex; flex-direction:column;">
           <div class="close-btn" onclick="document.getElementById('modal-iframe-link').style.display='none'"><i class="fas fa-times"></i></div>
           <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-external-link-alt"></i> Visualização de Anexo</h3>
@@ -88,7 +88,7 @@ const modaisGlobaisHTML = `
       </div>
   </div>
 
-  <div id="modal-correcao-lote" class="modal">
+  <div id="modal-correcao-lote" class="modal" onclick="if(event.target === this) this.style.display=\'none\'">
       <div class="modal-content" style="max-width: 600px;">
           <div class="close-btn" onclick="document.getElementById('modal-correcao-lote').style.display='none'"><i class="fas fa-times"></i></div>
           <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-tools"></i> Corrigir Ciclo Validado</h3>
@@ -131,8 +131,7 @@ window.switchSection = function(sectionId, btnElement) {
         btnElement.classList.add('active');
     } else {
         // Se a função foi chamada automaticamente pela URL, busca o botão
-        let pathName = sectionId.replace('modulo-', '');
-        let btnId = 'menu-' + pathName;
+        let btnId = 'menu-' + sectionId;
         let btn = document.getElementById(btnId);
         if (btn) btn.classList.add('active');
     }
@@ -146,15 +145,16 @@ window.switchSection = function(sectionId, btnElement) {
 document.addEventListener("DOMContentLoaded", () => {
     let path = window.location.pathname.replace('/', '').trim();
     
-    // Ignora se for a página inicial pura ou o index.html
     if (path && path !== 'index.html' && path !== '') {
         let sectionId = 'modulo-' + path;
         let targetSection = document.getElementById(sectionId);
-        
-        // Se a seção existir no HTML, vai direto para ela
         if (targetSection) {
             window.switchSection(sectionId, null);
+        } else {
+            window.switchSection('view-home', null);
         }
+    } else {
+        window.switchSection('view-home', null);
     }
 });
 

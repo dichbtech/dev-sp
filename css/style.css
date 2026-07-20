@@ -253,7 +253,7 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
 .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
 .btn-tab { background: var(--bg-elevated); border: 1px solid var(--border-strong); color: var(--text-muted); padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
 .btn-tab:hover { background: var(--bg-surface); border-color: var(--accent); color: var(--text-main); }
-.btn-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+.btn-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg-inverse); }
 .badge-tab { background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px; font-weight: 700; }
 
 /* Detalhes Membro Metas */
