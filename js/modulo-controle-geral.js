@@ -133,7 +133,7 @@ async function carregarAPIsGerais() {
         window.dadosGeraisRH.licencas.clear();
         if(Array.isArray(licencasRes)) {
             licencasRes.forEach(l => {
-                if(l.Envolvido && l.Status === 'Aprovado') {
+                if(l.Envolvido && l.Status && !l.Status.toLowerCase().includes('cancelad') && !l.Status.toLowerCase().includes('reprovad')) {
                     window.dadosGeraisRH.licencas.set(l.Envolvido.replace('[', '').toLowerCase(), l);
                 }
             });
@@ -203,8 +203,8 @@ function renderizarMembrosAtivos() {
         let dadosPatente = window.dadosGeraisRH.patentes.get(nickLower) || {};
         let patente = dadosPatente['Posto/Grad'] || 'Desconhecida';
         let dadosLicenca = window.dadosGeraisRH.licencas.get(nickLower);
-        let dtI = dadosLicenca ? (dadosLicenca['Data de Início'] || dadosLicenca['Data Início'] || dadosLicenca['Início'] || dadosLicenca['Data Inicial'] || dadosLicenca['Data'] || '?') : '?';
-        let dtT = dadosLicenca ? (dadosLicenca['Data de Término'] || dadosLicenca['Data Término'] || dadosLicenca['Término'] || dadosLicenca['Data Final'] || dadosLicenca['Vencimento'] || '?') : '?';
+        let dtI = dadosLicenca ? (dadosLicenca['Data e Inicio'] || dadosLicenca['Data de Início'] || dadosLicenca['Data Início'] || '?') : '?';
+        let dtT = dadosLicenca ? (dadosLicenca['Data de Termino'] || dadosLicenca['Data de Término'] || dadosLicenca['Data Término'] || '?') : '?';
         let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dtI} a ${dtT}</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
         let email = window.dadosGeraisRH.emails.get(nickLower) || '';
         let funcaoRaw = m.Cargos || m.Cargo || 'Sp';
@@ -524,7 +524,7 @@ function renderizarNotificacoes() {
         
         tr.innerHTML = `
             <td>#${n['# (ID)'] || n.ID || n['#'] || '-'}</td>
-            <td>${n.Aplicador || '-'}</td>
+            <td>${(n.Aplicador || '-').replace('[', '')}</td>
             <td><b>${(n.Envolvido || '-').replace('[', '')}</b></td>
             <td>${n['Data e Hora'] || '-'}</td>
             <td><span style="color:#aaa; font-size:12px;">${displayDias}</span></td>
