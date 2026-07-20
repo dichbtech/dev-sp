@@ -1,13 +1,11 @@
 
 // ==========================================
 // MÓDULO DE CONTROLE INTERNO GERAL
-// ==========================================
-
 window.unsubSolicitacoes = null;
 window.unsubRetiradas = null;
 
-// Usar Vercel Serverless Function em /api/proxy para desviar do Cloudflare
-const CORS_PROXY = '/api/proxy?url=';
+// Proxy Cloudflare Workers dedicado
+const CORS_PROXY = 'https://supervisores.alvesedu-br.workers.dev/?url=';
 const URL_MEMBROS_DIVISAO = 'https://policiadic.com/funcao/supervisores/tabela/membros';
 const URL_PATENTES = 'https://policiadic.com/lista/membros';
 const URL_LICENCAS = 'https://policiadic.com/lista/aval';
