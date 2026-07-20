@@ -110,7 +110,9 @@ select option { background: var(--bg-surface); color: var(--text-main); }
 .banner-main img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* AVATAR ANIMAÇÃO CORRIGIDA */
-.avatar-scene { display: flex; gap: 20px; align-items: stretch; }
+.home-columns { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; align-items: stretch; flex: 1; }
+@media (max-width: 1100px) { .home-columns { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 768px) { .home-columns { grid-template-columns: 1fr; } }
 .notice-board { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .avatar-container { position: relative; width: 200px; height: 160px; overflow: visible; flex-shrink: 0; }
 .habbo-avatar { position: absolute; bottom: 0; right: -150px; transition: right 2s linear; image-rendering: pixelated; z-index: 2; width: 90px; }

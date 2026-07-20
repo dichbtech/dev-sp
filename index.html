@@ -24,7 +24,7 @@
 
 
 
-    <link href="css/style.css?v=9" rel="stylesheet">
+    <link href="css/style.css?v=11" rel="stylesheet">
 
     
 
@@ -164,7 +164,7 @@
 
                 
 
-                <div class="avatar-scene">
+                <div class="home-columns">
 
                     <div class="notice-board card" style="margin:0;">
 
@@ -177,6 +177,20 @@
                         </p>
 
                     </div>
+
+                    <div class="events-box" id="events-container">
+
+                <div class="events-title"><span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span><span id="mes-atual" style="color:#fff; font-size:14px;"></span></div>
+
+                <div id="ui-lista-eventos" style="flex:1;"></div>
+
+                <div class="events-title" style="font-size: 15px; margin-top:10px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
+
+                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px; position:relative; flex-wrap:wrap;" id="sponsors-container" class="sponsor-list"></div>
+
+                <div class="sponsor-text">"<span id="ui-txt-patrocinio"></span>"<br><br><span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span></div>
+
+             </div>
 
                     <div class="avatar-container">
 
@@ -267,28 +281,9 @@
                 <div id="txt-empate-2" class="empate-text" style="display:none; position: absolute; left: 204px; top: 124px; width: auto;">EMPATE</div>
 
              </div>
-
-             <div class="events-box" id="events-container">
-
-                <div class="events-title"><span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span><span id="mes-atual" style="color:#fff; font-size:14px;"></span></div>
-
-                <div id="ui-lista-eventos" style="flex:1;"></div>
-
-                <div class="events-title" style="font-size: 15px; margin-top:10px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
-
-                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px; position:relative; flex-wrap:wrap;" id="sponsors-container" class="sponsor-list"></div>
-
-                <div class="sponsor-text">"<span id="ui-txt-patrocinio"></span>"<br><br><span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span></div>
-
-             </div>
-
-          </div>
-
-          <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;"><div class="input-block" style="max-width: 300px; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div></div>
-
-          
-
-          <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
+             <div class="member-search-box" style="display: flex; flex-direction: column; flex: 1; min-width: 300px; gap: 20px;">
+                <div style="display: flex; gap: 15px; align-items: center;"><div class="input-block" style="width: 100%; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div></div>
+                <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
 
              <div class="member-stage-box" id="stage-container" style="position: relative; height: 350px;">
 
@@ -321,6 +316,18 @@
              </div>
 
           </div>
+             </div>
+
+
+             
+
+          </div>
+
+          
+
+          
+
+          
 
 
 
