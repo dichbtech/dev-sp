@@ -491,7 +491,7 @@
 
         <main id="modulo-revisao" class="spa-view card">
 
-            <h3><i class="fas fa-search"></i> Revisão de Correções</h3><p class="subtext">Fiscalize as correções realizadas pela Liderança em um período específico.</p><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;"><div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;"><div style="flex:1; min-width:180px;"><label class="tech-label">Data de Início</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-inicio"></div></div><div style="flex:1; min-width:180px;"><label class="tech-label">Data de Fim</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-fim"></div></div><button class="btn-tech" onclick="window.solicitarLevantamento()" style="padding:15px;"><i class="fas fa-cloud-download-alt"></i> Buscar na Planilha</button></div></div><div id="rev-status-area" style="text-align:center; padding:20px; display:none;"></div><div id="rev-results-area" style="display:none; flex-direction:column; gap:20px;"><div class="tabs-container" id="tabs-revisao" style="justify-content:center; margin-bottom:10px;"><button class="btn-tab active" onclick="window.filtrarRevisao('Relatórios', this)">Relatórios</button><button class="btn-tab" onclick="window.filtrarRevisao('Grupos', this)">Grupos</button><button class="btn-tab" onclick="window.filtrarRevisao('Soldados', this)">Soldados</button><button class="btn-tab" onclick="window.filtrarRevisao('Convites', this)">Convites</button><button class="btn-tab" onclick="window.filtrarRevisao('PPP', this)">PPP</button></div><div id="rev-lista"></div><button class="btn-tech btn-save" onclick="window.concluirRevisao()" style="padding:15px; width:100%; background:#ef4444; color:#fff; border:none; box-shadow:0 0 15px rgba(239,68,68,0.3);"><i class="fas fa-trash-alt"></i> Concluir Revisão (Apagar Dados)</button></div>
+            <h3><i class="fas fa-search"></i> Revisão de Correções</h3><p class="subtext">Fiscalize as correções realizadas pela Liderança em um período específico.</p><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;"><div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;"><div style="flex:1; min-width:180px;"><label class="tech-label">Data de Início</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-inicio"></div></div><div style="flex:1; min-width:180px;"><label class="tech-label">Data de Fim</label><div class="input-block" style="margin:0;"><input type="date" id="rev-data-fim"></div></div><button class="btn-tech" onclick="window.solicitarLevantamento()" style="padding:15px;"><i class="fas fa-search"></i> Buscar no Banco</button></div></div><div id="rev-status-area" style="text-align:center; padding:20px; display:none;"></div><div id="rev-results-area" style="display:none; flex-direction:column; gap:20px;"><div class="tabs-container" id="tabs-revisao" style="justify-content:center; margin-bottom:10px;"><button class="btn-tab active" onclick="window.filtrarRevisao('Relatórios', this)">Relatórios</button><button class="btn-tab" onclick="window.filtrarRevisao('Grupos', this)">Grupos</button><button class="btn-tab" onclick="window.filtrarRevisao('Soldados', this)">Soldados</button><button class="btn-tab" onclick="window.filtrarRevisao('Convites', this)">Convites</button><button class="btn-tab" onclick="window.filtrarRevisao('PPP', this)">PPP</button></div><div id="rev-lista"></div></div>
 
         </main>
 
@@ -1580,9 +1580,9 @@
 
   <script src="js/modulo-correcoes.js?v=2"></script>
 
-  <script src="js/modulo-revisao.js?v=2"></script>
+  <script src="js/modulo-revisao.js?v=1784587722"></script>
 
-  <script src="js/modulo-requerimentos.js?v=2"></script>
+  <script src="js/modulo-requerimentos.js?v=1784587722"></script>
 
   <script src="js/auth.js?v=1784580714"></script>
 

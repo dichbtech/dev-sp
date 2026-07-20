@@ -65,71 +65,78 @@ window.submitFormRequerimentos = function(event) {
     }
 
     let formData = {
-        nick_autor: nick,
-        cargo_autor: cargo,
-        data_hora_envio: dataHoraEnvio,
-        aba_submetida: abaAtivaId
+        tipo: '',
+        nick: nick,
+        cargo: cargo,
+        dataPostagem: dataHoraEnvio,
+        avaliado: false,
+        lixo: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     let hasError = false;
 
     if (abaAtivaId === 'tab-relatorios') {
+        formData.tipo = 'Relatórios';
         formData.link = getVal('relatorio_link');
         formData.natureza = getVal('relatorio_natureza');
         
         if (!formData.link || !formData.natureza) hasError = true;
 
         if (formData.natureza === 'Grupo de Controle') {
-            formData.publico_alvo = getVal('relatorio_publico_alvo');
-            if (!formData.publico_alvo) hasError = true;
+            formData.publicoAlvo = getVal('relatorio_publico_alvo');
+            if (!formData.publicoAlvo) hasError = true;
         } else if (formData.natureza === 'Grupo de Promoções') {
-            formData.data_referencia = getVal('relatorio_data_referencia');
-            if (!formData.data_referencia) hasError = true;
+            formData.dataReferencia = getVal('relatorio_data_referencia');
+            if (!formData.dataReferencia) hasError = true;
         }
     } 
     else if (abaAtivaId === 'tab-soldados') {
+        formData.tipo = 'Soldados';
         formData.link = getVal('soldados_link');
         if (!formData.link) hasError = true;
     }
     else if (abaAtivaId === 'tab-grupos') {
+        formData.tipo = 'Grupos';
         formData.link = getVal('grupos_link');
         if (!formData.link) hasError = true;
     }
     else if (abaAtivaId === 'tab-convites') {
-        formData.nick_convidado = getVal('convite_nick');
-        formData.data_inicio = getVal('convite_data_inicio');
-        formData.data_fim = getVal('convite_data_fim');
+        formData.tipo = 'Convites';
+        formData.nickConvidado = getVal('convite_nick');
+        formData.dataInicio = getVal('convite_data_inicio');
+        formData.dataFim = getVal('convite_data_fim');
         formData.provas = getVal('convite_provas');
-        formData.status = getVal('convite_status');
+        formData.statusConvidado = getVal('convite_status');
 
-        if (!formData.nick_convidado || !formData.data_inicio || !formData.data_fim || !formData.provas || !formData.status) {
+        if (!formData.nickConvidado || !formData.dataInicio || !formData.dataFim || !formData.provas || !formData.statusConvidado) {
             hasError = true;
         }
     }
     else if (abaAtivaId === 'tab-ppp') {
-        formData.nick_promovido = getVal('ppp_promovido');
-        formData.nick_promotor = getVal('ppp_promotor');
-        formData.id_promocao = getVal('ppp_id');
+        formData.tipo = 'PPP';
+        formData.nickPromovido = getVal('ppp_promovido');
+        formData.nickPromotor = getVal('ppp_promotor');
+        formData.idPromocao = getVal('ppp_id');
         formData.provas = getVal('ppp_provas');
 
-        if (!formData.nick_promovido || !formData.nick_promotor || !formData.id_promocao || !formData.provas) {
+        if (!formData.nickPromovido || !formData.nickPromotor || !formData.idPromocao || !formData.provas) {
             hasError = true;
         }
     }
 
     if (hasError) {
-        alert('Por favor, preencha todos os campos obrigatórios da aba ativa.');
+        window.customAlert('Por favor, preencha todos os campos obrigatórios da aba ativa.', 'Atenção');
         return;
     }
 
-    console.log('=== DADOS DO FORMULÁRIO ENVIADO ===');
-    console.log(JSON.stringify(formData, null, 2));
-    console.log('===================================');
-
-    alert('Formulário enviado com sucesso! Verifique o console.log (F12) para ver os dados gerados.');
-    
-    document.getElementById('activityFormRequerimentos').reset();
-    window.resetConditionalFieldsRequerimentos();
+    db.collection('atividades_pendentes').add(formData).then(() => {
+        window.customAlert('Atividade submetida com sucesso! Aguarde a correção da liderança.', 'Enviado');
+        document.getElementById('activityFormRequerimentos').reset();
+        window.resetConditionalFieldsRequerimentos();
+    }).catch(err => {
+        window.customAlert('Erro ao enviar atividade: ' + err.message, 'Erro');
+    });
 };
 
 window.aplicarRestricoesRequerimentos = function() {
