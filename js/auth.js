@@ -19,6 +19,7 @@ window.liberarPainel = function() {
     window.escutarCargos();
     window.escutarConfigDashboard();
     window.escutarMetasDoFirebase();
+    if (window.carregarModuloRH) window.carregarModuloRH();
     
     let lvl = window.nivelUsuarioGlobal;
     if (['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
