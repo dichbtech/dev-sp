@@ -424,3 +424,64 @@ window.toggleTheme = function() {
         icon.className = newTheme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
     }
 };
+
+// ==========================================
+// FUNÇÕES UTILITÁRIAS E INTEGRAÇÃO DE BANNERS/IMGUR
+// ==========================================
+
+window.renderImgurEmbed = function(url) {
+    if (!url) return '';
+    let isImgur = url.toLowerCase().includes('imgur.com');
+    if (!isImgur) {
+        return `<a href="${url}" target="_blank" style="color:var(--sup-neon); text-decoration:underline;"><i class="fas fa-external-link-alt"></i> Ver Comprovação Original</a>`;
+    }
+    
+    let hash = '';
+    let match = url.match(/imgur\.com\/(?:a\/)?(?:gallery\/)?([a-zA-Z0-9]+)/);
+    if (match && match[1]) {
+        hash = match[1];
+        return `<iframe class="imgur-embed-iframe-pub" src="https://imgur.com/${hash}/embed?pub=true" style="height: 500px; width: 100%; border:none; margin-top:10px; border-radius:8px; background:#111;"></iframe>`;
+    }
+    return `<a href="${url}" target="_blank" style="color:var(--sup-neon); text-decoration:underline;"><i class="fas fa-external-link-alt"></i> Ver Comprovação</a>`;
+};
+
+window.initBannersHome = function() {
+    if (!window.db) return;
+    window.db.collection('configuracoes').doc('geral').onSnapshot(doc => {
+        let banners = [];
+        if (doc.exists && doc.data().banners && doc.data().banners.length > 0) {
+            banners = doc.data().banners;
+        } else {
+            banners = ['https://i.imgur.com/cJiEYNN.jpeg'];
+        }
+        
+        let wrapper = document.getElementById('home-banners-wrapper');
+        if (!wrapper) return;
+        
+        wrapper.innerHTML = '';
+        banners.forEach((b, i) => {
+            let div = document.createElement('div');
+            div.className = 'banner-slide' + (i === 0 ? ' active' : '');
+            div.style.backgroundImage = `url('${b}')`;
+            wrapper.appendChild(div);
+        });
+        
+        if (window.bannerInterval) clearInterval(window.bannerInterval);
+        if (banners.length > 1) {
+            let idx = 0;
+            window.bannerInterval = setInterval(() => {
+                let slides = wrapper.querySelectorAll('.banner-slide');
+                if (slides.length <= 1) return;
+                slides[idx].classList.remove('active');
+                idx = (idx + 1) % slides.length;
+                slides[idx].classList.add('active');
+            }, 6000);
+        }
+    });
+};
+
+setTimeout(() => {
+    if (window.db) {
+        window.initBannersHome();
+    }
+}, 1500);

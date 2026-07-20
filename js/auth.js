@@ -96,6 +96,16 @@ window.gerarMenusPorNivel = function() {
             <div class="tool-icon"><i class="fas fa-file-signature"></i></div>
             <div class="tool-info"><h4>Requerimentos</h4><p>Formulários DIC</p></div>
         </div>
+        ${ehAuxiliar ? `
+        <div class="tool-card" onclick="window.switchSection('modulo-acompanhamentos')">
+            <div class="tool-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="tool-info"><h4>Acompanhamentos</h4><p>Painel de Tarefas</p></div>
+        </div>
+        ` : ''}
+        <div class="tool-card" onclick="window.switchSection('modulo-avisos')">
+            <div class="tool-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="tool-info"><h4>Avisos</h4><p>Emissão Oficial</p></div>
+        </div>
         <div class="tool-card" onclick="window.abrirSystemDIC()">
             <div class="tool-icon"><i class="fas fa-external-link-alt"></i></div>
             <div class="tool-info"><h4>System DIC</h4><p>Acesso externo</p></div>
@@ -113,7 +123,9 @@ window.gerarMenusPorNivel = function() {
         ${ehAuxiliar ? `
         <div class="dock-item" id="menu-modulo-avais" data-label="Licenças" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i></div>
         <div class="dock-item" id="menu-modulo-feedbacks" data-label="Feedbacks" onclick="window.switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i></div>
+        <div class="dock-item" id="menu-modulo-acompanhamentos" data-label="Acompanhamentos" onclick="window.switchSection('modulo-acompanhamentos', this)"><i class="fas fa-clipboard-list"></i></div>
         ` : ''}
+        <div class="dock-item" id="menu-modulo-avisos" data-label="Avisos" onclick="window.switchSection('modulo-avisos', this)"><i class="fas fa-bullhorn"></i></div>
         <div class="dock-item" id="menu-modulo-grupos" data-label="Controle Grupos" onclick="window.switchSection('modulo-grupos', this)"><i class="fas fa-users"></i></div>
     `;
     if (ehLideranca) {
@@ -157,6 +169,8 @@ window.gerarMenusPorNivel = function() {
     if (cmd && ehSuperLideranca) {
                         cmd.innerHTML = `
             <div class="cmd-tile" onclick="window.switchSection('modulo-revisao'); window.toggleCommand();"><i class="fas fa-search"></i><span>Revisão</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-config-avisos'); window.carregarEditorAvisos(); window.toggleCommand();"><i class="fas fa-edit"></i><span>Textos Avisos</span></div>
+            <div class="cmd-tile" onclick="window.switchSection('modulo-config-banners'); window.carregarEditorBanners(); window.toggleCommand();"><i class="fas fa-images"></i><span>Banners Home</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-logs-atividades'); window.toggleCommand();"><i class="fas fa-eye"></i><span>Auditoria Global</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-logs'); window.toggleCommand();"><i class="fas fa-history"></i><span>Logs Estrelas</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-acessos'); window.toggleCommand();"><i class="fas fa-users-cog"></i><span>Acessos</span></div>

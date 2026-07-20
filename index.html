@@ -131,11 +131,11 @@
 
             <div class="home-layout">
 
-                <div class="banner-main">
-
-                    <img src="https://i.imgur.com/cJiEYNN.jpeg" alt="Banner Oficial">
-
-                </div>
+                <div id="banner-carousel-container">
+                        <div id="home-banners-wrapper">
+                            <!-- Banners dinâmicos serão injetados aqui -->
+                        </div>
+                    </div>
 
                 
 
@@ -681,6 +681,45 @@
                 </div>
             </form>
         </main>
+        <!-- ==========================================
+             MÓDULO DE ACOMPANHAMENTOS
+             ========================================== -->
+        <main class="spa-view card" id="modulo-acompanhamentos">
+            <h3><i class="fas fa-clipboard-list"></i> Sistema de Acompanhamentos</h3>
+            <p class="subtext">Central de gerenciamento de acompanhamentos para Auxiliares.</p>
+
+            <div class="tabs-container" id="tabs-acompanhamentos" style="margin-bottom: 20px;">
+                <button class="btn-tab active" data-target="acomp-disp" onclick="window.switchTabAcompanhamentos('acomp-disp', this)">Disponíveis</button>
+                <button class="btn-tab" data-target="acomp-meus" onclick="window.switchTabAcompanhamentos('acomp-meus', this)">Meus Acompanhamentos</button>
+                <button class="btn-tab" data-target="acomp-conc" onclick="window.switchTabAcompanhamentos('acomp-conc', this)">Concluídos</button>
+            </div>
+            
+            <div id="btn-criar-acompanhamento-box" style="margin-bottom: 20px; display:none;">
+                <button class="btn-tech" onclick="window.abrirModalCriarAcompanhamento()" style="padding:10px 20px;"><i class="fas fa-plus"></i> Novo Acompanhamento (Liderança)</button>
+            </div>
+
+            <div id="acomp-lista" class="cards-grid"></div>
+        </main>
+
+        <!-- ==========================================
+             MÓDULO DE AVISOS
+             ========================================== -->
+        <main class="spa-view card" id="modulo-avisos">
+            <h3><i class="fas fa-bullhorn"></i> Emissão de Avisos</h3>
+            <p class="subtext">Central de comunicados e registros oficiais da Supervisão.</p>
+            
+            <div id="btn-criar-aviso-box" style="margin-bottom: 20px; display:none;">
+                <button class="btn-tech" onclick="window.abrirModalCriarAviso()" style="padding:10px 20px;"><i class="fas fa-plus"></i> Emitir Novo Aviso (Liderança)</button>
+            </div>
+
+            <div class="tabs-container" id="tabs-avisos" style="margin-bottom: 20px;">
+                <button class="btn-tab active" data-target="avisos-disp" onclick="window.switchTabAvisos('avisos-disp', this)">Pendentes de Envio</button>
+                <button class="btn-tab" data-target="avisos-conc" onclick="window.switchTabAvisos('avisos-conc', this)">Enviados</button>
+            </div>
+
+            <div id="avisos-lista" class="cards-grid"></div>
+        </main>
+
 
 
 
@@ -1176,7 +1215,7 @@
 
   
 
-  <script src="js/ui-tools.js?v=1784521286"></script>
+  <script src="js/ui-tools.js?v=1784559015"></script>
 
   <script src="js/firebase-init.js?v=2"></script>
 
@@ -1184,7 +1223,7 @@
 
   <script src="js/modulo-estrelas.js?v=1784522438"></script>
 
-  <script src="js/modulo-admin.js?v=1784522438"></script>
+  <script src="js/modulo-admin.js?v=1784559015"></script>
 
   <script src="js/modulo-correcoes.js?v=2"></script>
 
@@ -1192,7 +1231,7 @@
 
   <script src="js/modulo-requerimentos.js?v=2"></script>
 
-  <script src="js/auth.js?v=1784522675"></script>
+  <script src="js/auth.js?v=1784559015"></script>
 
 
 

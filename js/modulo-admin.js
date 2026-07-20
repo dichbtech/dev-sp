@@ -259,3 +259,106 @@ window.escutarLogsAtividades = function() {
         });
     });
 }
+// ====== GESTÃO DE TEXTOS DE AVISOS ======
+window.carregarEditorAvisos = function() {
+    let container = document.getElementById('avisos-templates-container');
+    if(!container) return;
+    container.innerHTML = '<div style="text-align:center; color:var(--sup-neon);"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
+    
+    window.db.collection('configuracoes').doc('textos_avisos').get().then(doc => {
+        let tmpl = window.templatesAvisos; // from modulo-avisos.js (fallback)
+        if (doc.exists && doc.data().templates) {
+            tmpl = doc.data().templates;
+        }
+        
+        let html = '';
+        for(let t in tmpl) {
+            html += `
+            <div class="input-group" style="margin-bottom:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+                <label style="color:var(--sup-neon); font-weight:bold; font-size:14px;"><i class="fas fa-quote-left"></i> ${t}</label>
+                <textarea class="input-padrao template-aviso-input" data-tipo="${t}" rows="4" style="font-size:13px; font-family:monospace; margin-top:10px;">${tmpl[t]}</textarea>
+            </div>
+            `;
+        }
+        container.innerHTML = html;
+    });
+};
+
+window.salvarTemplatesAvisos = function() {
+    let container = document.getElementById('avisos-templates-container');
+    if(!container) return;
+    let inputs = container.querySelectorAll('.template-aviso-input');
+    let novosTemplates = {};
+    inputs.forEach(inp => {
+        novosTemplates[inp.getAttribute('data-tipo')] = inp.value;
+    });
+    
+    window.db.collection('configuracoes').doc('textos_avisos').set({
+        templates: novosTemplates
+    }).then(() => {
+        window.customAlert('Textos atualizados com sucesso!', 'Sucesso');
+        // Atualiza a memoria local
+        if (window.templatesAvisos) window.templatesAvisos = novosTemplates;
+    }).catch(e => {
+        window.customAlert('Erro ao salvar: ' + e.message, 'Erro');
+    });
+};
+
+// ====== GESTÃO DE BANNERS DA HOME ======
+window.carregarEditorBanners = function() {
+    let container = document.getElementById('lista-banners-container');
+    if(!container) return;
+    container.innerHTML = '<div style="text-align:center; color:var(--sup-neon);"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
+    
+    window.db.collection('configuracoes').doc('geral').get().then(doc => {
+        let banners = [];
+        if (doc.exists && doc.data().banners) {
+            banners = doc.data().banners;
+        } else {
+            banners = ['https://i.imgur.com/cJiEYNN.jpeg'];
+        }
+        
+        container.innerHTML = '';
+        banners.forEach(b => {
+            window.adicionarLinhaBanner(b);
+        });
+    });
+};
+
+window.adicionarLinhaBanner = function(url = '') {
+    let container = document.getElementById('lista-banners-container');
+    if(!container) return;
+    
+    let div = document.createElement('div');
+    div.style.display = 'flex';
+    div.style.gap = '10px';
+    div.style.marginBottom = '10px';
+    
+    div.innerHTML = `
+        <input type="text" class="input-padrao banner-url-input" value="${url}" placeholder="Ex: https://i.imgur.com/XXX.jpg" style="flex:1;">
+        <button onclick="this.parentElement.remove()" style="background:rgba(255,42,42,0.1); border:1px solid #ff2a2a; color:#ff2a2a; border-radius:6px; padding:0 15px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+    `;
+    container.appendChild(div);
+};
+
+window.salvarBannersHome = function() {
+    let inputs = document.querySelectorAll('.banner-url-input');
+    let urls = [];
+    inputs.forEach(inp => {
+        let val = inp.value.trim();
+        if(val) urls.push(val);
+    });
+    
+    if(urls.length === 0) {
+        window.customAlert('Adicione pelo menos um banner.', 'Aviso');
+        return;
+    }
+    
+    window.db.collection('configuracoes').doc('geral').set({
+        banners: urls
+    }, {merge:true}).then(() => {
+        window.customAlert('Banners da Home atualizados!', 'Sucesso');
+    }).catch(e => {
+        window.customAlert('Erro ao salvar: ' + e.message, 'Erro');
+    });
+};
