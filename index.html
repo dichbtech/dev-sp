@@ -1220,7 +1220,65 @@
             <div id="lista-banners-container"></div>
             <button class="btn-tech" style="width:100%; margin-top:20px; background:rgba(255,255,255,0.1); border-color:#fff;" onclick="window.adicionarLinhaBanner()"><i class="fas fa-plus"></i> Adicionar Banner</button>
             <button class="btn-tech" style="width:100%; margin-top:10px;" onclick="window.salvarBannersHome()"><i class="fas fa-save"></i> Salvar Carrossel</button>
+        </main>\n
+        <!-- ==========================================
+             MÓDULO DE VERIFICAÇÕES
+             ========================================== -->
+        <main class="spa-view card" id="modulo-verificacoes">
+            <h3><i class="fas fa-gavel"></i> Controle de Verificações</h3>
+            <p class="subtext">Painel de punições administrativas aplicadas pela Liderança.</p>
+
+            <div id="alertas-verificacoes-container"></div>
+
+            <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 25px;">
+                <h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-plus-circle"></i> Nova Verificação</h4>
+                
+                <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-start;">
+                    <div style="flex:1; min-width:150px;">
+                        <label class="tech-label">Nick do Policial</label>
+                        <div class="input-block" style="margin:0;">
+                            <input type="text" id="verif-alvo" placeholder="Ex: duduzinh872">
+                        </div>
+                    </div>
+                    
+                    <div style="flex:1; min-width:150px;">
+                        <label class="tech-label">ID da Promoção (Opcional)</label>
+                        <div class="input-block" style="margin:0;">
+                            <input type="text" id="verif-id" placeholder="Ex: 502">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:15px;">
+                    <label class="tech-label">Motivo / Descrição</label>
+                    <div class="input-block" style="margin:0;">
+                        <textarea id="verif-motivo" rows="3" placeholder="Explique a razão da punição..."></textarea>
+                    </div>
+                </div>
+
+                <button class="btn-tech" id="btn-aplicar-verif" onclick="window.aplicarVerificacao()" style="margin-top:20px; padding:12px 20px; width:100%;"><i class="fas fa-gavel"></i> Aplicar Verificação</button>
+            </div>
+
+            <h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-list"></i> Histórico de Verificações</h4>
+            <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Alvo</th>
+                            <th>ID Promo</th>
+                            <th>Status</th>
+                            <th>Progresso</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb-verificacoes">
+                        <!-- Renderizado via JS -->
+                    </tbody>
+                </table>
+            </div>
         </main>
+
 
 
     </div>
@@ -1305,7 +1363,7 @@
 
 
   <script src="js/modulo-acompanhamentos.js?v=1784561296"></script>
-  <script src="js/modulo-avisos.js?v=3"></script>
+  <script src="js/modulo-verificacoes.js?v=1784568995"></script>\n  <script src="js/modulo-avisos.js?v=3"></script>
   <script src="js/modulo-admin.js?v=1784559015"></script>
 
   <script src="js/modulo-correcoes.js?v=2"></script>
@@ -1314,7 +1372,7 @@
 
   <script src="js/modulo-requerimentos.js?v=2"></script>
 
-  <script src="js/auth.js?v=1784559015"></script>
+  <script src="js/auth.js?v=1784568995"></script>
 
 
 
