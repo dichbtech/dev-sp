@@ -16,7 +16,8 @@ window.dadosGeraisRH = {
     patentes: new Map(),
     licencas: new Map(),
     notificacoes: [],
-    emails: new Map() // Salvos no nosso Firebase
+    emails: new Map(),
+    congelados: new Set()
 };
 
 // ==========================================
@@ -111,6 +112,10 @@ async function carregarAPIsGerais() {
     
     try {
         let snapEmails = await db.collection('membros_emails').get();
+        let snapCongelados = await db.collection('membros_congelados').get();
+        window.dadosGeraisRH.congelados.clear();
+        snapCongelados.forEach(doc => window.dadosGeraisRH.congelados.add(doc.id.toLowerCase()));
+
         window.dadosGeraisRH.emails.clear();
         snapEmails.forEach(doc => {
             window.dadosGeraisRH.emails.set(doc.id.replace(/\[/g, '').replace(/\]/g, '').toLowerCase(), doc.data().email);
@@ -225,6 +230,7 @@ function renderizarMembrosAtivos() {
         "Sp": "Supervisor"
     };
 
+        let isAuxiliarOnly = ['AUXILIAR'].includes(window.nivelUsuarioGlobal) && !['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal);
     membros.forEach(m => {
         let rawNick = (m.Nickname || m.Nick || 'N/A').replace(/\[/g, '').replace(/\]/g, '');
         let nickLower = rawNick.toLowerCase();
@@ -233,7 +239,22 @@ function renderizarMembrosAtivos() {
         let dadosLicenca = window.dadosGeraisRH.licencas.get(nickLower);
         let dtI = dadosLicenca ? (dadosLicenca['Data e Inicio'] || dadosLicenca['Data de Início'] || dadosLicenca['Data Início'] || '?') : '?';
         let dtT = dadosLicenca ? (dadosLicenca['Data de Termino'] || dadosLicenca['Data de Término'] || dadosLicenca['Data Término'] || '?') : '?';
-        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dtI} a ${dtT}</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
+        
+        let isCongelado = window.dadosGeraisRH.congelados.has(nickLower);
+        let baseStatus = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dtI} a ${dtT}</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
+        
+        let status = baseStatus;
+        if (isCongelado) {
+            if (dadosLicenca) {
+                status = `<span style="color:#3b82f6;"><i class="fas fa-snowflake"></i> Congelado e em Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dtI} a ${dtT}</span>`;
+            } else {
+                status = `<span style="color:#3b82f6;"><i class="fas fa-snowflake"></i> Congelado</span>`;
+            }
+        }
+        
+        let checkedStr = isCongelado ? 'checked' : '';
+        let disabledStr = isAuxiliarOnly ? 'disabled' : '';
+
         let email = window.dadosGeraisRH.emails.get(nickLower) || '';
         let funcaoRaw = m.Cargos || m.Cargo || 'Sp';
         let funcaoInterna = mapaFuncoes[funcaoRaw] || funcaoRaw;
@@ -248,7 +269,7 @@ function renderizarMembrosAtivos() {
         }
 
         let membroData = {
-            rawNick, nickLower, patente, status, email, funcaoInterna, dataAsc, textoDias, dataObj, funcaoRaw
+            rawNick, nickLower, patente, status, email, funcaoInterna, dataAsc, textoDias, dataObj, funcaoRaw, checkedStr, disabledStr
         };
 
         if (['L.Sp', 'V.Sp', 'S.Sp'].includes(funcaoRaw) || ['Líder', 'Vice-Líder', 'Sub-Líder'].includes(funcaoInterna)) {
@@ -293,6 +314,9 @@ function renderizarMembrosAtivos() {
                 </div>
             </td>
             <td>${m.status}</td>
+            <td style="text-align:center;">
+                <input type="checkbox" ${m.checkedStr} ${m.disabledStr} onclick="window.toggleCongelarMembro('${m.nickLower}', this.checked)" style="transform: scale(1.3); cursor: ${m.disabledStr ? 'not-allowed' : 'pointer'};">
+            </td>
         `;
         tbody.appendChild(tr);
     }
@@ -665,3 +689,29 @@ firebase.auth().onAuthStateChanged(user => {
         }, 3000);
     }
 });
+
+
+window.toggleCongelarMembro = function(nickLower, isChecked) {
+    let lvl = window.nivelUsuarioGlobal;
+    let isAuxiliarOnly = ['AUXILIAR'].includes(lvl) && !['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl);
+    if(isAuxiliarOnly) {
+        window.customAlert("Você não tem permissão para alterar este status.", "Acesso Negado");
+        return;
+    }
+    
+    if(isChecked) {
+        db.collection('membros_congelados').doc(nickLower).set({ status: 'congelado', atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() })
+        .then(() => {
+            window.dadosGeraisRH.congelados.add(nickLower);
+            renderizarMembrosAtivos();
+        })
+        .catch(err => console.error("Erro ao congelar:", err));
+    } else {
+        db.collection('membros_congelados').doc(nickLower).delete()
+        .then(() => {
+            window.dadosGeraisRH.congelados.delete(nickLower);
+            renderizarMembrosAtivos();
+        })
+        .catch(err => console.error("Erro ao descongelar:", err));
+    }
+}
