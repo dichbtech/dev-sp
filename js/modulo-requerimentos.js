@@ -57,12 +57,8 @@ window.submitFormRequerimentos = function(event) {
     const minutos = String(dataAtual.getMinutes()).padStart(2, '0');
     const dataHoraEnvio = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
 
-    let nick = "Admin";
-    let cargo = "Supervisor";
-    if (window.sessionData) {
-        nick = window.sessionData.nick_usuario || nick;
-        cargo = window.sessionData.cargo_usuario || cargo;
-    }
+    let nick = window.usuarioLogadoNick || "Admin";
+    let cargo = window.cargoUsuarioGlobal || "Supervisor";
 
     let formData = {
         tipo: '',
@@ -104,12 +100,13 @@ window.submitFormRequerimentos = function(event) {
     else if (abaAtivaId === 'tab-convites') {
         formData.tipo = 'Convites';
         formData.nickConvidado = getVal('convite_nick');
-        formData.dataInicio = getVal('convite_data_inicio');
-        formData.dataFim = getVal('convite_data_fim');
+        formData.dataAplicacao = dataHoraEnvio.split(' ')[0];
+        formData.horaInicioFim = getVal('convite_data_inicio') + ' ~ ' + getVal('convite_data_fim');
+        formData.link = getVal('convite_provas');
         formData.provas = getVal('convite_provas');
-        formData.statusConvidado = getVal('convite_status');
+        formData.resposta = getVal('convite_status');
 
-        if (!formData.nickConvidado || !formData.dataInicio || !formData.dataFim || !formData.provas || !formData.statusConvidado) {
+        if (!formData.nickConvidado || !getVal('convite_data_inicio') || !getVal('convite_data_fim') || !formData.link || !formData.resposta) {
             hasError = true;
         }
     }
@@ -118,9 +115,10 @@ window.submitFormRequerimentos = function(event) {
         formData.nickPromovido = getVal('ppp_promovido');
         formData.nickPromotor = getVal('ppp_promotor');
         formData.idPromocao = getVal('ppp_id');
+        formData.link = getVal('ppp_provas');
         formData.provas = getVal('ppp_provas');
 
-        if (!formData.nickPromovido || !formData.nickPromotor || !formData.idPromocao || !formData.provas) {
+        if (!formData.nickPromovido || !formData.nickPromotor || !formData.idPromocao || !formData.link) {
             hasError = true;
         }
     }

@@ -1,3 +1,64 @@
+
+window.buscarHistoricoConvites = async function(element, nick, dataAtualStr) {
+    // A função aguarda um pouco para garantir que o element esteja no DOM se usar getElementById, 
+    // mas como passamos o elemento diretamente, podemos buscar dentro dele.
+    
+    // Pequeno delay para garantir DOM
+    setTimeout(async () => {
+        let histContainer = element.querySelector('.hist-container');
+        if (!histContainer) return;
+
+        try {
+            let snap = await window.db.collection('atividades_pendentes')
+                .where('tipo', '==', 'Convites')
+                .where('nickConvidado', '==', nick)
+                .get();
+            
+            let parseDateStr = function(str) {
+                if (!str) return null;
+                let p = str.split(' ')[0].split('/'); 
+                if (p.length === 3) return new Date(p[2], p[1] - 1, p[0]);
+                return null;
+            };
+            let dtAtual = parseDateStr(dataAtualStr);
+            let convitesRecentes = [];
+
+            snap.forEach(doc => {
+                let data = doc.data();
+                if (data.dataPostagem === dataAtualStr) return; // ignora a si mesmo
+                let dtHist = parseDateStr(data.dataPostagem);
+                if (dtAtual && dtHist) {
+                    let diffTime = dtAtual.getTime() - dtHist.getTime();
+                    let diffDias = Math.round(diffTime / (1000 * 3600 * 24));
+                    if (diffDias >= 0 && diffDias <= 7) {
+                        convitesRecentes.push({ diffDias: diffDias, resposta: data.resposta, dataStr: data.dataPostagem.split(' ')[0], autor: data.nick });
+                    }
+                }
+            });
+
+            if (convitesRecentes.length > 0) {
+                let html = '<strong style="color:#ff2a2a; font-size:12px; display:block; margin-bottom:8px;"><i class="fas fa-exclamation-triangle"></i> ATENÇÃO: CONVITES NOS ÚLTIMOS 7 DIAS (FARMING DETECTADO?)</strong>';
+                convitesRecentes.forEach(c => {
+                    let corResp = c.resposta && c.resposta.toLowerCase().includes('aceitou') ? '#4caf50' : '#ff2a2a';
+                    html += `<div style="font-size:11px; margin-bottom:5px; display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
+                        <span><i class="far fa-calendar-alt"></i> ${c.dataStr} (Há ${c.diffDias} dias)</span>
+                        <span style="color:#aaa;">Por: ${c.autor}</span>
+                        <span style="color:${corResp}; font-weight:bold;">${c.resposta || 'Sem resposta'}</span>
+                    </div>`;
+                });
+                histContainer.innerHTML = html;
+                histContainer.style.borderLeft = '3px solid #ff2a2a';
+                histContainer.style.background = 'rgba(255,42,42,0.1)';
+            } else {
+                histContainer.innerHTML = '<span style="color:#4caf50; font-size:11px;"><i class="fas fa-check-circle"></i> Nenhum convite nos últimos 7 dias.</span>';
+                histContainer.style.borderLeft = '3px solid #4caf50';
+            }
+        } catch (e) {
+            histContainer.innerHTML = '<span style="color:var(--text-sub); font-size:11px;">Erro ao buscar histórico.</span>';
+        }
+    }, 100);
+}
+
 /*
 * Módulo: Correção de Atividades (Liderança)
 * Responsável por puxar atividades da coleção 'atividades_pendentes' no Firebase, exibir e injetar a nota/correção nela mesma.
@@ -109,50 +170,8 @@ window.criarCardAtividade = function(d) {
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Grupo Associado</strong><span style="color:#fff;">${d.grupo || '-'}</span></div>
         </div>`;
     } else if (d.tipo === 'Convites') {
-        let historicoHtml = '<div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.5); border-left:3px solid var(--sup-neon); border-radius:4px;"><strong style="color:var(--sup-neon); font-size:12px; display:block; margin-bottom:8px;"><i class="fas fa-history"></i> HISTÓRICO DE CONVITES</strong>';
+        let historicoHtml = '<div class="hist-container" style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.5); border-left:3px solid var(--sup-neon); border-radius:4px;"><span style="color:var(--text-sub); font-size:11px;"><i class="fas fa-spinner fa-spin"></i> Buscando histórico de 7 dias...</span></div>';
         
-        if (d.historico) {
-            try {
-                let histArr = JSON.parse(d.historico);
-                if (histArr.length > 0) {
-                    let parseDateStr = function(str) {
-                        if (!str) return null;
-                        let p = str.split(' ')[0].split('/'); 
-                        if (p.length === 3) return new Date(p[2], p[1] - 1, p[0]);
-                        return null;
-                    };
-                    
-                    let dtAtual = parseDateStr(d.dataAplicacao);
-
-                    histArr.forEach(h => {
-                        let corResp = h.resposta.toLowerCase().includes('aceitou') ? '#4caf50' : '#ff2a2a';
-                        
-                        let dtHist = parseDateStr(h.data);
-                        let diffDias = 0;
-                        
-                        if (dtAtual && dtHist) {
-                            let diffTime = Math.abs(dtAtual.getTime() - dtHist.getTime());
-                            diffDias = Math.round(diffTime / (1000 * 3600 * 24));
-                        }
-                        
-                        let dataFormatada = h.data.split(' ')[0]; 
-                        historicoHtml += `<div style="font-size:11px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
-                            <span><i class="far fa-calendar-alt"></i> ${dataFormatada}</span>
-                            <span style="color:${corResp}; font-weight:bold; text-transform:uppercase;">${h.resposta}</span>
-                            <span style="color:var(--text-sub);">(${diffDias} dias atrás)</span>
-                        </div>`;
-                    });
-                } else {
-                    historicoHtml += '<span style="color:var(--text-sub); font-size:11px;">Nenhum convite anterior registrado para este policial.</span>';
-                }
-            } catch(e) {
-                historicoHtml += '<span style="color:var(--text-sub); font-size:11px;">Erro ao ler histórico.</span>';
-            }
-        } else {
-            historicoHtml += '<span style="color:var(--text-sub); font-size:11px;">Nenhum convite anterior registrado para este policial.</span>';
-        }
-        historicoHtml += '</div>';
-
         infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Aplicação</strong><span style="color:#fff;">${d.dataAplicacao || '-'}</span></div>
             <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Convidado</strong>${window.gerarAvatarNick(d.nickConvidado)}</div>
@@ -171,6 +190,7 @@ window.criarCardAtividade = function(d) {
 
     let linkUrl = d.link ? d.link.trim() : '';
     let btnLink = '';
+    let iframeHtml = '';
     
     if (linkUrl && linkUrl.startsWith('http')) {
         if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
@@ -178,6 +198,22 @@ window.criarCardAtividade = function(d) {
         } else {
             btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
         }
+
+        // Auto Embeds for Premium Visuals
+        if (linkUrl.includes('docs.google.com')) {
+            let embedUrl = linkUrl.replace(/\/edit.*?$/, '/preview');
+            iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);"><iframe src="${embedUrl}" style="width:100%; height:400px; border:none;"></iframe></div>`;
+        } else if (linkUrl.includes('imgur.com')) {
+            // Se for link direto de imagem
+            if (linkUrl.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+                iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); text-align:center; background:#000;"><img src="${linkUrl}" style="max-width:100%; max-height:400px; object-fit:contain;"></div>`;
+            } else {
+                // Tenta criar um iframe pro post
+                let imgurId = linkUrl.split('/').pop().split('.')[0];
+                iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);"><iframe src="https://imgur.com/a/${imgurId}/embed?pub=true" scrolling="no" frameborder="0" style="width:100%; height:350px;"></iframe></div>`;
+            }
+        }
+
     } else {
         btnLink = `<span style="color:#ff2a2a; font-size:13px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Link ausente ou inválido</span>`;
     }
@@ -212,6 +248,7 @@ window.criarCardAtividade = function(d) {
     div.innerHTML = `
         ${infoHtml}
         <div style="margin-bottom:15px;">${btnLink}</div>
+        ${iframeHtml}
         <div style="border-top:1px dashed rgba(251,191,36,0.3); padding-top:15px; background:rgba(251,191,36,0.02); padding: 15px; border-radius: 8px; margin-top:10px;">
             <label class="tech-label"><i class="fas fa-pencil-alt"></i> Área de Avaliação</label>
             <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap; margin-top:10px;">
@@ -221,6 +258,10 @@ window.criarCardAtividade = function(d) {
         </div>
     `;
 
+        if (d.tipo === 'Convites') {
+        window.buscarHistoricoConvites(div, d.nickConvidado, d.dataPostagem);
+    }
+    
     return div;
 }
 
