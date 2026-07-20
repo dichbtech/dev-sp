@@ -1277,19 +1277,19 @@
                     </tbody>
                 </table>
             </div>
-        </main>\n
+        </main>
         <!-- ==========================================
              MÓDULO DE RECURSOS HUMANOS (RH)
              ========================================== -->
         <main class="spa-view card" id="modulo-rh">
-            <h3><i class="fas fa-users-cog"></i> Controle de Recursos Humanos</h3>
-            <p class="subtext">Gerenciamento do corpo de membros, recrutamento e admissão.</p>
+            <h3><i class="fas fa-users-cog"></i> Controle Interno Geral</h3>
+            <p class="subtext">Gerenciador de membros e solicitações.</p>
 
             <div class="tabs-container" id="tabs-rh" style="margin-bottom: 20px;">
                 <button class="btn-tab active" id="tab-rh-membros" onclick="window.switchTabRH('Membros', this)">Membros</button>
                 <button class="btn-tab" id="tab-rh-retiradas" onclick="window.switchTabRH('Retiradas', this)">Retiradas</button>
                 <button class="btn-tab" id="tab-rh-notificacoes" onclick="window.switchTabRH('Notificacoes', this)">Notificações</button>
-                <button class="btn-tab" id="tab-rh-solicitacoes" onclick="window.switchTabRH('Solicitacoes', this)">Solicitações (Recrutas)</button>
+                <button class="btn-tab" id="tab-rh-solicitacoes" onclick="window.switchTabRH('Solicitacoes', this)">Solicitações</button>
             </div>
 
             <div id="rh-loading-status" style="display:none; text-align:center; padding: 20px; color: var(--sup-neon);">
@@ -1302,10 +1302,10 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Policial</th>
+                                <th>Nick</th>
+                                <th>Cargo/Posto/Graduação</th>
+                                <th>Função Interna</th>
                                 <th>E-mail</th>
-                                <th>Patente</th>
-                                <th>Cargo</th>
                                 <th>Status</th>
                                 <th>Ação</th>
                             </tr>
@@ -1317,11 +1317,30 @@
 
             <!-- View 2: Retiradas (SubLider+) -->
             <div id="rh-view-retiradas" class="rh-view" style="display:none;">
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 25px;">
+                    <h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-user-minus"></i> Cadastrar Retirada Manual</h4>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+                        <div style="flex:1; min-width:120px;">
+                            <label class="tech-label">Nick do Policial</label>
+                            <div class="input-block" style="margin:0;"><input type="text" id="ret-nick" placeholder="Nick" onblur="window.autoFetchEmailRetirada(this.value)"></div>
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label class="tech-label">Cargo Anterior</label>
+                            <div class="input-block" style="margin:0;"><input type="text" id="ret-cargo" placeholder="Ex: Supervisão"></div>
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label class="tech-label">E-mail</label>
+                            <div class="input-block" style="margin:0;"><input type="text" id="ret-email" placeholder="E-mail (Busca Auto)" disabled></div>
+                        </div>
+                        <button class="btn-tech" onclick="window.cadastrarRetiradaManual()" style="padding:15px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;"><i class="fas fa-sign-out-alt"></i> Cadastrar</button>
+                    </div>
+                </div>
                 <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Nick/Email</th>
+                                <th>Nick</th>
+                                <th>E-mail</th>
                                 <th>Cargo Anterior</th>
                                 <th>Data Retirada</th>
                                 <th>Checklist de Revogação</th>
@@ -1344,7 +1363,7 @@
                                 <th>Aplicador</th>
                                 <th>Envolvido</th>
                                 <th>Data/Hora</th>
-                                <th>Status (System)</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="tb-rh-notificacoes"></tbody>
@@ -1355,22 +1374,19 @@
             <!-- View 4: Solicitacoes (Auxiliar+) -->
             <div id="rh-view-solicitacoes" class="rh-view" style="display:none;">
                 <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 25px;">
-                    <h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-user-plus"></i> Novo Recruta</h4>
+                    <h4 style="color:var(--sup-neon); margin-bottom:15px; font-size:16px;"><i class="fas fa-user-plus"></i> Novo policial em formação</h4>
                     <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
                         <div style="flex:1; min-width:120px;">
                             <label class="tech-label">Nick</label>
-                            <div class="input-block" style="margin:0;"><input type="text" id="solic-nick" placeholder="Nick"></div>
-                        </div>
-                        <div style="flex:1; min-width:120px;">
-                            <label class="tech-label">Patente</label>
-                            <div class="input-block" style="margin:0;"><input type="text" id="solic-patente" placeholder="Cabo"></div>
+                            <div class="input-block" style="margin:0;"><input type="text" id="solic-nick" placeholder="Nick" onblur="window.autoFetchCargo(this.value)"></div>
                         </div>
                         <div style="flex:1; min-width:120px;">
                             <label class="tech-label">Telegram</label>
                             <div class="input-block" style="margin:0;"><input type="text" id="solic-telegram" placeholder="@arroba"></div>
                         </div>
-                        <button class="btn-tech" onclick="window.adicionarSolicitacaoRH()" style="padding:15px;"><i class="fas fa-plus"></i> Inserir no Funil</button>
+                        <button class="btn-tech" onclick="window.adicionarSolicitacaoRH()" style="padding:15px;"><i class="fas fa-plus"></i> Inserir policial</button>
                     </div>
+                    <div id="solic-cargo-feedback" style="margin-top:10px; font-size:12px; color:#10b981;"></div>
                 </div>
 
                 <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
@@ -1378,7 +1394,7 @@
                         <thead>
                             <tr>
                                 <th>Nick</th>
-                                <th>Patente</th>
+                                <th>Cargo/Posto/Graduação</th>
                                 <th>Telegram</th>
                                 <th>Criado Em</th>
                                 <th>Vence Em (3 Dias)</th>
@@ -1476,7 +1492,8 @@
 
 
   <script src="js/modulo-acompanhamentos.js?v=1784561296"></script>
-  <script src="js/modulo-rh.js?v=1784576133"></script>\n  <script src="js/modulo-verificacoes.js?v=1784570335"></script>
+  <script src="js/modulo-rh.js?v=1784577164"></script>
+  <script src="js/modulo-verificacoes.js?v=1784570335"></script>
   <script src="js/modulo-avisos.js?v=3"></script>
   <script src="js/modulo-admin.js?v=1784559015"></script>
 

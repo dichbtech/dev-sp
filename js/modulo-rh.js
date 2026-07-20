@@ -1,12 +1,13 @@
 
 // ==========================================
-// MÓDULO DE RECURSOS HUMANOS (CONTROLE GERAL)
+// MÓDULO DE CONTROLE INTERNO GERAL
 // ==========================================
 
 window.unsubSolicitacoes = null;
 window.unsubRetiradas = null;
 
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+// Removemos proxy corsproxy caso não precise, ou mantemos como fallback.
+const CORS_PROXY = 'https://corsproxy.io/?url=';
 const URL_MEMBROS_DIVISAO = 'https://policiadic.com/funcao/supervisores/tabela/membros';
 const URL_PATENTES = 'https://policiadic.com/lista/membros';
 const URL_LICENCAS = 'https://policiadic.com/lista/aval';
@@ -31,7 +32,6 @@ window.carregarModuloRH = async function() {
     
     if (!ehAuxiliar) return;
 
-    // Configura a visibilidade das abas baseada no cargo
     if(!ehSuperLider) {
         document.getElementById('tab-rh-membros').style.display = 'none';
         document.getElementById('tab-rh-retiradas').style.display = 'none';
@@ -41,13 +41,10 @@ window.carregarModuloRH = async function() {
         window.switchTabRH('Membros', document.getElementById('tab-rh-membros'));
     }
 
-    // Inicializa Listeners do Firebase (Sempre rodando)
     iniciarListenersFirebaseRH();
     
-    // Se for SubLider+, carrega os dados das APIs
-    if (ehSuperLider) {
-        await carregarAPIsGerais();
-    }
+    // Sempre carrega APIs se for auxiliar ou super, pois auxiliar precisa buscar o Cargo na solicitação
+    await carregarAPIsGerais();
 };
 
 window.switchTabRH = function(tabName, btnElement) {
@@ -58,7 +55,6 @@ window.switchTabRH = function(tabName, btnElement) {
     let view = document.getElementById('rh-view-' + tabName.toLowerCase());
     if(view) view.style.display = 'block';
     
-    // Renderizações específicas
     if(tabName === 'Membros') renderizarMembrosAtivos();
     if(tabName === 'Notificacoes') renderizarNotificacoes();
 };
@@ -67,21 +63,47 @@ window.switchTabRH = function(tabName, btnElement) {
 // INTEGRAÇÃO DE APIS E CROSS-DATA
 // ==========================================
 
+function parseHtmlTable(htmlStr) {
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(htmlStr, 'text/html');
+    let table = doc.querySelector('table');
+    if(!table) return [];
+    
+    let headers = Array.from(table.querySelectorAll('th')).map(th => th.innerText.trim());
+    let rows = Array.from(table.querySelectorAll('tbody tr'));
+    
+    return rows.map(tr => {
+        let obj = {};
+        let tds = Array.from(tr.querySelectorAll('td'));
+        tds.forEach((td, i) => {
+            if(headers[i]) obj[headers[i]] = td.innerText.trim();
+        });
+        return obj;
+    });
+}
+
 async function fetchSeguro(url) {
+    let htmlText = '';
     try {
         let response = await fetch(url);
         if(!response.ok) throw new Error('Erro HTTP ' + response.status);
-        return await response.json();
+        htmlText = await response.text();
     } catch (e) {
         console.warn('Falha acesso direto, tentando proxy para:', url);
         try {
             let proxyRes = await fetch(CORS_PROXY + encodeURIComponent(url));
             if(!proxyRes.ok) throw new Error('Proxy falhou ' + proxyRes.status);
-            return await proxyRes.json();
+            htmlText = await proxyRes.text();
         } catch (e2) {
             console.error('Erro absoluto no Fetch:', e2);
-            return []; // Retorna fallback
+            return [];
         }
+    }
+    
+    try {
+        return JSON.parse(htmlText);
+    } catch(e) {
+        return parseHtmlTable(htmlText);
     }
 }
 
@@ -90,14 +112,12 @@ async function carregarAPIsGerais() {
     if(containerStatus) containerStatus.style.display = 'block';
     
     try {
-        // Carrega também os emails salvos no firebase
         let snapEmails = await db.collection('membros_emails').get();
         window.dadosGeraisRH.emails.clear();
         snapEmails.forEach(doc => {
             window.dadosGeraisRH.emails.set(doc.id.toLowerCase(), doc.data().email);
         });
 
-        // 1. Fetch em Paralelo
         const [membrosRes, patentesRes, licencasRes, notificacoesRes] = await Promise.all([
             fetchSeguro(URL_MEMBROS_DIVISAO),
             fetchSeguro(URL_PATENTES),
@@ -105,7 +125,6 @@ async function carregarAPIsGerais() {
             fetchSeguro(URL_NOTIFICACOES)
         ]);
         
-        // 2. Indexação de Mapas (O(1) para busca)
         window.dadosGeraisRH.patentes.clear();
         if(Array.isArray(patentesRes)) {
             patentesRes.forEach(p => {
@@ -115,11 +134,8 @@ async function carregarAPIsGerais() {
         
         window.dadosGeraisRH.licencas.clear();
         if(Array.isArray(licencasRes)) {
-            let hoje = new Date().getTime();
             licencasRes.forEach(l => {
                 if(l.Envolvido && l.Status === 'Aprovado') {
-                    // Verifica se a licença está vigente hoje
-                    // (assumindo formato DD/MM/AAAA ou YYYY-MM-DD, simplificando parse)
                     window.dadosGeraisRH.licencas.set(l.Envolvido.toLowerCase(), l);
                 }
             });
@@ -128,7 +144,6 @@ async function carregarAPIsGerais() {
         window.dadosGeraisRH.membrosDivisao = Array.isArray(membrosRes) ? membrosRes : [];
         window.dadosGeraisRH.notificacoes = Array.isArray(notificacoesRes) ? notificacoesRes : [];
         
-        // Renderiza
         renderizarMembrosAtivos();
         renderizarNotificacoes();
         
@@ -156,31 +171,32 @@ function renderizarMembrosAtivos() {
     }
     
     membros.forEach(m => {
-        let nickLower = (m.Nickname || m.Nick || '').toLowerCase();
+        let rawNick = m.Nickname || m.Nick || 'N/A';
+        let nickLower = rawNick.toLowerCase();
         
-        // Cruzamento
         let dadosPatente = window.dadosGeraisRH.patentes.get(nickLower) || {};
         let patente = dadosPatente['Posto/Grad'] || 'Desconhecida';
         
         let dadosLicenca = window.dadosGeraisRH.licencas.get(nickLower);
-        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Aval/Licença</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
+        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licenças</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
         
         let email = window.dadosGeraisRH.emails.get(nickLower) || '';
+        let funcaoInterna = m.Cargos || m.Cargo || 'Supervisão';
         
         let tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><b>${m.Nickname || m.Nick || 'N/A'}</b></td>
+            <td><b>${rawNick}</b></td>
+            <td>${patente}</td>
+            <td>${funcaoInterna}</td>
             <td>
                 <div style="display:flex; align-items:center; gap:5px;">
                     <input type="email" id="email-${nickLower}" class="form-input" style="padding:2px 5px; height:24px; font-size:12px; width:120px;" placeholder="Sem e-mail" value="${email}">
                     <button onclick="salvarEmailRH('${nickLower}')" style="background:var(--accent); color:#fff; border:none; border-radius:4px; cursor:pointer;" title="Salvar Email"><i class="fas fa-save"></i></button>
                 </div>
             </td>
-            <td>${patente}</td>
-            <td>${m.Cargos || m.Cargo || 'Supervisão'}</td>
             <td>${status}</td>
             <td>
-                <button class="btn-tech" style="padding: 4px 8px; font-size:11px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;" onclick="demitirMembroRH('${m.Nickname || m.Nick}', '${m.Cargos || m.Cargo}')"><i class="fas fa-user-minus"></i> Demitir</button>
+                <button class="btn-tech" style="padding: 4px 8px; font-size:11px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;" onclick="demitirMembroRH('${rawNick}', '${funcaoInterna}')"><i class="fas fa-user-minus"></i> Demitir</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -214,7 +230,7 @@ window.demitirMembroRH = function(nick, cargo) {
             checks: { system: false, groups: false, habbo: false }
         }).then(() => {
             window.customAlert(`${nick} movido para a lista de Retiradas. Lembre-se de removê-lo oficialmente no System.`, 'Sucesso');
-            carregarAPIsGerais(); // Atualiza a tabela pra ver se ele saiu do system (embora dependa do delay da API)
+            carregarAPIsGerais();
         });
     }
 };
@@ -234,7 +250,7 @@ function iniciarListenersFirebaseRH() {
             tbody.innerHTML = '';
             
             if(snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma retirada pendente.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhuma retirada pendente.</td></tr>';
                 return;
             }
             
@@ -248,7 +264,8 @@ function iniciarListenersFirebaseRH() {
                 let dateStr = d.dataRetirada ? d.dataRetirada.toDate().toLocaleDateString('pt-BR') : 'Recente';
                 
                 tr.innerHTML = `
-                    <td><b>${d.nick}</b><br><span style="font-size:11px; color:#888;">${d.email}</span></td>
+                    <td><b>${d.nick}</b></td>
+                    <td><span style="font-size:12px; color:#aaa;">${d.email}</span></td>
                     <td>${d.cargo}</td>
                     <td>${dateStr}<br><span style="font-size:11px; color:#888;">Por: ${d.responsavel}</span></td>
                     <td>
@@ -265,7 +282,6 @@ function iniciarListenersFirebaseRH() {
         });
     }
 
-    // Solicitações (Auxiliar+)
     if(window.unsubSolicitacoes) window.unsubSolicitacoes();
     window.unsubSolicitacoes = db.collection('solicitacoes').orderBy('dataEntrada', 'desc').onSnapshot(snap => {
         let tbody = document.getElementById('tb-rh-solicitacoes');
@@ -279,8 +295,6 @@ function iniciarListenersFirebaseRH() {
         
         snap.forEach(doc => {
             let d = doc.data();
-            if(d.status === 'Retirado' || d.status === 'Ingressou') return; // Oculta concluídos na visao base? Vamos deixar todos mas ordenados, ou ocultar.
-            // Vou exibir só Pendentes.
             if(d.status !== 'Pendente') return;
             
             let dtEntrada = d.dataEntrada ? d.dataEntrada.toDate() : new Date();
@@ -292,7 +306,7 @@ function iniciarListenersFirebaseRH() {
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${d.nick}</b></td>
-                <td>${d.patente}</td>
+                <td>${d.patente || 'Desconhecido'}</td>
                 <td>${d.telegram}</td>
                 <td>${dtEntrada.toLocaleDateString('pt-BR')}</td>
                 <td style="${stylePrazo}">${dtVencimento.toLocaleDateString('pt-BR')}</td>
@@ -311,6 +325,53 @@ window.toggleCheckRetirada = function(id, campo, valor) {
     let updateData = {};
     updateData[`checks.${campo}`] = valor;
     db.collection('retiradas').doc(id).update(updateData);
+};
+
+window.autoFetchEmailRetirada = function(nick) {
+    let emailInput = document.getElementById('ret-email');
+    if(!nick || !emailInput) return;
+    let nickLower = nick.toLowerCase();
+    
+    if(window.dadosGeraisRH.emails.has(nickLower)) {
+        emailInput.value = window.dadosGeraisRH.emails.get(nickLower);
+    } else {
+        // Fallback fetch Firebase
+        db.collection('membros_emails').doc(nickLower).get().then(doc => {
+            if(doc.exists) {
+                emailInput.value = doc.data().email;
+                window.dadosGeraisRH.emails.set(nickLower, doc.data().email);
+            } else {
+                emailInput.value = 'Sem E-mail registrado';
+            }
+        });
+    }
+};
+
+window.cadastrarRetiradaManual = function() {
+    let nick = document.getElementById('ret-nick').value.trim();
+    let cargo = document.getElementById('ret-cargo').value.trim();
+    let email = document.getElementById('ret-email').value.trim();
+    
+    if(!nick || !cargo) {
+        window.customAlert('Preencha pelo menos o Nick e o Cargo Anterior.', 'Atenção');
+        return;
+    }
+    
+    if(email === 'Sem E-mail registrado') email = 'Não informado';
+    
+    db.collection('retiradas').add({
+        nick: nick,
+        cargo: cargo,
+        email: email,
+        responsavel: window.usuarioLogadoNick,
+        dataRetirada: firebase.firestore.FieldValue.serverTimestamp(),
+        checks: { system: false, groups: false, habbo: false }
+    }).then(() => {
+        window.customAlert('Retirada cadastrada manualmente.', 'Sucesso');
+        document.getElementById('ret-nick').value = '';
+        document.getElementById('ret-cargo').value = '';
+        document.getElementById('ret-email').value = '';
+    });
 };
 
 // ==========================================
@@ -336,12 +397,7 @@ function renderizarNotificacoes() {
     
     notifs.forEach(n => {
         let status = n.Status || 'Ativo';
-        
-        // Calcula 45 dias
-        let dataStr = n['Data e Hora']; // Assumindo formato string parseable ou ajustamos
-        // Em APIs do system costuma vir '2023-08-01 15:00:00' ou similar. 
-        // Vamos tentar parseDate nativo. Se der NaN, assumimos que nao expirou pra nao quebrar.
-        // Tratar formato DD/MM/AAAA HH:MM:SS para AAAA-MM-DDTHH:MM:SS
+        let dataStr = n['Data e Hora'];
         let parseDateStr = dataStr;
         if(parseDateStr && parseDateStr.includes('/')) {
             let parts = parseDateStr.split(' ');
@@ -351,6 +407,7 @@ function renderizarNotificacoes() {
                 if(parts[1]) parseDateStr += `T${parts[1]}`;
             }
         }
+        
         let dtNotif = new Date(parseDateStr);
         let diffDias = 0;
         let isExpirada = false;
@@ -371,7 +428,7 @@ function renderizarNotificacoes() {
         if(isExpirada) tr.style.background = 'rgba(239, 68, 68, 0.1)';
         
         tr.innerHTML = `
-            <td>#${n['# (ID)'] || n.ID || '-'}</td>
+            <td>#${n['# (ID)'] || n.ID || n['#'] || '-'}</td>
             <td>${n.Aplicador || '-'}</td>
             <td><b>${n.Envolvido || '-'}</b></td>
             <td>${n['Data e Hora'] || '-'}</td>
@@ -382,7 +439,6 @@ function renderizarNotificacoes() {
         tbody.appendChild(tr);
     });
     
-    // Alerta Crítico (>= 3 Notificações)
     for (let nick in contagemPorNick) {
         if(contagemPorNick[nick] >= 3) {
             let alertDiv = document.createElement('div');
@@ -400,15 +456,32 @@ function renderizarNotificacoes() {
 // ABA 4: SOLICITAÇÕES (FUNIL)
 // ==========================================
 
+window.autoFetchCargo = function(nick) {
+    let feed = document.getElementById('solic-cargo-feedback');
+    if(!nick || !feed) return;
+    
+    let nickLower = nick.toLowerCase();
+    let dadosPatente = window.dadosGeraisRH.patentes.get(nickLower);
+    if(dadosPatente && dadosPatente['Posto/Grad']) {
+        feed.innerHTML = `Cargo/Posto/Graduação Encontrado: <b>${dadosPatente['Posto/Grad']}</b>`;
+        feed.dataset.patente = dadosPatente['Posto/Grad'];
+    } else {
+        feed.innerHTML = `<span style="color:#fbbf24;">Não encontrado na Base Geral. Será registrado como 'Desconhecido'.</span>`;
+        feed.dataset.patente = 'Desconhecido';
+    }
+};
+
 window.adicionarSolicitacaoRH = function() {
     let nick = document.getElementById('solic-nick').value.trim();
-    let patente = document.getElementById('solic-patente').value.trim();
     let telegram = document.getElementById('solic-telegram').value.trim();
+    let feed = document.getElementById('solic-cargo-feedback');
     
-    if(!nick || !patente || !telegram) {
-        window.customAlert('Preencha todos os campos do Recruta!', 'Atenção');
+    if(!nick || !telegram) {
+        window.customAlert('Preencha o Nick e o Telegram!', 'Atenção');
         return;
     }
+    
+    let patente = feed && feed.dataset.patente ? feed.dataset.patente : 'Desconhecido';
     
     let dataEntrada = new Date();
     let dataVencimento = new Date();
@@ -423,10 +496,10 @@ window.adicionarSolicitacaoRH = function() {
         status: 'Pendente',
         responsavel: window.usuarioLogadoNick
     }).then(() => {
-        window.customAlert('Recruta adicionado ao Funil!', 'Sucesso');
+        window.customAlert('Policial inserido com sucesso!', 'Sucesso');
         document.getElementById('solic-nick').value = '';
-        document.getElementById('solic-patente').value = '';
         document.getElementById('solic-telegram').value = '';
+        if(feed) feed.innerHTML = '';
     }).catch(err => window.customAlert('Erro: ' + err.message, 'Erro'));
 };
 
@@ -446,20 +519,19 @@ window.aprovarSolicitacao = function(id, nick) {
         db.collection('solicitacoes').doc(id).update({
             status: 'Ingressou'
         }).then(() => {
-            window.customAlert(`${nick} aprovado! Lembre-se de adicioná-lo oficialmente no System para que ele apareça na Aba Membros.`, 'Sucesso');
+            window.customAlert(`${nick} aprovado! Lembre-se de adicioná-lo oficialmente no System.`, 'Sucesso');
         });
     }
 };
 
 window.retirarSolicitacao = function(id) {
-    if(confirm(`O recruta falhou ou desistiu? Isso o removerá do funil.`)) {
+    if(confirm(`O policial falhou ou desistiu? Isso o removerá do funil.`)) {
         db.collection('solicitacoes').doc(id).update({
             status: 'Retirado'
         });
     }
 };
 
-// Hook no Auth para inicialização (assim que logar)
 firebase.auth().onAuthStateChanged(user => {
     if(user) {
         setTimeout(() => {
