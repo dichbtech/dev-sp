@@ -5,11 +5,11 @@ window.unsubSolicitacoes = null;
 window.unsubRetiradas = null;
 
 // Proxy Cloudflare Workers dedicado
-const CORS_PROXY = 'https://supervisores.alvesedu-br.workers.dev/?url=';
-const URL_MEMBROS_DIVISAO = 'https://policiadic.com/funcao/supervisores/tabela/membros';
-const URL_PATENTES = 'https://policiadic.com/lista/membros';
-const URL_LICENCAS = 'https://policiadic.com/lista/aval';
-const URL_NOTIFICACOES = 'https://policiadic.com/funcao/supervisores/tabela/notificacao';
+window.CORS_PROXY = 'https://supervisores.alvesedu-br.workers.dev/?url=';
+window.URL_MEMBROS_DIVISAO = 'https://policiadic.com/funcao/supervisores/tabela/membros';
+window.URL_PATENTES = 'https://policiadic.com/lista/membros';
+window.URL_LICENCAS = 'https://policiadic.com/lista/aval';
+window.URL_NOTIFICACOES = 'https://policiadic.com/funcao/supervisores/tabela/notificacao';
 
 window.dadosGeraisRH = {
     membrosDivisao: [],
@@ -61,7 +61,7 @@ window.switchTabRH = function(tabName, btnElement) {
 // INTEGRAÇÃO DE APIS E CROSS-DATA
 // ==========================================
 
-function parseHtmlTable(htmlStr) {
+window.parseHtmlTable = function(htmlStr) {
     let parser = new DOMParser();
     let doc = parser.parseFromString(htmlStr, 'text/html');
     let table = doc.querySelector('table');
@@ -80,7 +80,7 @@ function parseHtmlTable(htmlStr) {
     });
 }
 
-async function fetchSeguro(url) {
+window.fetchSeguro = async function(url) {
     let htmlText = '';
     try {
         let response = await fetch(url);
@@ -174,33 +174,53 @@ function renderizarMembrosAtivos() {
     }
     
     membros.forEach(m => {
-        let rawNick = m.Nickname || m.Nick || 'N/A';
+        let rawNick = (m.Nickname || m.Nick || 'N/A').replace('[', '');
         let nickLower = rawNick.toLowerCase();
         
         let dadosPatente = window.dadosGeraisRH.patentes.get(nickLower) || {};
         let patente = dadosPatente['Posto/Grad'] || 'Desconhecida';
         
         let dadosLicenca = window.dadosGeraisRH.licencas.get(nickLower);
-        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licenças</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
+        let status = dadosLicenca ? `<span style="color:#fbbf24;"><i class="fas fa-bed"></i> Licença</span><br><span style="font-size: 10px; color: #aaa;">de ${dadosLicenca['Data de Início'] || '?'} a ${dadosLicenca['Data de Término'] || '?'}</span>` : `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Ativo</span>`;
         
         let email = window.dadosGeraisRH.emails.get(nickLower) || '';
-        let funcaoInterna = m.Cargos || m.Cargo || 'Supervisão';
+        let funcaoRaw = m.Cargos || m.Cargo || 'Sp';
         
+        const mapaFuncoes = {
+            "L.Sp": "Líder",
+            "V.Sp": "Vice-Líder",
+            "S.Sp": "Sub-Líder",
+            "A.Sp": "Auxiliar",
+            "Sp": "Supervisor"
+        };
+        let funcaoInterna = mapaFuncoes[funcaoRaw] || funcaoRaw;
+        
+        let dataAsc = m['Data e Hora'] || '';
+        let textoDias = '';
+        if(dataAsc.includes('/')) {
+            try {
+                let dataS = dataAsc.split(' ')[0];
+                let partes = dataS.split('/');
+                let dataObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                let diffTime = Math.abs(new Date() - dataObj);
+                let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                textoDias = `<br><span style="font-size: 10px; color: #aaa;">Há ${diffDays} dias atrás</span>`;
+            } catch(e){}
+        }
+
         let tr = document.createElement('tr');
         tr.innerHTML = `
             <td><b>${rawNick}</b></td>
             <td>${patente}</td>
             <td>${funcaoInterna}</td>
+            <td>${dataAsc} ${textoDias}</td>
             <td>
                 <div style="display:flex; align-items:center; gap:5px;">
                     <input type="email" id="email-${nickLower}" class="form-input" style="padding:2px 5px; height:24px; font-size:12px; width:120px;" placeholder="Sem e-mail" value="${email}">
-                    <button onclick="salvarEmailRH('${nickLower}')" style="background:var(--accent); color:#fff; border:none; border-radius:4px; cursor:pointer;" title="Salvar Email"><i class="fas fa-save"></i></button>
+                    <button onclick="salvarEmailRH('${nickLower}')" style="background:transparent; color:var(--accent); border:none; cursor:pointer;" title="Salvar Email"><i class="fas fa-edit"></i></button>
                 </div>
             </td>
             <td>${status}</td>
-            <td>
-                <button class="btn-tech" style="padding: 4px 8px; font-size:11px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;" onclick="demitirMembroRH('${rawNick}', '${funcaoInterna}')"><i class="fas fa-user-minus"></i> Demitir</button>
-            </td>
         `;
         tbody.appendChild(tr);
     });

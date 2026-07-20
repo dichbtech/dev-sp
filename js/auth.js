@@ -204,34 +204,63 @@ window.verificarAcessoBD = async function(email) {
     try {
         let authEmail = email.toLowerCase().trim();
         
-        // Tenta buscar dados do sistema
-        const planRef = window.db.collection("sistema").doc("acessos_planilha");
-        const planSnap = await planRef.get();
-        if (planSnap.exists && planSnap.data().dados) {
-            try { window.planilhaAcessos = JSON.parse(planSnap.data().dados); } catch (e) { window.planilhaAcessos = {}; }
-        }
-        
+        // 1. Busca acessos manuais (Superiores/Externos)
         const manualSnap = await window.db.collection("acessos").get();
         window.acessosData = [];
         manualSnap.forEach(doc => { window.acessosData.push({ id: doc.id, ...doc.data() }); });
-
         let userManual = window.acessosData.find(u => (u.email || u.id || '').toLowerCase().trim() === authEmail);
-        let userPlan = null;
-        if (window.planilhaAcessos) {
-            for (let key in window.planilhaAcessos) {
-                if (key.toLowerCase().trim() === authEmail) { userPlan = window.planilhaAcessos[key]; break; }
+
+        let autorizado = false;
+        
+        if (userManual) {
+            autorizado = true; 
+            window.nivelUsuarioGlobal = userManual.nivel; 
+            window.usuarioLogadoNick = userManual.nick;
+        } else {
+            // 2. Tenta buscar o email na lista de membros vinculados (membros_emails)
+            const emailsSnap = await window.db.collection("membros_emails").get();
+            let membroNick = null;
+            emailsSnap.forEach(doc => {
+                let d = doc.data();
+                if(d.email && d.email.toLowerCase().trim() === authEmail) {
+                    membroNick = doc.id.toLowerCase();
+                }
+            });
+            
+            if (membroNick) {
+                // 3. Faz cross-check na API ao vivo
+                console.log("Checando API ao vivo para o membro:", membroNick);
+                if (window.fetchSeguro && window.URL_MEMBROS_DIVISAO) {
+                    let membrosApi = await window.fetchSeguro(window.URL_MEMBROS_DIVISAO);
+                    let membroAtivo = (membrosApi || []).find(m => {
+                        let rawN = (m.Nickname || m.Nick || '').replace('[', '').toLowerCase().trim();
+                        return rawN === membroNick;
+                    });
+                    
+                    if (membroAtivo) {
+                        autorizado = true;
+                        window.usuarioLogadoNick = (membroAtivo.Nickname || membroAtivo.Nick || membroNick).replace('[', '');
+                        
+                        let funcaoRaw = membroAtivo.Cargos || membroAtivo.Cargo || 'Sp';
+                        const mapaFuncoes = {
+                            "L.Sp": "Líder",
+                            "V.Sp": "Vice-Líder",
+                            "S.Sp": "Sub-Líder",
+                            "A.Sp": "Auxiliar",
+                            "Sp": "Supervisor"
+                        };
+                        window.nivelUsuarioGlobal = mapaFuncoes[funcaoRaw] || funcaoRaw;
+                    } else {
+                        window.customAlert(`O nick <b>${membroNick}</b> não consta mais na API da divisão. O acesso foi revogado automaticamente.`, "Acesso Negado");
+                        setTimeout(() => auth.signOut(), 5000);
+                        return;
+                    }
+                }
             }
         }
 
-        let autorizado = false;
-        if (userPlan) {
-            autorizado = true; window.nivelUsuarioGlobal = userPlan.nivel; window.usuarioLogadoNick = userPlan.nick;
-        } else if (userManual) {
-            autorizado = true; window.nivelUsuarioGlobal = userManual.nivel; window.usuarioLogadoNick = userManual.nick;
-        }
-
         if (autorizado) {
-            window.nivelUsuarioGlobal = window.nivelUsuarioGlobal.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            window.nivelUsuarioGlobal = window.nivelUsuarioGlobal.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
             if (window.nivelUsuarioGlobal === 'VICELIDER') window.nivelUsuarioGlobal = 'VICE-LIDER';
             if (window.nivelUsuarioGlobal === 'SUBLIDER') window.nivelUsuarioGlobal = 'SUB-LIDER';
             
@@ -252,8 +281,6 @@ window.verificarAcessoBD = async function(email) {
         }
     } catch (err) {
         console.error("Erro na verificação:", err);
-        // Se der erro de permissão (bloqueio de navegador), NÃO deslogamos o usuário. 
-        // Tentamos apenas liberar o painel para ver se o Firebase se recupera sozinho.
         if (err.message.includes("permissions") || err.message.includes("Insufficient")) {
             console.warn("Bloqueio de segurança detectado. Tentando contornar...");
             if (window.nivelUsuarioGlobal) window.liberarPainel();
