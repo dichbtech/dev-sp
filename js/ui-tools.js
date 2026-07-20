@@ -125,6 +125,14 @@ window.switchSection = function(sectionId, btnElement) {
     // 2. Acende a luz do módulo correto
     let targetSection = document.getElementById(sectionId);
     if (targetSection) targetSection.classList.add('active');
+    
+    // Força o tab de relatórios ficar aceso quando entra em requerimentos
+    if (sectionId === 'modulo-requerimentos') {
+        let firstTabBtn = document.querySelector('[data-target="tab-relatorios"]');
+        if (firstTabBtn && window.switchTabRequerimentos) {
+            window.switchTabRequerimentos('tab-relatorios', firstTabBtn);
+        }
+    }
 
     // 3. Destaca o botão correto no menu lateral
     if (btnElement) {
@@ -142,22 +150,6 @@ window.switchSection = function(sectionId, btnElement) {
 };
 
 // Quando a página termina de carregar, lê a URL para saber onde o usuário estava
-document.addEventListener("DOMContentLoaded", () => {
-    let path = window.location.pathname.replace('/', '').trim();
-    
-    if (path && path !== 'index.html' && path !== '') {
-        let sectionId = 'modulo-' + path;
-        let targetSection = document.getElementById(sectionId);
-        if (targetSection) {
-            window.switchSection(sectionId, null);
-        } else {
-            window.switchSection('view-home', null);
-        }
-    } else {
-        window.switchSection('view-home', null);
-    }
-});
-
 // Faz os botões "Voltar" e "Avançar" do navegador funcionarem perfeitamente
 window.addEventListener('popstate', (event) => {
     if (event.state && event.state.section) {

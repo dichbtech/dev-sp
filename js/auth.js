@@ -126,6 +126,23 @@ window.gerarMenusPorNivel = function() {
         dock.classList.add('active'); // show dock
     }
     
+    // ==========================================
+    // Roteamento Inicial (Movel pra cá pra evitar race condition com a injeção do dock)
+    // ==========================================
+    setTimeout(() => {
+        let path = window.location.pathname.replace('/', '').trim();
+        if (path && path !== 'index.html' && path !== '') {
+            let sectionId = 'modulo-' + path;
+            if (document.getElementById(sectionId)) {
+                window.switchSection(sectionId, null);
+            } else {
+                window.switchSection('view-home', null);
+            }
+        } else {
+            window.switchSection('view-home', null);
+        }
+    }, 50);
+    
     if (cmd && ehSuperLideranca) {
                         cmd.innerHTML = `
             <div class="cmd-tile" onclick="window.switchSection('modulo-revisao'); window.toggleCommand();"><i class="fas fa-search"></i><span>Revisão</span></div>
