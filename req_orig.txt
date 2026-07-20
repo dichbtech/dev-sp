@@ -1,0 +1,119 @@
+<main class="spa-view card" id="modulo-requerimentos"><style>
+
+                .form-tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
+
+                .form-tab-content.active { display: block; }
+
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+            </style>
+
+            <h3><i class="fas fa-file-signature"></i> Formulário de Atividades</h3>
+
+            <p class="subtext" style="margin-bottom: 25px;">Preencha as informações abaixo com atenção. Seus dados (Nick e Cargo) são incluídos automaticamente.</p>
+
+
+
+            <div class="tabs-container" id="tabs-formulario" style="margin-bottom: 30px;">
+
+                <button class="btn-tab active" data-target="tab-relatorios" onclick="window.switchTabRequerimentos('tab-relatorios', this)">Relatórios</button>
+
+                <button class="btn-tab" data-target="tab-soldados" onclick="window.switchTabRequerimentos('tab-soldados', this)">Soldados</button>
+
+                <button class="btn-tab" data-target="tab-grupos" onclick="window.switchTabRequerimentos('tab-grupos', this)">Grupos</button>
+
+                <button class="btn-tab" data-target="tab-convites" onclick="window.switchTabRequerimentos('tab-convites', this)">Convites</button>
+
+                <button class="btn-tab" data-target="tab-ppp" onclick="window.switchTabRequerimentos('tab-ppp', this)">PPP</button>
+
+            </div>
+
+
+
+            <form id="activityFormRequerimentos" onsubmit="window.submitFormRequerimentos(event)" style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
+
+                
+
+                <!-- ABA: Relatórios -->
+
+                <div id="tab-relatorios" class="form-tab-content active">
+
+                    <h4 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-file-alt"></i> Relatórios (Auxiliares)</h4>
+
+                    
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Link do Relatório (Google Docs)</label>
+
+                        <div class="input-block">
+
+                            <i class="fas fa-link"></i>
+
+                            <input type="url" name="relatorio_link" placeholder="https://docs.google.com/..." id="relatorio_link" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Natureza do Relatório</label>
+
+                        <div class="input-block">
+
+                            <i class="fas fa-list"></i>
+
+                            <select name="relatorio_natureza" id="relatorio_natureza" onchange="window.handleNaturezaChangeRequerimentos()" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+
+                                <option value="" disabled selected style="color:#000;">Selecione a natureza...</option>
+
+                                <option value="Grupo de Controle" style="color:#000;">Grupo de Controle</option>
+
+                                <option value="Grupo de Promoções" style="color:#000;">Grupo de Promoções</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="input-group" id="container_publico_alvo" style="display: none; margin-bottom: 20px;">
+
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Público-Alvo</label>
+
+                        <div class="input-block">
+
+                            <i class="fas fa-users"></i>
+
+                            <select name="relatorio_publico_alvo" id="relatorio_publico_alvo" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;">
+
+                                <option value="" disabled selected style="color:#000;">Selecione o público-alvo...</option>
+
+                                <option value="Corpo Executivo" style="color:#000;">Corpo Executivo</option>
+
+                                <option value="Cabos até Subtenentes" style="color:#000;">Cabos até Subtenentes</option>
+
+                                <option value="Aspirantes a Coronéis" style="color:#000;">Aspirantes a Coronéis</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="input-group" id="container_data_referencia" style="display: none; margin-bottom: 20px;">
+
+                        <label class="tech-label" style="display:block; margin-bottom:5px;">Data de Referência</label>
+
+                        <div class="input-block">
+
+                            <i class="far fa-calendar-alt"></i>
+
+                            <input type="date" name="relatorio_data_referencia" id="relatorio_data_referencia" style="width:100%; border:none; background:transparent; color:#fff; outline:none; font-family:'Rajdhani', sans-serif;"></main>

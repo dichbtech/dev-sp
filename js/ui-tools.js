@@ -462,7 +462,7 @@ window.initBannersHome = function() {
         banners.forEach((b, i) => {
             let div = document.createElement('div');
             div.className = 'banner-slide' + (i === 0 ? ' active' : '');
-            div.style.backgroundImage = `url('${b}')`;
+            div.innerHTML = `<img src="${b}" alt="Banner" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
             wrapper.appendChild(div);
         });
         

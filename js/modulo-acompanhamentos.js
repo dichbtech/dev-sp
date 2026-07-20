@@ -103,13 +103,7 @@ window.carregarAcompanhamentos = function() {
     if (window.abaAtivaAcomp === 'acomp-disp') {
         ref = ref.where('status', '==', 'aberto');
     } else if (window.abaAtivaAcomp === 'acomp-meus') {
-        if (!ehLideranca) {
-            // Auxiliar só vê os dele
-            ref = ref.where('status', '==', 'andamento').where('responsavel', '==', window.usuarioLogadoNick);
-        } else {
-            // Liderança vê tudo em andamento
-            ref = ref.where('status', '==', 'andamento');
-        }
+        ref = ref.where('status', '==', 'andamento'); // Filtragem de responsavel sera feita na memoria
     } else if (window.abaAtivaAcomp === 'acomp-conc') {
         ref = ref.where('status', '==', 'concluido');
     }
@@ -119,6 +113,10 @@ window.carregarAcompanhamentos = function() {
         snap.forEach(doc => {
             let d = doc.data();
             d.id = doc.id;
+            // Filtro local para evitar erro de Index composto no Firebase
+            if (window.abaAtivaAcomp === 'acomp-meus' && !ehLideranca) {
+                if (d.responsavel !== window.usuarioLogadoNick) return;
+            }
             docs.push(d);
         });
 
