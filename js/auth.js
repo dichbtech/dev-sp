@@ -103,19 +103,19 @@ window.gerarMenusPorNivel = function() {
     
     // Dock Floating (New UI)
     let dockHtml = `
-        <div class="dock-item" data-label="Home" onclick="window.switchSection('view-home', this)"><i class="fas fa-home"></i></div>
+        <div class="dock-item" id="menu-view-home" data-label="Home" onclick="window.switchSection('view-home', this)"><i class="fas fa-home"></i></div>
         <div class="dock-separator"></div>
-        <div class="dock-item" data-label="Metas" onclick="window.switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i></div>
-        <div class="dock-item" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
-        <div class="dock-item" data-label="Licenças" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i></div>
-        <div class="dock-item" data-label="Feedbacks" onclick="window.switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i></div>
-        <div class="dock-item" data-label="Controle Grupos" onclick="window.switchSection('modulo-grupos', this)"><i class="fas fa-users"></i></div>
+        <div class="dock-item" id="menu-modulo-metas" data-label="Metas" onclick="window.switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i></div>
+        <div class="dock-item" id="menu-modulo-requerimentos" data-label="Requerimentos" onclick="window.switchSection('modulo-requerimentos', this)"><i class="fas fa-file-signature"></i></div>
+        <div class="dock-item" id="menu-modulo-avais" data-label="Licenças" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i></div>
+        <div class="dock-item" id="menu-modulo-feedbacks" data-label="Feedbacks" onclick="window.switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i></div>
+        <div class="dock-item" id="menu-modulo-grupos" data-label="Controle Grupos" onclick="window.switchSection('modulo-grupos', this)"><i class="fas fa-users"></i></div>
     `;
     if (ehLideranca) {
         dockHtml += `
             <div class="dock-separator"></div>
-            <div class="dock-item" data-label="Correções" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i></div>
-            <div class="dock-item" data-label="Estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i></div>
+            <div class="dock-item" id="menu-modulo-correcoes" data-label="Correções" onclick="window.switchSection('modulo-correcoes', this)"><i class="fas fa-check-double"></i></div>
+            <div class="dock-item" id="menu-modulo-estrelas" data-label="Estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i></div>
             <div class="dock-item dock-command" data-label="Configurações da Liderança" onclick="window.toggleCommand()"><i class="fas fa-bolt"></i></div>
         `;
     }
