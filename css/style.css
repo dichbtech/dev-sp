@@ -296,8 +296,8 @@ footer { text-align: center; padding: 30px 20px; font-size: 12px; color: var(--t
 }
 
 #hub-bubble {
-    top: -133px !important;
-    left: 73px !important;
-    max-width: 325px !important;
-    width: auto !important;
+    top: -123px !important;
+    left: 69px !important;
+    width: 220px !important;
+    max-width: none !important;
 }
