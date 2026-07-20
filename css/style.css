@@ -60,7 +60,7 @@
    ========================================== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); color: var(--text-main); transition: all 0.3s ease; overflow-x: hidden; margin: 0; height: 100vh; overflow-y: hidden; }
-.container { max-width: 100%; margin: 0; padding: 0 40px; height: 100%; display: flex; flex-direction: column; }
+.container { width: 100%; max-width: 100%; margin: 0; padding: 0 40px; height: 100%; display: flex; flex-direction: column; }
 a { text-decoration: none; color: inherit; cursor: pointer; }
 
 /* FIX DOS DROPDOWNS DIFÍCEIS DE LER E INPUTS GERAIS */
