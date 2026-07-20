@@ -37,11 +37,7 @@
         
         /* Forcing iframes to be HUGE and take up the whole screen height */
         #modulo-feedbacks, #modulo-grupos {
-            width: 100vw !important;
-            height: calc(100vh - 150px) !important;
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
+            width: 100% !important; height: calc(100vh - 150px) !important; position: relative;
             margin-bottom: 0 !important;
             padding: 20px 0 !important;
             border-radius: 0 !important;
@@ -1217,6 +1213,73 @@
   <script src="js/auth.js?v=2"></script>
 
 
+
+
+    <!-- AVATAR ADJUSTER TOOL -->
+    <div id="avatar-adjuster" style="position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); padding: 20px; border: 2px solid #facc15; border-radius: 12px; z-index: 9999; color: white; font-family: sans-serif; width: 300px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+        <h3 style="margin-top: 0; color: #facc15; font-size: 16px; margin-bottom: 15px;">Ajustador do Avatar</h3>
+        
+        <label style="display: block; margin-bottom: 10px; font-size: 12px;">Zoom (Width px)
+            <input type="range" id="adj-zoom" min="30" max="150" value="64" style="width: 100%;">
+        </label>
+        
+        <label style="display: block; margin-bottom: 10px; font-size: 12px;">Posição Vertical (Margin Top px)
+            <input type="range" id="adj-top" min="-50" max="50" value="-12" style="width: 100%;">
+        </label>
+        
+        <label style="display: block; margin-bottom: 10px; font-size: 12px;">Posição Horizontal (Margin Left px)
+            <input type="range" id="adj-left" min="-50" max="50" value="0" style="width: 100%;">
+        </label>
+        
+        <div style="background: #222; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px; word-wrap: break-word; user-select: all;" id="adj-output">
+            width: 64px; margin-top: -12px; margin-left: 0px;
+        </div>
+        
+        <button onclick="document.getElementById('avatar-adjuster').style.display='none'" style="margin-top: 15px; width: 100%; padding: 10px; background: #facc15; color: black; border: none; font-weight: bold; border-radius: 6px; cursor: pointer;">Finalizar (Copie o texto acima)</button>
+
+        <script>
+            function updateAvatar() {
+                var zoom = document.getElementById('adj-zoom').value;
+                var top = document.getElementById('adj-top').value;
+                var left = document.getElementById('adj-left').value;
+                
+                var img = document.querySelector('.avatar-mini img');
+                if(img) {
+                    img.style.width = zoom + 'px';
+                    img.style.marginTop = top + 'px';
+                    img.style.marginLeft = left + 'px';
+                }
+                
+                document.getElementById('adj-output').innerText = 'width: ' + zoom + 'px; margin-top: ' + top + 'px; margin-left: ' + left + 'px;';
+            }
+            
+            document.getElementById('adj-zoom').addEventListener('input', updateAvatar);
+            document.getElementById('adj-top').addEventListener('input', updateAvatar);
+            document.getElementById('adj-left').addEventListener('input', updateAvatar);
+            
+            // Allow adjusting the container size too
+            document.getElementById('avatar-adjuster').innerHTML += `
+                <hr style="border: 1px solid #444; margin: 15px 0;">
+                <label style="display: block; margin-bottom: 10px; font-size: 12px;">Tamanho do Círculo (Width/Height px)
+                    <input type="range" id="adj-circle" min="20" max="80" value="40" style="width: 100%;">
+                </label>
+                <div style="background: #222; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px; word-wrap: break-word; user-select: all; margin-top: 5px;" id="adj-circle-output">
+                    .avatar-mini { width: 40px; height: 40px; }
+                </div>
+            `;
+            
+            document.getElementById('adj-circle').addEventListener('input', function() {
+                var sz = this.value;
+                var circ = document.querySelector('.avatar-mini');
+                if(circ) {
+                    circ.style.width = sz + 'px';
+                    circ.style.height = sz + 'px';
+                }
+                document.getElementById('adj-circle-output').innerText = '.avatar-mini { width: ' + sz + 'px; height: ' + sz + 'px; }';
+            });
+            
+        </script>
+    </div>
 
 </body>
 
