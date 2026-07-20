@@ -52,7 +52,7 @@ window.switchTabRH = function(tabName, btnElement) {
     
     if(btnElement) btnElement.classList.add('active');
     let view = document.getElementById('rh-view-' + tabName.toLowerCase());
-    if(view) view.style.display = 'block';
+    if(view) view.style.display = 'flex';
     
     if(tabName === 'Membros') renderizarMembrosAtivos();
     if(tabName === 'Notificacoes') renderizarNotificacoes();
