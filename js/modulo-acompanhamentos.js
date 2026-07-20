@@ -168,7 +168,7 @@ window.gerarCardAcompanhamento = function(d, ehLideranca) {
             Criado por <b>${d.criador}</b> em ${dataF}
         </div>
         <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:6px; margin-bottom:15px; font-size:14px; border-left:3px solid var(--sup-neon);">
-            ${d.motivo.replace(/\\n/g, '<br>')}
+            ${d.motivo.replace(/\n/g, '<br>')}
         </div>
     `;
 
@@ -236,14 +236,14 @@ window.gerarCardAcompanhamento = function(d, ehLideranca) {
                 <p style="margin:0 0 5px 0;"><b>Dúvidas Sanadas:</b> ${d.duvidasSanadas}</p>
                 <p style="margin:0 0 5px 0;"><b>Disposição:</b> ${d.disposicao}</p>
                 <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);">
-                    <b>Relatório:</b><br>${d.obs ? d.obs.replace(/\\n/g, '<br>') : 'Nenhuma observação.'}
+                    <b>Relatório:</b><br>${d.obs ? d.obs.replace(/\n/g, '<br>') : 'Nenhuma observação.'}
                 </div>
             </div>
         `;
         
         // Verifica se há link imgur no texto para renderizar
         if (ehLideranca && d.obs && d.obs.includes('imgur.com')) {
-            let links = d.obs.match(/https?:\\/\\/[\\w\\.\\/]+/g) || [];
+            let links = d.obs.match(/https?:\/\/[\w\.\/]+/g) || [];
             let rendered = false;
             links.forEach(l => {
                 if(l.includes('imgur.com') && !rendered && window.renderImgurEmbed) {
