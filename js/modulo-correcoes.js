@@ -37,7 +37,7 @@ window.buscarHistoricoConvites = async function(element, nick, dataAtualStr) {
             });
 
             if (convitesRecentes.length > 0) {
-                let html = '<strong style="color:#ff2a2a; font-size:12px; display:block; margin-bottom:8px;"><i class="fas fa-exclamation-triangle"></i> ATENÇÃO: CONVITES NOS ÚLTIMOS 7 DIAS (FARMING DETECTADO?)</strong>';
+                let html = '<strong style="color:#ff2a2a; font-size:12px; display:block; margin-bottom:8px;"><i class="fas fa-exclamation-triangle"></i> ATENÇÃO: CONVITES NOS ÚLTIMOS 7 DIAS</strong>';
                 convitesRecentes.forEach(c => {
                     let corResp = c.resposta && c.resposta.toLowerCase().includes('aceitou') ? '#4caf50' : '#ff2a2a';
                     html += `<div style="font-size:11px; margin-bottom:5px; display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
@@ -204,13 +204,8 @@ window.criarCardAtividade = function(d) {
             let embedUrl = linkUrl.replace(/\/edit.*?$/, '/preview');
             iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);"><iframe src="${embedUrl}" style="width:100%; height:400px; border:none;"></iframe></div>`;
         } else if (linkUrl.includes('imgur.com')) {
-            // Se for link direto de imagem
-            if (linkUrl.match(/\.(jpeg|jpg|gif|png)$/) != null) {
-                iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); text-align:center; background:#000;"><img src="${linkUrl}" style="max-width:100%; max-height:400px; object-fit:contain;"></div>`;
-            } else {
-                // Tenta criar um iframe pro post
-                let imgurId = linkUrl.split('/').pop().split('.')[0];
-                iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);"><iframe src="https://imgur.com/a/${imgurId}/embed?pub=true" scrolling="no" frameborder="0" style="width:100%; height:350px;"></iframe></div>`;
+            if (window.renderImgurEmbed) {
+                iframeHtml = window.renderImgurEmbed(linkUrl);
             }
         }
 
