@@ -183,6 +183,19 @@ async function carregarAPIsGerais() {
         renderizarMembrosAtivos();
         renderizarNotificacoes();
         
+        // Sincroniza supervisores para o Módulo de Metas
+        window.admissoesGeral = {};
+        window.dadosGeraisRH.membrosDivisao.forEach(m => {
+            let func = String(m['Função'] || m.Funcao || m.Cargo || '').trim();
+            if (func === 'Sp' || func === 'Supervisor') {
+                let nickOriginal = (m.Nickname || m.Nick || '').replace(/\[/g, '').replace(/\]/g, '').trim();
+                let nickLimpo = window.normalizeNick ? window.normalizeNick(nickOriginal) : nickOriginal.toLowerCase();
+                let dAdm = m['Data/Hora'] || m['Data de Admissão'] || '';
+                window.admissoesGeral[nickLimpo] = { cargo: 'Sp', data: dAdm, nickOriginal: nickOriginal };
+            }
+        });
+        if(window.processarPontuacoesSemanais) window.processarPontuacoesSemanais();
+        
     } catch (err) {
         console.error("Erro no Promise.all das APIs:", err);
         window.customAlert('Erro ao sincronizar com o system. Alguns dados podem estar faltando.', 'Erro de Sincronização');

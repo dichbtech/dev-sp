@@ -1574,7 +1574,7 @@
 
 
   <script src="js/modulo-acompanhamentos.js?v=1784561296"></script>
-  <script src="js/modulo-controle-geral.js?v=1784584148"></script>
+  <script src="js/modulo-controle-geral.js?v=1784598474"></script>
   <script src="js/modulo-verificacoes.js?v=1784570335"></script>
   <script src="js/modulo-avisos.js?v=1784597263"></script>
   <script src="js/modulo-admin.js?v=1784559015"></script>
@@ -1603,6 +1603,71 @@
     
     
 
-    </body>
+    
+    <!-- MODAL DASHBOARD (Metas e Eventos) -->
+    <div id="modal-dashboard" class="modal-overlay" style="display:none; align-items:center; justify-content:center; z-index:9999;">
+        <div class="modal-content" style="width: 800px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3 style="font-family:'Rajdhani', sans-serif; font-size:24px; color:var(--sup-neon); margin:0;">
+                    <i class="fas fa-bullseye"></i> HUB DE METAS E EVENTOS
+                </h3>
+                <button onclick="window.fecharDashboard()" class="close-btn" style="background:none; border:none; color:#aaa; font-size:24px; cursor:pointer;"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                
+                <!-- Coluna 1: Atividades -->
+                <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
+                    <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-tasks"></i> Pontuação das Atividades</h4>
+                    <div id="dash-atividades-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;"></div>
+                    <button class="btn-tech btn-add" style="width:100%;" onclick="window.adicionarNovaAtividadeBox()"><i class="fas fa-plus"></i> Adicionar Regra</button>
+                </div>
+                
+                <!-- Coluna 2: Eventos e Patrocínios -->
+                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;">
+                    
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
+                        <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-calendar-alt"></i> Controle de Evento Global</h4>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 15px;">
+                            <label style="color:#aaa; font-size:14px;">Status do Evento</label>
+                            <label class="switch">
+                                <input type="checkbox" id="dash-toggle-evento">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="input-group">
+                            <label>Multiplicador Base (Ex: 2 para Dobro)</label>
+                            <input type="number" id="dash-mult-evento" class="input-padrao" min="1" step="0.5">
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
+                        <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-trophy"></i> Patrocinadores</h4>
+                        <div class="input-group" style="display:flex; gap:10px;">
+                            <input type="text" id="dash-novo-sponsor" class="input-padrao" placeholder="Nick do Patrocinador">
+                            <button class="btn-tech btn-add" onclick="window.adicionarAdminSponsor()"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div id="dash-sponsors-container" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:15px;"></div>
+                        
+                        <div class="input-group" style="margin-top:20px;">
+                            <label>Texto de Chamada de Patrocínio</label>
+                            <textarea id="dash-txt-patrocinio" class="input-padrao" style="height: 60px;" placeholder="Ex: Deseja patrocinar?"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
+                        <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-list-ol"></i> Log de Eventos Externos</h4>
+                        <div id="dash-eventos-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; max-height:150px; overflow-y:auto;"></div>
+                        <button class="btn-tech btn-add" style="width:100%;" onclick="window.adicionarAdminEvento()"><i class="fas fa-plus"></i> Adicionar Evento</button>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <button class="btn-tech btn-save" style="width:100%; margin-top: 25px; padding: 15px; font-size: 16px;" onclick="window.salvarConfigDashboard()"><i class="fas fa-save"></i> SALVAR TODAS AS CONFIGURAÇÕES</button>
+        </div>
+    </div>
+
+</body>
 
 </html>
