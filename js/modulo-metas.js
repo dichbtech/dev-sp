@@ -577,6 +577,7 @@ window.escutarConfigDashboard = function() {
             if (tSpon) tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
 
             let uiLista = document.getElementById('ui-lista-eventos');
+            window.processarPontuacoesSemanais();
             if (uiLista) {
                 uiLista.innerHTML = '';
                 if (window.dashboardEventosData.length === 0) {
