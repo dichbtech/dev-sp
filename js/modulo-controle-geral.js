@@ -187,7 +187,7 @@ async function carregarAPIsGerais() {
         window.admissoesGeral = {};
         window.dadosGeraisRH.membrosDivisao.forEach(m => {
             let func = String(m.Cargos || m.Cargo || m['Função'] || m.Funcao || '').trim();
-            if (func.includes('Sp') || func.includes('Supervisor') || func.includes('Líder') || func.includes('Auxiliar')) {
+            if (func === 'Sp') {
                 let nickOriginal = (m.Nickname || m.Nick || '').replace(/\[/g, '').replace(/\]/g, '').trim();
                 let nickLimpo = window.normalizeNick ? window.normalizeNick(nickOriginal) : nickOriginal.toLowerCase();
                 let dAdm = m['Data e Hora'] || m['Data/Hora'] || m['Data de Admissão'] || '';

@@ -479,186 +479,51 @@ window.renderAdminEventosList = function() {
     
     window.dashboardEventosData.forEach((ev, i) => {
         let html = `
-        <div class="admin-evento-item">
-            <button type="button" onclick="window.removerEventoBox(${i})" style="position:absolute; right:15px; top:15px; background:rgba(255,42,42,0.1); border:none; color:#ef4444; width:30px; height:30px; border-radius:50%; cursor:pointer;"><i class="fas fa-trash"></i></button>
-            <h4 style="color:#fff; margin-bottom:10px; font-size:13px; text-transform:uppercase;">Evento ${i + 1}</h4>
-            <div class="input-block" style="margin-bottom:10px;"><input type="text" class="ev-nome" placeholder="Nome do Evento" value="${ev.nome}"></div>
-            <div style="display:flex; gap:15px; margin-bottom:10px;">
-                <div style="flex:1;"><label class="tech-label">Início</label><div class="input-block" style="margin:0;"><input type="date" class="ev-data-inicio" value="${ev.dataInicio}"></div></div>
-                <div style="flex:1;"><label class="tech-label">Fim</label><div class="input-block" style="margin:0;"><input type="date" class="ev-data-fim" value="${ev.dataFim}"></div></div>
-            </div>
-            <label class="tech-label">Regras e Descrição</label>
-            ${window.buildEditorHTML ? window.buildEditorHTML(`ev-desc-${i}`, ev.descricao) : `<textarea class="ev-desc" style="width:100%; height:80px; margin-bottom:10px;">${ev.descricao}</textarea>`}
-            <label class="tech-label">Texto da Premiação</label>
-            <input type="text" class="admin-input ev-premios-txt" style="margin-bottom:10px;" placeholder="Ex: 4 HCs para o 1º lugar..." value="${ev.premiosTexto || ''}">
-            <div style="display:flex; gap:20px; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-            <label style="color:#fff; cursor:pointer;"><input type="checkbox" class="ev-hc" ${ev.hc ? 'checked' : ''}> HC</label>
-            <label style="color:#fff; cursor:pointer;"><input type="checkbox" class="ev-moedas" ${ev.moedas ? 'checked' : ''}> Moedas</label>
+        <div class="admin-evento-item" style="position:relative; background:rgba(0,0,0,0.4); padding:25px; border-radius:12px; border:1px solid rgba(251,191,36,0.2); margin-bottom:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <button type="button" onclick="window.removerEventoBox(${i})" style="position:absolute; right:15px; top:15px; background:rgba(255,42,42,0.15); border:none; color:#ef4444; width:35px; height:35px; border-radius:8px; cursor:pointer; transition: all 0.2s;"><i class="fas fa-trash"></i></button>
+            <h4 style="color:var(--sup-neon); margin-bottom:20px; font-size:16px; font-weight:600; text-transform:uppercase; letter-spacing:1px;"><i class="fas fa-calendar-star"></i> Evento ${i + 1}</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <div class="input-block" style="margin:0;">
+                    <label class="tech-label" style="font-size:12px; margin-bottom:5px;">Nome do Evento</label>
+                    <input type="text" class="admin-input ev-nome" placeholder="Ex: Guerra de Divisões" value="${ev.nome}">
+                </div>
+                
+                <div style="display:flex; gap:20px;">
+                    <div style="flex:1;">
+                        <label class="tech-label" style="font-size:12px; margin-bottom:5px;">Data de Início</label>
+                        <div class="input-block" style="margin:0;">
+                            <input type="date" class="admin-input ev-data-inicio" value="${ev.dataInicio}">
+                        </div>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="tech-label" style="font-size:12px; margin-bottom:5px;">Data de Fim</label>
+                        <div class="input-block" style="margin:0;">
+                            <input type="date" class="admin-input ev-data-fim" value="${ev.dataFim}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="tech-label" style="font-size:12px; margin-bottom:5px;">Regras e Descrição</label>
+                    ${window.buildEditorHTML ? window.buildEditorHTML(`ev-desc-${i}`, ev.descricao) : `<textarea class="admin-input ev-desc" style="width:100%; height:100px; resize:vertical;">${ev.descricao}</textarea>`}
+                </div>
+                
+                <div class="input-block" style="margin:0;">
+                    <label class="tech-label" style="font-size:12px; margin-bottom:5px;">Texto da Premiação</label>
+                    <input type="text" class="admin-input ev-premios-txt" placeholder="Ex: 40c + 20 Pontos" value="${ev.premiosTexto}">
+                </div>
+                
+                <div style="display:flex; gap:20px; align-items:center; margin-top:5px; background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 8px;">
+                    <label class="checkbox-container" style="color:var(--text-sub); font-size:13px;"><input type="checkbox" class="ev-hc" ${ev.hc ? 'checked' : ''}><span class="checkmark"></span> Emblema no Habbo</label>
+                    <label class="checkbox-container" style="color:var(--text-sub); font-size:13px;"><input type="checkbox" class="ev-moedas" ${ev.moedas ? 'checked' : ''}><span class="checkmark"></span> Prêmio em Moedas</label>
+                </div>
             </div>
         </div>`;
-        container.insertAdjacentHTML('beforeend', html);
+        container.innerHTML += html;
     });
-}
-
-window.salvarDashboard = function() {
-    let evs = [];
-    document.querySelectorAll('.admin-evento-item').forEach(el => {
-        let descEl = el.querySelector('.ev-desc');
-        evs.push({
-            nome: el.querySelector('.ev-nome').value,
-            dataInicio: el.querySelector('.ev-data-inicio').value,
-            dataFim: el.querySelector('.ev-data-fim').value,
-            descricao: descEl.innerHTML !== undefined ? descEl.innerHTML : descEl.value,
-            premiosTexto: el.querySelector('.ev-premios-txt').value,
-            hc: el.querySelector('.ev-hc').checked,
-            moedas: el.querySelector('.ev-moedas').checked
-        });
-    });
-
-    let atvs = [];
-    document.querySelectorAll('.admin-atividade-item').forEach(el => {
-        let valPontos = String(el.querySelector('.atv-pontos').value).replace(',', '.');
-        atvs.push({
-            nome: el.getAttribute('data-nome'),
-            pontos: parseFloat(valPontos) || 0,
-            multiplica: el.getAttribute('data-multiplica') === 'true'
-        });
-    });
-
-    window.db.collection("sistema").doc("config_metas").set({
-        textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
-        eventos: evs,
-        atividades: atvs,
-        sponsors: window.dashboardSponsorsData
-    }).then(() => {
-        window.customAlert("Configurações do Hub salvas com sucesso!", "Sucesso");
-        window.fecharDashboard();
-    }).catch(err => {
-        console.error(err);
-        window.customAlert("Erro ao salvar configurações do Hub.", "Erro");
-    });
-}
-
-window.escutarConfigDashboard = function() {
-    window.db.collection("sistema").doc("config_metas").onSnapshot((doc) => {
-        if (doc.exists) {
-            let d = doc.data();
-            window.eventoAtivo = d.eventoAtivo || false;
-            window.eventoMult = window.eventoAtivo ? (parseInt(d.eventoMult, 10) || 1) : 1;
-            window.pontosExtrasMap = d.pontosExtras || {};
-            window.dashboardEventosData = d.eventos || [];
-            
-            // Lê os Patrocinadores
-            window.dashboardSponsorsData = d.sponsors || [];
-            window.renderSponsors(window.dashboardSponsorsData);
-            
-            let defaultAtividades = [
-                { nome: 'Grupos', pontos: 0.5, multiplica: true },
-                { nome: 'Soldados', pontos: 0.5, multiplica: true },
-                { nome: 'Convites', pontos: 1, multiplica: false },
-                { nome: 'PPP', pontos: 1, multiplica: false },
-                { nome: 'Avisos', pontos: 1, multiplica: false }
-            ];
-            window.configAtividades = d.atividades || defaultAtividades;
-            if (window.configAtividades.length === 0) window.configAtividades = defaultAtividades;
-            
-            let btnPE = document.getElementById('btn-pontos-extras');
-            let btnDash = document.getElementById('btn-dashboard-metas');
-            if (['LIDER', 'VICE-LIDER', 'SUB-LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
-                if (btnPE) btnPE.style.display = window.eventoAtivo ? 'inline-flex' : 'none';
-                if (btnDash) btnDash.style.display = 'inline-flex';
-            } else {
-                if (btnPE) btnPE.style.display = 'none';
-                if (btnDash) btnDash.style.display = 'none';
-            }
-
-            let banner = document.getElementById('evento-banner');
-            if(banner) banner.style.display = (window.eventoAtivo && window.eventoMult > 1) ? 'flex' : 'none';
-            
-            let tSpon = document.getElementById('ui-txt-patrocinio');
-            if (tSpon) tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
-
-            let uiLista = document.getElementById('ui-lista-eventos');
-            window.processarPontuacoesSemanais();
-            if (uiLista) {
-                uiLista.innerHTML = '';
-                if (window.dashboardEventosData.length === 0) {
-                    uiLista.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid var(--sup-neon); margin-bottom: 15px;"><div style="color: #fff; font-size: 14px;">Fique atento aos anúncios no grupo!</div></div>`;
-                } else {
-                    window.dashboardEventosData.forEach((ev, i) => {
-                        let dtTxt = (ev.dataInicio && ev.dataFim) ? `${window.parseQualquerData(ev.dataInicio).formatada} a ${window.parseQualquerData(ev.dataFim).formatada}` : (ev.dataInicio ? window.parseQualquerData(ev.dataInicio).formatada : "");
-                        
-                        let pUI = '';
-                        if (ev.premiosTexto || ev.hc || ev.moedas) {
-                            pUI = `<div style="margin-top:15px; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);">`;
-                            if (ev.premiosTexto) pUI += `<div style="color:var(--sup-neon); font-size:13px; margin-bottom:10px; font-weight:600;">${ev.premiosTexto}</div>`;
-                            if (ev.hc || ev.moedas) {
-                                pUI += `<div style="display:flex; gap:15px; align-items:center;">`;
-                                if (ev.hc) pUI += `<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirfXmN9g_cDNpjq8o7oXeKFIRwJLgI-w2FEisZ3iJdxqblDlMM858H3fDrWh-PpDE12pNyMmPBdxX8TRgBU95PXO8nd24V9Gny1nFTkhqsGKUKfMmtK-AEoIAvFTsJBjsNV2gk2oUkTTpf/s1600/HC31.gif" draggable="false" style="display:block; width:40px;">`;
-                                if (ev.moedas) pUI += `<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDZ6AWqYyPxpnw-heLbJ-k1qoyj_EZN8_wWWotWVW5MzTQZKPQEY-L3zuPCYIK-ExBKbQFBxyfS_c_F4xY6pPUAgRoHiJvC9HgpWYj6iVUCp4eXDF7M-ilisPyCQ6KBpGfdqgwjpmvWrsi/s1600/15c6908117fc3.gif" draggable="false" style="display:block; width:175px;">`;
-                                pUI += `</div>`;
-                            }
-                            pUI += `</div>`;
-                        }
-
-                        uiLista.insertAdjacentHTML('beforeend', `
-                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid var(--sup-neon); margin-bottom: 15px;">
-                                <h4 style="color:var(--sup-neon); margin-bottom: 5px; font-size: 18px; text-transform: uppercase;">${ev.nome || 'Evento'}</h4>
-                                ${dtTxt ? `<div style="color: var(--text-sub); font-size: 13px; margin-bottom: 10px; display:flex; align-items:center; gap:5px; font-weight:600;"><i class="fas fa-calendar-alt"></i> <span>${dtTxt}</span></div>` : ''}
-                                <div style="color: #fff; font-size: 14px; line-height: 1.5;">${ev.descricao || ''}</div>
-                                ${pUI}
-                            </div>
-                        `);
-                    });
-                }
-            }
-            window.processarPontuacoesSemanais();
-        }
-    });
-}
-
-window.abrirModalPontosExtras = function() {
-    document.getElementById('modal-pontos-extras').style.display = 'flex';
-    let sel = document.getElementById('pe-select-membro');
-    sel.innerHTML = '<option value="" disabled selected>Selecione...</option>';
-    [...window.membrosDataArray].sort((a, b) => window.normalizeNick(a.nick).localeCompare(window.normalizeNick(b.nick))).forEach(m => {
-        sel.innerHTML += `<option value="${m.nick}">${m.nick}</option>`;
-    });
-    window.renderTabelaPontosExtras();
-}
-
-window.fecharModalPontosExtras = function() {
-    document.getElementById('modal-pontos-extras').style.display = 'none';
-}
-
-window.salvarPontoExtra = function() {
-    let nick = document.getElementById('pe-select-membro').value;
-    let pts = parseFloat(document.getElementById('pe-input-pontos').value.replace(',', '.'));
-    if (!nick || isNaN(pts)) return window.mostrarToast ? window.mostrarToast("Selecione um membro e digite a pontuação.", "error") : alert("Erro");
-    window.pontosExtrasMap[nick] = pts;
-    window.db.collection("sistema").doc("config_metas").set({ pontosExtras: window.pontosExtrasMap }, { merge: true }).then(() => {
-        document.getElementById('pe-input-pontos').value = '';
-        if (window.mostrarToast) window.mostrarToast(`+${window.formatarNumeroDecimal(pts)} pontos para ${nick}`, "success");
-        window.renderTabelaPontosExtras();
-    });
-}
-
-window.removerPontoExtra = function(nick) {
-    delete window.pontosExtrasMap[nick];
-    window.db.collection("sistema").doc("config_metas").set({ pontosExtras: window.pontosExtrasMap }, { merge: true });
-    window.renderTabelaPontosExtras();
-}
-
-window.renderTabelaPontosExtras = function() {
-    let tbody = document.querySelector('#tb-pontos-extras tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    for (let n in window.pontosExtrasMap) {
-        tbody.innerHTML += `<tr><td>${n}</td><td style="text-align:center; color:var(--sup-neon); font-weight:bold;">+${window.formatarNumeroDecimal(window.pontosExtrasMap[n])}</td><td style="text-align:right;"><button class="btn-admin-icon btn-admin-del" onclick="window.removerPontoExtra('${n}')"><i class="fas fa-trash"></i></button></td></tr>`;
-    }
-    if (Object.keys(window.pontosExtrasMap).length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-sub);">Nenhum ponto extra.</td></tr>';
-    }
+    
+    if (window.inicializarEditoresTexto) window.inicializarEditoresTexto();
 }
 
 window.toggleFiltrosHistorico = function() {
@@ -832,3 +697,5 @@ window.buscarHistoricoMetas = async function() {
         container.innerHTML = 'Erro ao processar busca histórica.';
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => { if(window.setSemanaAtual) window.setSemanaAtual(); });
