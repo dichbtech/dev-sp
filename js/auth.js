@@ -170,6 +170,7 @@ window.gerarMenusPorNivel = function() {
     
     if (cmd && ehSuperLideranca) {
                         cmd.innerHTML = `
+            <div class="cmd-tile" onclick="window.abrirDashboard(); window.toggleCommand();"><i class="fas fa-bullseye"></i><span>Metas e Eventos</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-revisao'); window.toggleCommand();"><i class="fas fa-search"></i><span>Revisão</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-config-avisos'); window.carregarEditorAvisos(); window.toggleCommand();"><i class="fas fa-edit"></i><span>Textos Avisos</span></div>
             <div class="cmd-tile" onclick="window.switchSection('modulo-config-banners'); window.carregarEditorBanners(); window.toggleCommand();"><i class="fas fa-images"></i><span>Banners Home</span></div>

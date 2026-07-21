@@ -559,6 +559,7 @@ window.escutarConfigDashboard = function() {
                 { nome: 'Avisos', pontos: 1, multiplica: false }
             ];
             window.configAtividades = d.atividades || defaultAtividades;
+            if (window.configAtividades.length === 0) window.configAtividades = defaultAtividades;
             
             let btnPE = document.getElementById('btn-pontos-extras');
             let btnDash = document.getElementById('btn-dashboard-metas');
