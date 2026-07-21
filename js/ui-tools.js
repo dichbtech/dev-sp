@@ -36,28 +36,6 @@ const modaisGlobaisHTML = `
       </div>
   </div>
 
-  <div id="modal-dashboard" class="modal" onclick="if(event.target === this) this.style.display=\'none\'">
-     <div class="modal-content">
-        <div class="close-btn" onclick="window.fecharDashboard()"><i class="fas fa-times"></i></div>
-        <h3 style="color: var(--sup-neon); margin-bottom: 25px;"><i class="fas fa-tachometer-alt"></i> Dashboard de Metas e Eventos</h3>
-        <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px dashed rgba(251,191,36,0.3); margin-bottom: 25px;">
-           <h4 style="color:#fff; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; font-size:14px;"><i class="fas fa-bolt"></i> Multiplicador Global de Pontos</h4>
-           <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
-               <div style="display: flex; align-items: center;"><label class="switch" title="Ativar Bônus"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label><span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR BÔNUS</span></div>
-               <div class="input-block" style="margin:0; width: 150px;"><select id="dash-mult-evento"><option value="1">1x (Normal)</option><option value="2">2x Pontos</option><option value="3">3x Pontos</option><option value="4">4x Pontos</option></select></div>
-           </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(251,191,36,0.2); padding-bottom:10px; margin-bottom:15px;">
-            <h4 style="color:#fff; font-size:16px; text-transform:uppercase; margin:0;"><i class="far fa-calendar-alt"></i> Eventos do Mês</h4>
-            <button class="btn-tech" onclick="window.adicionarNovoEventoBox()" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-plus"></i> Adicionar Evento</button>
-        </div>
-        <div id="dash-eventos-container"></div>
-        <label class="tech-label" style="margin-top: 15px;">Frase de Patrocínio Padrão</label>
-        <input type="text" id="dash-txt-patrocinio" class="admin-input" style="margin-bottom:20px;" placeholder="Deseja patrocinar algum dos eventos...">
-        <button class="btn-tech btn-save" onclick="window.salvarDashboard()" style="width: 100%; margin-top: 10px; padding: 15px; font-size: 16px;"><i class="fas fa-save"></i> Salvar e Atualizar Painel</button>
-     </div>
-  </div>
-
   <div id="modal-pontos-extras" class="modal" onclick="if(event.target === this) this.style.display=\'none\'">
       <div class="modal-content" style="max-width: 500px;">
           <div class="close-btn" onclick="window.fecharModalPontosExtras()"><i class="fas fa-times"></i></div>
