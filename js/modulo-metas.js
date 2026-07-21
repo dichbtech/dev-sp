@@ -1,3 +1,21 @@
+
+window.setSemanaAtual = function() {
+    let hoje = new Date();
+    let domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - hoje.getDay());
+    let sabado = new Date(domingo);
+    sabado.setDate(domingo.getDate() + 6);
+    
+    let elInicio = document.getElementById('filtro-semana-inicio');
+    let elFim = document.getElementById('filtro-semana-fim');
+    
+    if(elInicio && elFim) {
+        elInicio.value = window.formatDateInput(domingo);
+        elFim.value = window.formatDateInput(sabado);
+        window.processarPontuacoesSemanais();
+    }
+}
+
 window.membrosDataArray = [];
 window.logsHistoricoGeral = [];
 window.admissoesGeral = {};
