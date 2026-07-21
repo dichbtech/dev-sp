@@ -328,7 +328,12 @@
 
           
           <!-- ACERVO GERAL -->
-          <div id="acervo-geral-container" style="display:none; margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3);">
+          
+          <div id="container-botoes-acervo" style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3); display: flex; gap: 15px; flex-wrap: wrap;">
+              <button class="btn-tech" onclick="window.toggleAcervoGeral()" style="background:#10b981; border-color:#10b981; color:#fff; padding: 10px 20px; font-size: 15px;"><i class="fas fa-archive"></i> Listar Acervo</button>
+              <button class="btn-tech" onclick="window.abrirRelatorioSupervisores()" style="background:#3b82f6; border-color:#3b82f6; color:#fff; padding: 10px 20px; font-size: 15px;"><i class="fas fa-file-alt"></i> Relatório de Supervisores</button>
+          </div>
+<div id="acervo-geral-container" style="display:none; margin-top: 15px;">
               <h3 style="margin-bottom: 15px;"><i class="fas fa-archive"></i> Acervo Geral de Atividades e Pontuações</h3>
               
               <div class="tabs-container" style="display:flex; gap:10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
