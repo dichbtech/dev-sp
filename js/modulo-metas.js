@@ -114,18 +114,30 @@ window.escutarMetasDoFirebase = function() {
         }
     });
 
-    window.db.collection("sistema").doc("registro_atividades").onSnapshot((doc) => {
-        if (doc.exists && doc.data().dados) {
-            try { window.logsHistoricoGeral = JSON.parse(doc.data().dados); } catch(e){}
-            window.processarPontuacoesSemanais();
-        }
+    window.atividadesCorrigidasGeral = [];
+    window.avisosValidosGeral = [];
+
+    // Listen to atividades corrigidas
+    window.db.collection("atividades_pendentes").where("avaliado", "==", true).onSnapshot(snap => {
+        let docs = [];
+        snap.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+        window.atividadesCorrigidasGeral = docs;
+        window.processarPontuacoesSemanais();
+    });
+
+    // Listen to avisos (apenas os concluídos e que não estão no lixo)
+    window.db.collection("avisos").where("lixo", "==", false).where("status", "==", "concluido").onSnapshot(snap => {
+        let docs = [];
+        snap.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+        window.avisosValidosGeral = docs;
+        window.processarPontuacoesSemanais();
     });
 
     window.escutarConfigDashboard();
 }
 
 window.processarPontuacoesSemanais = function() {
-    if (!window.logsHistoricoGeral || Object.keys(window.admissoesGeral).length === 0 || window.configAtividades.length === 0) return;
+    if (Object.keys(window.admissoesGeral).length === 0 || window.configAtividades.length === 0) return;
 
     let valInicio = document.getElementById('filtro-semana-inicio');
     let valFim = document.getElementById('filtro-semana-fim');
@@ -138,6 +150,12 @@ window.processarPontuacoesSemanais = function() {
 
     window.membrosDataArray = [];
     let nicksValidos = Object.keys(window.admissoesGeral);
+
+    // Prepare config map for easy access (case insensitive)
+    let configMap = {};
+    window.configAtividades.forEach(cfg => {
+        configMap[String(cfg.nome).toLowerCase().trim()] = cfg;
+    });
 
     nicksValidos.forEach(nickLimpo => {
         let info = window.admissoesGeral[nickLimpo];
@@ -160,9 +178,12 @@ window.processarPontuacoesSemanais = function() {
             stats.atividades_dinamicas[cfg.nome] = 0;
         });
 
-        let ativMembro = window.logsHistoricoGeral.filter(a => {
+        // ==========================
+        // PROCESSAR ATIVIDADES PENDENTES (Corrigidas)
+        // ==========================
+        let ativMembro = (window.atividadesCorrigidasGeral || []).filter(a => {
             if (window.normalizeNick(a.nick) !== nickLimpo) return false;
-            let dtParsed = window.parseQualquerData(a.data);
+            let dtParsed = window.parseQualquerData(a.dataPostagem); // Nova arquitetura usa dataPostagem
             if (!dtParsed.dateObj) return false;
             if (dAdm && dtParsed.dateObj < dAdm) return false;
             return dtParsed.dateObj >= dataI && dtParsed.dateObj <= dataF;
@@ -170,31 +191,52 @@ window.processarPontuacoesSemanais = function() {
 
         ativMembro.forEach(a => {
             let st = a.status ? String(a.status).toLowerCase().trim() : "";
-            let valido = st.startsWith('v');
+            let valido = st.startsWith('v'); // Relatórios geralmente são 'Válido' tbm
             
             if (valido) {
-                let abaLimpa = a.aba ? String(a.aba).toLowerCase().trim() : "";
-                let cfgAtividade = window.configAtividades.find(c => abaLimpa.includes(String(c.nome).toLowerCase().trim()));
+                let tipoLower = String(a.tipo || "").toLowerCase().trim();
+                let cfgAtividade = configMap[tipoLower];
                 
                 if (cfgAtividade) {
-                    let valQtd = String(a.qtd || "").trim();
-                    let qtdNum = parseFloat(valQtd.replace(',', '.'));
-                    if (isNaN(qtdNum) || valQtd === "") qtdNum = 1; 
+                    let ptsAtuais = 0;
+                    let basePts = parseFloat(cfgAtividade.pontos) || 0;
                     
-                    let valDesc = String(a.descontos || "0").trim();
-                    let descNum = parseFloat(valDesc.replace(',', '.'));
-                    if (isNaN(descNum)) descNum = 0;
+                    if (a.tipo === 'Grupos' || a.tipo === 'Soldados') {
+                        let incorrecoes = parseInt(a.incorrecoes) || 0;
+                        ptsAtuais = cfgAtividade.multiplica ? (basePts * incorrecoes) : basePts;
+                    } else if (a.tipo === 'Convites' || a.tipo === 'PPP') {
+                        let desc = parseFloat(a.descontos) || 0;
+                        ptsAtuais = basePts - desc;
+                    } else {
+                        // Outros tipos genéricos (Relatórios, etc), se houver multiplica usa qtdNum? Relatórios não multiplicam.
+                        ptsAtuais = basePts;
+                    }
                     
-                    let basePts = parseFloat(cfgAtividade.pontos);
-                    if (isNaN(basePts)) basePts = 0;
-                    
-                    let ptsAtuais = cfgAtividade.multiplica ? (basePts * qtdNum) : basePts;
-                    ptsAtuais -= descNum;
                     if (ptsAtuais < 0) ptsAtuais = 0;
-                    
                     stats.atividades_dinamicas[cfgAtividade.nome] += ptsAtuais;
                     stats.total_base += ptsAtuais;
                 }
+            }
+        });
+
+        // ==========================
+        // PROCESSAR AVISOS
+        // ==========================
+        let avisosMembro = (window.avisosValidosGeral || []).filter(av => {
+            if (av.invalido) return false; // Se foi invalidado pela liderança, ignora
+            if (window.normalizeNick(av.criador) !== nickLimpo) return false;
+            let ts = av.dataConclusao ? av.dataConclusao.toMillis() : (av.dataCriacao ? av.dataCriacao.toMillis() : 0);
+            let dt = new Date(ts);
+            if (dAdm && dt < dAdm) return false;
+            return dt >= dataI && dt <= dataF;
+        });
+
+        avisosMembro.forEach(av => {
+            let cfgAvisos = configMap['avisos'];
+            if (cfgAvisos) {
+                let basePts = parseFloat(cfgAvisos.pontos) || 0;
+                stats.atividades_dinamicas[cfgAvisos.nome] += basePts;
+                stats.total_base += basePts;
             }
         });
 
@@ -513,7 +555,8 @@ window.escutarConfigDashboard = function() {
                 { nome: 'Grupos', pontos: 0.5, multiplica: true },
                 { nome: 'Soldados', pontos: 0.5, multiplica: true },
                 { nome: 'Convites', pontos: 1, multiplica: false },
-                { nome: 'PPP', pontos: 1, multiplica: false }
+                { nome: 'PPP', pontos: 1, multiplica: false },
+                { nome: 'Avisos', pontos: 1, multiplica: false }
             ];
             window.configAtividades = d.atividades || defaultAtividades;
             

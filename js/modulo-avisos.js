@@ -219,9 +219,14 @@ window.gerarCardAviso = function(d, ehLideranca) {
         dataF = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
     }
 
-    let statusHtml = d.status === 'pendente' ? 
-        '<span style="background:var(--sup-neon); color:#000; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">PENDENTE</span>' : 
-        '<span style="background:#4caf50; color:#fff; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">ENVIADO</span>';
+    let statusHtml = '';
+    if (d.invalido) {
+        statusHtml = '<span style="background:#ff2a2a; color:#fff; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">INVALIDADO</span>';
+    } else if (d.status === 'pendente') {
+        statusHtml = '<span style="background:var(--sup-neon); color:#000; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">PENDENTE</span>';
+    } else {
+        statusHtml = '<span style="background:#4caf50; color:#fff; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">ENVIADO</span>';
+    }
 
     // Gerar Texto Automático (Preview)
     let template = window.templatesAvisos[d.tipo] || `Você recebeu um(a) ${d.tipo}. Motivo: [motivo].`;
@@ -277,11 +282,15 @@ window.gerarCardAviso = function(d, ehLideranca) {
         }
         html += `<div style="margin-bottom:10px; font-size:13px; color:var(--text-sub);"><i class="fas fa-check-circle" style="color:#4caf50;"></i> Enviado por: <b>${d.responsavel}</b> em ${dataConc}</div>`;
         
-        if (ehLideranca) {
+                if (ehLideranca) {
+            let btnInvalidar = d.invalido ? 
+                `<button onclick="window.invalidarAviso('${d.id}', true)" style="width:100%; margin-top:15px; background:rgba(76,175,80,0.1); border:1px solid #4caf50; color:#4caf50; border-radius:6px; padding:8px; cursor:pointer;"><i class="fas fa-check"></i> Revalidar Aviso</button>` : 
+                `<button onclick="window.invalidarAviso('${d.id}', false)" style="width:100%; margin-top:15px; background:rgba(255,42,42,0.1); border:1px solid #ff2a2a; color:#ff2a2a; border-radius:6px; padding:8px; cursor:pointer;"><i class="fas fa-ban"></i> Invalidar Aviso</button>`;
             html += `
                 <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; margin-top:10px;">
                     <div style="font-size:12px; color:#aaa; margin-bottom:10px;">Link de Comprovação: <a href="${d.linkPrint}" target="_blank" style="color:var(--sup-neon);">${d.linkPrint}</a></div>
                     ${(d.linkPrint && window.renderImgurEmbed) ? window.renderImgurEmbed(d.linkPrint) : ''}
+                    ${btnInvalidar}
                 </div>
             `;
         }
