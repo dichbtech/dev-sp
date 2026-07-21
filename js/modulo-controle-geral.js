@@ -186,11 +186,11 @@ async function carregarAPIsGerais() {
         // Sincroniza supervisores para o Módulo de Metas
         window.admissoesGeral = {};
         window.dadosGeraisRH.membrosDivisao.forEach(m => {
-            let func = String(m['Função'] || m.Funcao || m.Cargo || '').trim();
+            let func = String(m.Cargos || m.Cargo || m['Função'] || m.Funcao || '').trim();
             if (func === 'Sp' || func === 'Supervisor') {
                 let nickOriginal = (m.Nickname || m.Nick || '').replace(/\[/g, '').replace(/\]/g, '').trim();
                 let nickLimpo = window.normalizeNick ? window.normalizeNick(nickOriginal) : nickOriginal.toLowerCase();
-                let dAdm = m['Data/Hora'] || m['Data de Admissão'] || '';
+                let dAdm = m['Data e Hora'] || m['Data/Hora'] || m['Data de Admissão'] || '';
                 window.admissoesGeral[nickLimpo] = { cargo: 'Sp', data: dAdm, nickOriginal: nickOriginal };
             }
         });
