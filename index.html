@@ -1568,7 +1568,7 @@
 
   <script src="js/firebase-init.js?v=2"></script>
 
-  <script src="js/modulo-metas.js?v=1784648189"></script>
+  <script src="js/modulo-metas.js?v=1784649453"></script>
 
   <script src="js/modulo-estrelas.js?v=1784522438"></script>
 
@@ -1620,32 +1620,17 @@
                 <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
                     <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-tasks"></i> Pontuação das Atividades</h4>
                     <div id="dash-atividades-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;"></div>
-                    <button class="btn-tech btn-add" style="width:100%;" onclick="window.adicionarNovaAtividadeBox()"><i class="fas fa-plus"></i> Adicionar Regra</button>
+                    
                 </div>
                 
                 <!-- Coluna 2: Eventos e Patrocínios -->
                 <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;">
                     
                     <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
-                        <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-calendar-alt"></i> Controle de Evento Global</h4>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 15px;">
-                            <label style="color:#aaa; font-size:14px;">Status do Evento</label>
-                            <label class="switch">
-                                <input type="checkbox" id="dash-toggle-evento">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <label>Multiplicador Base (Ex: 2 para Dobro)</label>
-                            <input type="number" id="dash-mult-evento" class="input-padrao" min="1" step="0.5">
-                        </div>
-                    </div>
-                    
-                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
                         <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-trophy"></i> Patrocinadores</h4>
                         <div class="input-group" style="display:flex; gap:10px;">
                             <input type="text" id="dash-novo-sponsor" class="input-padrao" placeholder="Nick do Patrocinador">
-                            <button class="btn-tech btn-add" onclick="window.adicionarAdminSponsor()"><i class="fas fa-plus"></i></button>
+                            <button class="btn-tech btn-add" onclick="window.adicionarSponsor()"><i class="fas fa-plus"></i></button>
                         </div>
                         <div id="dash-sponsors-container" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:15px;"></div>
                         
@@ -1658,13 +1643,13 @@
                     <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
                         <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-list-ol"></i> Log de Eventos Externos</h4>
                         <div id="dash-eventos-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; max-height:150px; overflow-y:auto;"></div>
-                        <button class="btn-tech btn-add" style="width:100%;" onclick="window.adicionarAdminEvento()"><i class="fas fa-plus"></i> Adicionar Evento</button>
+                        <button class="btn-tech btn-add" style="width:100%;" onclick="window.adicionarNovoEventoBox()"><i class="fas fa-plus"></i> Adicionar Evento</button>
                     </div>
                     
                 </div>
             </div>
             
-            <button class="btn-tech btn-save" style="width:100%; margin-top: 25px; padding: 15px; font-size: 16px;" onclick="window.salvarConfigDashboard()"><i class="fas fa-save"></i> SALVAR TODAS AS CONFIGURAÇÕES</button>
+            <button class="btn-tech btn-save" style="width:100%; margin-top: 25px; padding: 15px; font-size: 16px;" onclick="window.salvarDashboard()"><i class="fas fa-save"></i> SALVAR TODAS AS CONFIGURAÇÕES</button>
         </div>
     </div>
 

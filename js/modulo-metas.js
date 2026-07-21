@@ -394,32 +394,32 @@ window.abrirDashboard = function() {
 window.fecharDashboard = function() { document.getElementById('modal-dashboard').style.display = 'none'; }
 
 // HUB DE ATIVIDADES
-window.adicionarNovaAtividadeBox = function() {
-    window.configAtividades.push({ nome: '', pontos: 1, multiplica: false });
-    window.renderAdminAtividadesList();
-}
-window.removerAtividadeBox = function(index) {
-    window.configAtividades.splice(index, 1);
-    window.renderAdminAtividadesList();
-}
 window.renderAdminAtividadesList = function() {
     let container = document.getElementById('dash-atividades-container');
     if (!container) return;
     container.innerHTML = '';
-    if(window.configAtividades.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-sub); font-style:italic; font-size:14px; margin-bottom:20px;">Nenhuma atividade configurada. O sistema não pontuará nada.</p>';
-        return;
-    }
-    window.configAtividades.forEach((atv, i) => {
+    
+    // Categorias fixas
+    const categoriasFixas = [
+        { nome: 'Soldados', defaultPontos: 0.5, multiplica: true, label: 'Soldados (por incorreção)' },
+        { nome: 'Grupos', defaultPontos: 0.5, multiplica: true, label: 'Grupos (por incorreção)' },
+        { nome: 'Convites', defaultPontos: 1, multiplica: false, label: 'Convites Válidos' },
+        { nome: 'PPP', defaultPontos: 1, multiplica: false, label: 'PPP Válidos' },
+        { nome: 'Avisos', defaultPontos: 1, multiplica: false, label: 'Avisos Válidos' }
+    ];
+
+    categoriasFixas.forEach((cat) => {
+        let cfg = window.configAtividades.find(a => String(a.nome).toLowerCase() === cat.nome.toLowerCase());
+        let pontosAtuais = cfg ? cfg.pontos : cat.defaultPontos;
+
         container.innerHTML += `
-        <div style="display:flex; gap:10px; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);" class="admin-atividade-item">
-            <div style="flex:2;"><label class="tech-label">Nome da Aba (Planilha)</label><input type="text" class="admin-input atv-nome" value="${atv.nome}" placeholder="Ex: Grupos"></div>
-            <div style="flex:1;"><label class="tech-label">Pontos</label><input type="number" step="0.1" class="admin-input atv-pontos" value="${atv.pontos}"></div>
-            <div style="flex:1; display:flex; align-items:center; padding-top:20px;">
-                <label style="color:#fff; font-size:12px; cursor:pointer;"><input type="checkbox" class="atv-multiplica" ${atv.multiplica ? 'checked' : ''}> Vezes a Qtd?</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:15px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-bottom: 8px;" class="admin-atividade-item" data-nome="${cat.nome}" data-multiplica="${cat.multiplica}">
+            <div style="flex:2;">
+                <label class="tech-label" style="font-size:14px; font-weight:bold; color:var(--sup-neon);">${cat.label}</label>
             </div>
-            <div style="padding-top:20px;">
-                <button type="button" onclick="window.removerAtividadeBox(${i})" style="background:rgba(255,42,42,0.1); border:none; color:#ef4444; width:30px; height:30px; border-radius:4px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+            <div style="flex:1; display:flex; justify-content:flex-end; align-items:center; gap: 10px;">
+                <label class="tech-label" style="margin:0;">Pontos:</label>
+                <input type="number" step="0.1" class="admin-input atv-pontos" value="${pontosAtuais}" style="width: 80px; text-align:center;">
             </div>
         </div>`;
     });
@@ -519,22 +519,23 @@ window.salvarDashboard = function() {
     document.querySelectorAll('.admin-atividade-item').forEach(el => {
         let valPontos = String(el.querySelector('.atv-pontos').value).replace(',', '.');
         atvs.push({
-            nome: el.querySelector('.atv-nome').value,
+            nome: el.getAttribute('data-nome'),
             pontos: parseFloat(valPontos) || 0,
-            multiplica: el.querySelector('.atv-multiplica').checked
+            multiplica: el.getAttribute('data-multiplica') === 'true'
         });
     });
 
     window.db.collection("sistema").doc("config_metas").set({
-        eventoAtivo: document.getElementById('dash-toggle-evento').checked,
-        eventoMult: parseInt(document.getElementById('dash-mult-evento').value, 10) || 1,
         textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
         eventos: evs,
         atividades: atvs,
-        sponsors: window.dashboardSponsorsData // Salva a nova lista de patrocinadores
-    }, { merge: true }).then(() => {
-        if (window.mostrarToast) window.mostrarToast("Painel Atualizado!", "success");
+        sponsors: window.dashboardSponsorsData
+    }).then(() => {
+        window.customAlert("Configurações do Hub salvas com sucesso!", "Sucesso");
         window.fecharDashboard();
+    }).catch(err => {
+        console.error(err);
+        window.customAlert("Erro ao salvar configurações do Hub.", "Erro");
     });
 }
 
