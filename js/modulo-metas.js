@@ -151,7 +151,7 @@ window.escutarMetasDoFirebase = function() {
         window.processarPontuacoesSemanais();
     });
 
-    window.escutarConfigDashboard();
+    // window.escutarConfigDashboard(); // Already called in auth.js, prevents duplicate listener
 }
 
 window.processarPontuacoesSemanais = function() {
@@ -188,12 +188,14 @@ window.processarPontuacoesSemanais = function() {
             nick: info.nickOriginal,
             total_base: 0, 
             status_base: 'Não cumprida', 
-            cargo: 'Supervisor',
-            atividades_dinamicas: {} 
+            cargo: 'Sp: Supervisor',
+            atividades_dinamicas: {},
+            contagem_dinamicas: {}
         };
 
         window.configAtividades.forEach(cfg => {
             stats.atividades_dinamicas[cfg.nome] = 0;
+            stats.contagem_dinamicas[cfg.nome] = 0;
         });
 
         // ==========================
@@ -201,11 +203,15 @@ window.processarPontuacoesSemanais = function() {
         // ==========================
         let ativMembro = (window.atividadesCorrigidasGeral || []).filter(a => {
             if (window.normalizeNick(a.nick) !== nickLimpo) return false;
-            let dtParsed = window.parseQualquerData(a.dataPostagem); // Nova arquitetura usa dataPostagem
+            let dtParsed = window.parseQualquerData(a.dataPostagem);
             if (!dtParsed.dateObj) return false;
             if (dAdm && dtParsed.dateObj < dAdm) return false;
+            a._dataObjParaSort = dtParsed.dateObj;
             return dtParsed.dateObj >= dataI && dtParsed.dateObj <= dataF;
         });
+
+        // Ordenação Cronológica (mais antigo para mais novo)
+        ativMembro.sort((a, b) => a._dataObjParaSort - b._dataObjParaSort);
 
         ativMembro.forEach(a => {
             let st = a.status ? String(a.status).toLowerCase().trim() : "";
@@ -226,13 +232,19 @@ window.processarPontuacoesSemanais = function() {
                         let desc = parseFloat(a.descontos) || 0;
                         ptsAtuais = basePts - desc;
                     } else {
-                        // Outros tipos genéricos (Relatórios, etc), se houver multiplica usa qtdNum? Relatórios não multiplicam.
                         ptsAtuais = basePts;
                     }
                     
                     if (ptsAtuais < 0) ptsAtuais = 0;
-                    stats.atividades_dinamicas[cfgAtividade.nome] += ptsAtuais;
-                    stats.total_base += ptsAtuais;
+                    
+                    // Contagem cronológica
+                    stats.contagem_dinamicas[cfgAtividade.nome] = (stats.contagem_dinamicas[cfgAtividade.nome] || 0) + 1;
+                    let limite = parseInt(cfgAtividade.limite) || 0;
+                    
+                    if (limite === 0 || stats.contagem_dinamicas[cfgAtividade.nome] <= limite) {
+                        stats.atividades_dinamicas[cfgAtividade.nome] += ptsAtuais;
+                        stats.total_base += ptsAtuais;
+                    }
                 }
             }
         });
@@ -241,24 +253,43 @@ window.processarPontuacoesSemanais = function() {
         // PROCESSAR AVISOS
         // ==========================
         let avisosMembro = (window.avisosValidosGeral || []).filter(av => {
-            if (av.invalido) return false; // Se foi invalidado pela liderança, ignora
+            if (av.invalido) return false;
             if (window.normalizeNick(av.criador) !== nickLimpo) return false;
-            let ts = av.dataConclusao ? av.dataConclusao.toMillis() : (av.dataCriacao ? av.dataCriacao.toMillis() : 0);
-            let dt = new Date(ts);
+            let dt = new Date(0);
+            try {
+                let ts = av.dataConclusao ? av.dataConclusao.toMillis() : (av.dataCriacao ? av.dataCriacao.toMillis() : 0);
+                dt = new Date(ts);
+            } catch(e) {
+                let dtParsed = window.parseQualquerData(av.dataConclusao || av.dataCriacao);
+                if (dtParsed.dateObj) dt = dtParsed.dateObj;
+            }
             if (dAdm && dt < dAdm) return false;
+            av._dataObjParaSort = dt;
             return dt >= dataI && dt <= dataF;
         });
+
+        avisosMembro.sort((a, b) => a._dataObjParaSort - b._dataObjParaSort);
 
         avisosMembro.forEach(av => {
             let cfgAvisos = configMap['avisos'];
             if (cfgAvisos) {
                 let basePts = parseFloat(cfgAvisos.pontos) || 0;
-                stats.atividades_dinamicas[cfgAvisos.nome] += basePts;
-                stats.total_base += basePts;
+                
+                stats.contagem_dinamicas[cfgAvisos.nome] = (stats.contagem_dinamicas[cfgAvisos.nome] || 0) + 1;
+                let limite = parseInt(cfgAvisos.limite) || 0;
+                
+                if (limite === 0 || stats.contagem_dinamicas[cfgAvisos.nome] <= limite) {
+                    stats.atividades_dinamicas[cfgAvisos.nome] += basePts;
+                    stats.total_base += basePts;
+                }
             }
         });
 
-        if (stats.total_base >= 5) stats.status_base = "Cumprida";
+        if (typeof window.metaSemanal !== 'undefined' && window.metaSemanal !== null) {
+            if (stats.total_base >= window.metaSemanal) stats.status_base = "Cumprida";
+        } else {
+            stats.status_base = "Sem Meta";
+        }
         window.membrosDataArray.push(stats);
     });
 
@@ -436,8 +467,10 @@ window.renderAdminAtividadesList = function() {
                 <label class="tech-label" style="font-size:14px; font-weight:bold; color:var(--sup-neon);">${cat.label}</label>
             </div>
             <div style="flex:1; display:flex; justify-content:flex-end; align-items:center; gap: 10px;">
-                <label class="tech-label" style="margin:0;">Pontos:</label>
-                <input type="number" step="0.1" class="admin-input atv-pontos" value="${pontosAtuais}" style="width: 80px; text-align:center;">
+                <label class="tech-label" style="margin:0;">Limite/Sem (0=sem):</label>
+                <input type="number" step="1" class="admin-input atv-limite" value="${cfg ? (cfg.limite || 0) : 0}" style="width: 60px; text-align:center;">
+                <label class="tech-label" style="margin:0; margin-left:10px;">Pontos:</label>
+                <input type="number" step="0.1" class="admin-input atv-pontos" value="${pontosAtuais}" style="width: 60px; text-align:center;">
             </div>
         </div>`;
     });
@@ -562,14 +595,19 @@ window.salvarDashboard = function() {
     let atvs = [];
     document.querySelectorAll('.admin-atividade-item').forEach(el => {
         let valPontos = String(el.querySelector('.atv-pontos').value).replace(',', '.');
+        let valLimite = el.querySelector('.atv-limite') ? parseInt(el.querySelector('.atv-limite').value, 10) : 0;
         atvs.push({
             nome: el.getAttribute('data-nome'),
             pontos: parseFloat(valPontos) || 0,
+            limite: valLimite || 0,
             multiplica: el.getAttribute('data-multiplica') === 'true'
         });
     });
+    
+    let metaSem = document.getElementById('dash-meta-semanal') ? parseFloat(document.getElementById('dash-meta-semanal').value.replace(',', '.')) : 0;
 
     window.db.collection("sistema").doc("config_metas").set({
+        metaSemanal: metaSem,
         textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
         eventos: evs,
         atividades: atvs,
@@ -585,6 +623,14 @@ window.salvarDashboard = function() {
 
 window.escutarConfigDashboard = function() {
     window.db.collection("sistema").doc("config_metas").onSnapshot((doc) => {
+        let defaultAtividades = [
+            { nome: 'Grupos', pontos: 0.5, multiplica: true },
+            { nome: 'Soldados', pontos: 0.5, multiplica: true },
+            { nome: 'Convites', pontos: 1, multiplica: false },
+            { nome: 'PPP', pontos: 1, multiplica: false },
+            { nome: 'Avisos', pontos: 1, multiplica: false }
+        ];
+
         if (doc.exists) {
             let d = doc.data();
             window.eventoAtivo = d.eventoAtivo || false;
@@ -595,6 +641,11 @@ window.escutarConfigDashboard = function() {
             // Lê os Patrocinadores
             window.dashboardSponsorsData = d.sponsors || [];
             window.renderSponsors(window.dashboardSponsorsData);
+            
+            window.metaSemanal = d.metaSemanal;
+            if (document.getElementById('dash-meta-semanal') && typeof window.metaSemanal !== 'undefined') {
+                document.getElementById('dash-meta-semanal').value = window.metaSemanal;
+            }
             
             let defaultAtividades = [
                 { nome: 'Grupos', pontos: 0.5, multiplica: true },
@@ -656,6 +707,12 @@ window.escutarConfigDashboard = function() {
                     });
                 }
             }
+            window.processarPontuacoesSemanais();
+        } else {
+            // FALLBACK
+            window.configAtividades = defaultAtividades;
+            window.metaSemanal = undefined;
+            if (document.getElementById('dash-meta-semanal')) document.getElementById('dash-meta-semanal').value = '';
             window.processarPontuacoesSemanais();
         }
     });
@@ -859,7 +916,10 @@ window.buscarHistoricoMetas = async function() {
                     return dA - dB;
                 }).forEach(wk => {
                     let total = semanas[wk].pts;
-                    let st = total >= 5 ? 'Cumprida' : 'Não cumprida';
+                    let metaCalc = (typeof window.metaSemanal !== 'undefined' && window.metaSemanal !== null) ? window.metaSemanal : 0;
+                    let st = 'Não cumprida';
+                    if (metaCalc === 0) st = 'Sem Meta';
+                    else if (total >= metaCalc) st = 'Cumprida';
                     if (total === 0) st = "Aval/Licença ou Justificada";
                     
                     resultLines.push(`${wk} | ${window.formatarNumeroDecimal(total)} | ${st}`);

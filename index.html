@@ -24,7 +24,7 @@
 
 
 
-    <link href="css/style.css?v=1784520644" rel="stylesheet">
+    <link href="css/style.css?v=1784661469" rel="stylesheet">
 
     
 
@@ -276,39 +276,7 @@
              </div>
              <div class="member-search-box" style="display: flex; flex-direction: column; flex: 1; min-width: 300px; gap: 20px;">
                 <div style="display: flex; gap: 15px; align-items: center;"><div class="input-block" style="width: 100%; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div></div>
-                <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
-
-             <div class="member-stage-box" id="stage-container" style="position: relative; height: 350px;">
-
-                 <div class="stage-glow"></div>
-
-                 <img id="img-palco-base" src="https://i.imgur.com/7XXAuf4.png" draggable="false" style="z-index: 2; position: absolute; left: 102px; top: 255px; width: 170px; image-rendering: pixelated;">
-
-                 <img id="img-brasao" src="https://i.imgur.com/aOXCYBj.png" draggable="false" style="z-index: 3; position: absolute; left: -7px; top: 47px; width: 181px; image-rendering: pixelated;">
-
-                 <img id="img-emblema-sup" src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" draggable="false" style="z-index: 4; position: absolute; left: 38px; top: 93px; width: 84px; image-rendering: pixelated;">
-
-                 <img id="avatar-selecionado" src="" draggable="false" style="z-index: 5; position: absolute; left: 104px; top: 59px; width: 154px; image-rendering: pixelated;">
-
-             </div>
-
-             
-
-             <div class="stats-grid-box">
-
-                <div class="stat-total" style="grid-column: 1 / -1; margin-bottom: 10px;">
-
-                    <div><h4 style="color:var(--text-sub); margin-bottom:0;">Total de Pontos</h4><div class="val" id="det-total" style="display:flex; align-items:baseline; gap:10px;">-</div></div>
-
-                    <div style="text-align: right;"><h4 style="color:var(--text-sub); margin-bottom:0;">Status da Meta</h4><div id="det-status" style="font-size: 20px; font-weight: 700; text-transform: uppercase; margin-top:5px;">-</div></div>
-
-                </div>
-
-                <div id="dynamic-stats-cards" style="display: contents;"></div>
-
-             </div>
-
-          </div>
+                
              </div>
 
 
@@ -1556,36 +1524,36 @@
 
 
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js?v=1784657370"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js?v=1784660321"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js?v=1784657370"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js?v=1784660321"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js?v=1784657370"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js?v=1784660321"></script>
 
   
 
-  <script src="js/ui-tools.js?v=1784657370"></script>
+  <script src="js/ui-tools.js?v=1784660321"></script>
 
-  <script src="js/firebase-init.js?v=1784657370"></script>
+  <script src="js/firebase-init.js?v=1784660321"></script>
 
-  <script src="js/modulo-metas.js?v=1784657370"></script>
+  <script src="js/modulo-metas.js?v=1784661469"></script>
 
-  <script src="js/modulo-estrelas.js?v=1784657370"></script>
+  <script src="js/modulo-estrelas.js?v=1784660321"></script>
 
 
-  <script src="js/modulo-acompanhamentos.js?v=1784657370"></script>
-  <script src="js/modulo-controle-geral.js?v=1784657370"></script>
-  <script src="js/modulo-verificacoes.js?v=1784657370"></script>
-  <script src="js/modulo-avisos.js?v=1784657370"></script>
-  <script src="js/modulo-admin.js?v=1784657370"></script>
+  <script src="js/modulo-acompanhamentos.js?v=1784660321"></script>
+  <script src="js/modulo-controle-geral.js?v=1784660321"></script>
+  <script src="js/modulo-verificacoes.js?v=1784660321"></script>
+  <script src="js/modulo-avisos.js?v=1784660321"></script>
+  <script src="js/modulo-admin.js?v=1784660321"></script>
 
-  <script src="js/modulo-correcoes.js?v=1784657370"></script>
+  <script src="js/modulo-correcoes.js?v=1784660321"></script>
 
-  <script src="js/modulo-revisao.js?v=1784657370"></script>
+  <script src="js/modulo-revisao.js?v=1784660321"></script>
 
-  <script src="js/modulo-requerimentos.js?v=1784657370"></script>
+  <script src="js/modulo-requerimentos.js?v=1784660321"></script>
 
-  <script src="js/auth.js?v=1784657370"></script>
+  <script src="js/auth.js?v=1784660321"></script>
 
 
 
@@ -1619,6 +1587,11 @@
                 <!-- Coluna 1: Atividades -->
                 <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
                     <h4 style="margin-bottom: 15px; color:#fff;"><i class="fas fa-tasks"></i> Pontuação das Atividades</h4>
+                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                        <label style="color:#aaa; font-size:14px; display:block; margin-bottom:5px;">Meta Semanal da Divisão (Pontos)</label>
+                        <input type="number" id="dash-meta-semanal" class="input-padrao" style="width: 100px;" step="0.5" placeholder="Ex: 80">
+                        <small style="color:var(--text-sub); font-size:11px; display:block; margin-top:5px;">Define os pontos mínimos para "Meta Cumprida".</small>
+                    </div>
                     <div id="dash-atividades-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;"></div>
                     
                 </div>
