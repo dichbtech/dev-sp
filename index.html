@@ -237,7 +237,7 @@
 
                 <button class="btn-tech" id="btn-pontos-extras" style="display:none; padding: 8px 15px; font-size: 13px; border-color: #4caf50; color: #4caf50;" onclick="window.abrirModalPontosExtras()"><i class="fas fa-star"></i> Pontos Extras</button>
 
-                <button class="btn-tech" id="btn-dashboard-metas" onclick="window.abrirDashboard()" style="display:none; padding: 8px 15px; font-size: 13px;"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                
 
             </div>
 
@@ -277,7 +277,75 @@
              <div class="member-search-box" style="display: flex; flex-direction: column; flex: 1; min-width: 300px; gap: 20px;">
                 <div style="display: flex; gap: 15px; align-items: center;"><div class="input-block" style="width: 100%; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div></div>
                 
+             
+id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
+
+             <div class="member-stage-box" id="stage-container" style="position: relative; height: 350px;">
+
+                 <div class="stage-glow"></div>
+
+                 <img id="img-palco-base" src="https://i.imgur.com/7XXAuf4.png" draggable="false" style="z-index: 2; position: absolute; left: 102px; top: 255px; width: 170px; image-rendering: pixelated;">
+
+                 <img id="img-brasao" src="https://i.imgur.com/aOXCYBj.png" draggable="false" style="z-index: 3; position: absolute; left: -7px; top: 47px; width: 181px; image-rendering: pixelated;">
+
+                 <img id="img-emblema-sup" src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" draggable="false" style="z-index: 4; position: absolute; left: 38px; top: 93px; width: 84px; image-rendering: pixelated;">
+
+                 <img id="avatar-selecionado" src="" draggable="false" style="z-index: 5; position: absolute; left: 104px; top: 59px; width: 154px; image-rendering: pixelated;">
+
              </div>
+
+             
+
+             <div class="stats-grid-box">
+
+                <div class="stat-total" style="grid-column: 1 / -1; margin-bottom: 10px;">
+
+                    <div><h4 style="color:var(--text-sub); margin-bottom:0;">Total de Pontos</h4><div class="val" id="det-total" style="display:flex; align-items:baseline; gap:10px;">-</div></div>
+
+                    <div style="text-align: right;"><h4 style="color:var(--text-sub); margin-bottom:0;">Status da Meta</h4><div id="det-status" style="font-size: 20px; font-weight: 700; text-transform: uppercase; margin-top:5px;">-</div></div>
+
+                </div>
+
+                <div id="dynamic-stats-cards" style="display: contents;"></div>
+
+             </div>
+
+          </div>
+             </div>
+
+
+             
+
+          </div>
+
+          
+
+          
+
+          
+
+
+
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3);">
+
+              <h3 style="margin-bottom: 15px;"><i class="fas fa-search-plus"></i> Buscador de Histórico e Metas</h3>
+
+              <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
+
+                  <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+
+                      <div style="flex:1; min-width:200px;">
+
+                          <label class="tech-label">Policial / Auxiliar</label>
+
+                          <div class="input-block" style="margin:0;">
+
+                              <i class="fas fa-user"></i>
+
+                              <input type="text" id="hist-input-membro" list="hist-nicks-list" placeholder="Digite o nick exato..." style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
+
+                           
+</div>
 
 
              

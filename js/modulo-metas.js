@@ -462,15 +462,19 @@ window.renderAdminAtividadesList = function() {
         let pontosAtuais = cfg ? cfg.pontos : cat.defaultPontos;
 
         container.innerHTML += `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:15px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-bottom: 8px;" class="admin-atividade-item" data-nome="${cat.nome}" data-multiplica="${cat.multiplica}">
-            <div style="flex:2;">
-                <label class="tech-label" style="font-size:14px; font-weight:bold; color:var(--sup-neon);">${cat.label}</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:15px 20px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" class="admin-atividade-item" data-nome="${cat.nome}" data-multiplica="${cat.multiplica}">
+            <div style="flex:1; min-width: 150px;">
+                <div style="font-size:15px; font-weight:700; color:var(--sup-neon); text-transform:uppercase; letter-spacing:0.5px;">${cat.label}</div>
             </div>
-            <div style="flex:1; display:flex; justify-content:flex-end; align-items:center; gap: 10px;">
-                <label class="tech-label" style="margin:0;">Limite/Sem (0=sem):</label>
-                <input type="number" step="1" class="admin-input atv-limite" value="${cfg ? (cfg.limite || 0) : 0}" style="width: 60px; text-align:center;">
-                <label class="tech-label" style="margin:0; margin-left:10px;">Pontos:</label>
-                <input type="number" step="0.1" class="admin-input atv-pontos" value="${pontosAtuais}" style="width: 60px; text-align:center;">
+            <div style="display:flex; gap: 20px; align-items:center;">
+                <div style="display:flex; flex-direction:column; gap:5px; align-items:center;">
+                    <label class="tech-label" style="margin:0; font-size:11px; text-transform:uppercase; color:#9ca3af; letter-spacing:0.5px;">Limite/Sem (0=inf)</label>
+                    <input type="number" step="1" class="input-padrao atv-limite" value="${cfg ? (cfg.limite || 0) : 0}" style="width: 70px; text-align:center; padding: 6px; font-weight:bold; border-color: rgba(251,191,36,0.3);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px; align-items:center;">
+                    <label class="tech-label" style="margin:0; font-size:11px; text-transform:uppercase; color:#9ca3af; letter-spacing:0.5px;">Pontos</label>
+                    <input type="number" step="0.1" class="input-padrao atv-pontos" value="${pontosAtuais}" style="width: 70px; text-align:center; padding: 6px; font-weight:bold; border-color: rgba(251,191,36,0.3);">
+                </div>
             </div>
         </div>`;
     });
@@ -658,14 +662,11 @@ window.escutarConfigDashboard = function() {
             if (window.configAtividades.length === 0) window.configAtividades = defaultAtividades;
             
             let btnPE = document.getElementById('btn-pontos-extras');
-            let btnDash = document.getElementById('btn-dashboard-metas');
             if (['LIDER', 'VICE-LIDER', 'SUB-LIDER', 'ADMIN'].includes(window.nivelUsuarioGlobal)) {
                 if (btnPE) btnPE.style.display = window.eventoAtivo ? 'inline-flex' : 'none';
-                if (btnDash) btnDash.style.display = 'inline-flex';
-            } else {
+                } else {
                 if (btnPE) btnPE.style.display = 'none';
-                if (btnDash) btnDash.style.display = 'none';
-            }
+                }
 
             let banner = document.getElementById('evento-banner');
             if(banner) banner.style.display = (window.eventoAtivo && window.eventoMult > 1) ? 'flex' : 'none';
