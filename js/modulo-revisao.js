@@ -131,79 +131,127 @@ window.renderizarListaRevisao = function() {
         let cardsHtml = '';
         grupos[dia].forEach(d => {
             let labelPostador = d.tipo === 'Relatórios' ? 'Auxiliar:' : 'Supervisor:';
-            let labelAvaliador = 'Responsável:';
             
-            let btnLink = '';
-            if (d.link && d.link.startsWith('http')) {
-                btnLink = `<button class="btn-tech" style="padding: 4px 10px; font-size: 11px;" data-url="${d.link}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
+            let btnRelatorioAnterior = '';
+            if ((d.tipo === 'Grupos' || d.tipo === 'Soldados') && d.linkAnterior) {
+                btnRelatorioAnterior = `<button onclick="window.open('${d.linkAnterior}', '_blank')" style="background: rgba(251,191,36,0.1); border: 1px solid var(--sup-neon); color: var(--sup-neon); padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; text-transform: uppercase; font-weight: bold; margin-left: 10px; transition: 0.3s; display:inline-flex; align-items:center; gap:5px;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';"><i class="fas fa-history"></i> Relatório Anterior</button>`;
             }
+
+            let infoHtml = ``;
+            let dataCorrigido = d.timestampAvaliacao ? new Date(d.timestampAvaliacao).toLocaleString('pt-BR') : '-';
             
-            let detalhesExtras = '';
+            infoHtml += `<div style="font-size:12px; color:var(--text-sub); margin-bottom:10px; font-weight:600;"><i class="far fa-clock"></i> Postado em: ${d.dataPostagem || '-'} &nbsp;|&nbsp; <i class="fas fa-check-circle" style="color:#4caf50;"></i> Corrigido em: ${dataCorrigido}</div>`;
+            infoHtml += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+                <span style="color:#fff; font-size:14px; font-weight:600; width:85px;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)} ${btnRelatorioAnterior}
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+                <span style="color:#fff; font-size:14px; font-weight:600; width:85px;">Responsável:</span> ${window.gerarAvatarNick(d.avaliador)}
+            </div>`;
+
+            if (d.tipo === 'Relatórios') {
+                let dataRefFmt = d.dataReferencia;
+                if (dataRefFmt && dataRefFmt.includes('-')) {
+                    dataRefFmt = dataRefFmt.split('-').reverse().join('/');
+                }
+                infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Ref.</strong><span style="color:#fff;">${dataRefFmt || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Público Alvo</strong><span style="color:#fff;">${d.publicoAlvo || d.grupo || '-'}</span></div>
+                </div>`;
+            } else if (d.tipo === 'Convites') {
+                let historicoHtml = '<div class="hist-container" style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.5); border-left:3px solid var(--sup-neon); border-radius:4px;"><span style="color:var(--text-sub); font-size:11px;"><i class="fas fa-spinner fa-spin"></i> Buscando histórico de 7 dias...</span></div>';
+                
+                infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Aplicação</strong><span style="color:#fff;">${d.dataAplicacao || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Convidado</strong>${window.gerarAvatarNick(d.nickConvidado)}</div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Hora (Início ~ Fim)</strong><span style="color:#fff;">${d.horaInicioFim || '-'}</span></div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Resposta</strong><span style="color:#fff;">${d.resposta || '-'}</span></div>
+                    <div style="grid-column: 1 / -1;" id="hist-revisao-${d.id}">${historicoHtml}</div>
+                </div>`;
+            } else if (d.tipo === 'PPP') {
+                let idLink = d.idPromocao ? `<a href="https://dic.systemhb.net/promocao/ver/${d.idPromocao}" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-weight:600;">${d.idPromocao} <i class="fas fa-external-link-alt"></i></a>` : '-';
+                infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">ID Promoção</strong>${idLink}</div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Promotor</strong>${window.gerarAvatarNick(d.nickPromotor)}</div>
+                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Promovido</strong>${window.gerarAvatarNick(d.nickPromovido)}</div>
+                </div>`;
+            }
+
+            let linkUrl = d.link ? d.link.trim() : '';
+            let btnLink = '';
+            let iframeHtml = '';
+            
+            if (linkUrl && linkUrl.startsWith('http')) {
+                if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
+                    btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK (PRINTS)</button>`;
+                } else {
+                    btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK (PRINTS)</button>`;
+                }
+
+                if (linkUrl.includes('docs.google.com')) {
+                    let embedUrl = linkUrl.replace(/\/edit.*?$/, '/preview');
+                    iframeHtml = `<div style="margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);"><iframe src="${embedUrl}" style="width:100%; height:400px; border:none;"></iframe></div>`;
+                } else if (linkUrl.includes('imgur.com')) {
+                    if (window.renderImgurEmbed) {
+                        iframeHtml = window.renderImgurEmbed(linkUrl);
+                    }
+                }
+
+            } else {
+                btnLink = `<span style="color:#ff2a2a; font-size:13px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Link (Print) ausente ou inválido</span>`;
+            }
+
             let edicaoHtml = '';
 
             if (d.tipo === 'Relatórios') {
-                detalhesExtras = `
-                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Ref.</strong><span style="color:#fff; font-size:13px;">${d.dataReferencia || '-'}</span></div>
-                    <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Público Alvo</strong><span style="color:#fff; font-size:13px;">${d.publicoAlvo || '-'}</span></div>
-                `;
                 edicaoHtml = `
-                    <div style="flex:1;"><label class="tech-label">Nota Final</label><input type="number" id="rev-nota-${d.id}" class="form-input" style="padding:8px;" value="${d.nota !== undefined ? d.nota : ''}"></div>
+                    <div style="flex:1;"><label class="tech-label">Nota Final</label><div class="input-block"><input type="number" id="rev-nota-${d.id}" value="${d.nota !== undefined ? d.nota : ''}"></div></div>
                 `;
             } else if (d.tipo === 'Grupos' || d.tipo === 'Soldados') {
                 edicaoHtml = `
-                    <div style="flex:1;"><label class="tech-label">Incorreções</label><input type="number" id="rev-inc-${d.id}" class="form-input" style="padding:8px;" value="${d.incorrecoes !== undefined ? d.incorrecoes : 0}"></div>
-                    <div style="flex:1;"><label class="tech-label">Status</label><select id="rev-status-${d.id}" class="form-input" style="padding:8px;"><option value="Válido" ${d.status === 'Válido' ? 'selected' : ''}>Válido</option><option value="Inválido" ${d.status === 'Inválido' ? 'selected' : ''}>Inválido</option></select></div>
+                    <div style="flex:1;"><label class="tech-label">Incorreções</label><div class="input-block"><input type="number" id="rev-inc-${d.id}" value="${d.incorrecoes !== undefined ? d.incorrecoes : 0}"></div></div>
+                    <div style="flex:1;"><label class="tech-label">Status</label><div class="input-block"><select id="rev-status-${d.id}"><option value="Válido" ${d.status === 'Válido' ? 'selected' : ''}>Válido</option><option value="Inválido" ${d.status === 'Inválido' ? 'selected' : ''}>Inválido</option></select></div></div>
                 `;
             } else if (d.tipo === 'Convites' || d.tipo === 'PPP') {
-                if(d.tipo === 'Convites') {
-                    detalhesExtras = `
-                        <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Convidado</strong><span style="color:#fff; font-size:13px;">${d.nickConvidado || '-'}</span></div>
-                        <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Provas</strong><span style="color:#fff; font-size:13px;">${d.provas || '-'}</span></div>
-                    `;
-                } else {
-                    detalhesExtras = `
-                        <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Promotor</strong><span style="color:#fff; font-size:13px;">${d.nickPromotor || '-'}</span></div>
-                        <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Promovido</strong><span style="color:#fff; font-size:13px;">${d.nickPromovido || '-'}</span></div>
-                    `;
-                }
                 edicaoHtml = `
-                    <div style="flex:1;"><label class="tech-label">Descontos</label><input type="text" id="rev-desc-${d.id}" class="form-input" style="padding:8px;" value="${d.descontos !== undefined ? d.descontos : 0}"></div>
-                    <div style="flex:1;"><label class="tech-label">Status</label><select id="rev-status-${d.id}" class="form-input" style="padding:8px;"><option value="Válido" ${d.status === 'Válido' ? 'selected' : ''}>Válido</option><option value="Inválido" ${d.status === 'Inválido' ? 'selected' : ''}>Inválido</option></select></div>
+                    <div style="flex:1;"><label class="tech-label">Descontos</label><div class="input-block"><input type="text" id="rev-desc-${d.id}" value="${d.descontos !== undefined ? d.descontos : 0}"></div></div>
+                    <div style="flex:1;"><label class="tech-label">Status</label><div class="input-block"><select id="rev-status-${d.id}"><option value="Válido" ${d.status === 'Válido' ? 'selected' : ''}>Válido</option><option value="Inválido" ${d.status === 'Inválido' ? 'selected' : ''}>Inválido</option></select></div></div>
                 `;
             }
 
             cardsHtml += `
-            <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(251,191,36,0.1); border-radius:8px; padding:15px; margin-bottom:10px; display:flex; flex-direction:column;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
-                    <div style="flex: 1;">
-                        <div style="color:var(--text-sub); font-size:12px; font-weight:bold; margin-bottom:10px;"><i class="far fa-clock"></i> Postado em: ${d.dataPostagem} (Corrigido em: ${d.dataAvaliacao || '-'})</div>
-                        <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
-                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:#fff; font-weight:600; width:85px;">${labelPostador}</span> <b>${d.nick}</b></div>
-                            <div style="font-size:14px; display:flex; align-items:center;"><span style="color:#fff; font-weight:600; width:85px;">${labelAvaliador}</span> <b>${d.avaliador || '-'}</b></div>
-                        </div>
-                        ${detalhesExtras ? `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">${detalhesExtras}</div>` : ''}
-                    </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-                        ${btnLink}
-                    </div>
-                </div>
+            <div id="card-rev-${d.id}" style="background:rgba(0,0,0,0.4); border:1px solid rgba(251,191,36,0.2); border-radius:8px; padding:20px; margin-bottom:15px; position:relative;">
+                ${infoHtml}
+                <div style="margin-bottom:15px;">${btnLink}</div>
+                ${iframeHtml}
                 
-                <div style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:15px;">
+                <div style="margin-top:15px; border-top:1px dashed rgba(251,191,36,0.3); padding-top:15px; background:rgba(251,191,36,0.02); border-radius: 8px; padding: 15px;">
                     <strong style="color:var(--sup-neon); font-size:13px; margin-bottom:10px; display:block;"><i class="fas fa-edit"></i> Editar Correção</strong>
                     <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:10px;">
                         ${edicaoHtml}
                     </div>
                     <div style="margin-bottom:10px;">
-                        <label class="tech-label">Justificativa</label>
-                        <input type="text" id="rev-just-${d.id}" class="form-input" style="padding:8px;" value="${d.justificativa || ''}">
+                        <label class="tech-label">Justificativa (Opcional)</label>
+                        <div class="input-block" style="height:auto; padding:0;">
+                            <textarea id="rev-just-${d.id}" class="admin-input" style="width:100%; min-height:60px; resize:vertical; background:transparent; border:none; padding:12px; color:#fff; font-family:var(--font-ui);">${d.justificativa || ''}</textarea>
+                        </div>
                     </div>
-                    <div style="text-align:right;">
-                        ${d.revisadoPor ? `<span style="font-size:11px; color:#aaa; margin-right:15px;">Última edição por: ${d.revisadoPor}</span>` : ''}
-                        <button class="btn-tech" style="padding: 6px 15px; font-size: 12px; background:rgba(16,185,129,0.2); color:#10b981; border-color:#10b981;" onclick="window.salvarEdicaoRevisao('${d.id}', '${d.tipo}')"><i class="fas fa-save"></i> Salvar Edição</button>
+                    <div style="text-align:right; display:flex; justify-content:space-between; align-items:flex-end;">
+                        ${d.revisadoPor ? `<span style="font-size:11px; color:#aaa;"><i class="fas fa-history"></i> Última edição por: ${d.revisadoPor}</span>` : '<span></span>'}
+                        <button class="btn-tech" style="padding: 10px 20px; font-size: 13px; background:rgba(16,185,129,0.2); color:#10b981; border-color:#10b981;" onclick="window.salvarEdicaoRevisao('${d.id}', '${d.tipo}')"><i class="fas fa-save"></i> Salvar Edição</button>
                     </div>
                 </div>
             </div>
             `;
+            
+            // Asynchronous hook for 7 days history check in Revisões!
+            if (d.tipo === 'Convites') {
+                setTimeout(() => {
+                    let card = document.getElementById(`card-rev-${d.id}`);
+                    if (card && window.buscarHistoricoConvites) {
+                        window.buscarHistoricoConvites(card, d.nickConvidado, d.dataPostagem);
+                    }
+                }, 200);
+            }
         });
 
         lista.innerHTML += headerHtml + cardsHtml;

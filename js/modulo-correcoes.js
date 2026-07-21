@@ -164,10 +164,14 @@ window.criarCardAtividade = function(d) {
     infoHtml += `<div style="font-size:12px; color:var(--text-sub); margin-bottom:10px; font-weight:600;"><i class="far fa-clock"></i> Postado em: ${d.dataPostagem || '-'}</div>`;
     infoHtml += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;"><span style="color:#fff; font-size:14px; font-weight:600;">${labelPostador}</span> ${window.gerarAvatarNick(d.nick)} ${btnRelatorioAnterior}</div>`;
 
-    if (d.tipo === 'Relatórios') {
+        if (d.tipo === 'Relatórios') {
+        let dataRefFmt = d.dataReferencia;
+        if (dataRefFmt && dataRefFmt.includes('-')) {
+            dataRefFmt = dataRefFmt.split('-').reverse().join('/');
+        }
         infoHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">
-            <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Ref.</strong><span style="color:#fff;">${d.dataReferencia || '-'}</span></div>
-            <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Grupo Associado</strong><span style="color:#fff;">${d.grupo || '-'}</span></div>
+            <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Data Ref.</strong><span style="color:#fff;">${dataRefFmt || '-'}</span></div>
+            <div><strong style="color:var(--sup-neon); font-size:12px; display:block;">Público Alvo</strong><span style="color:#fff;">${d.publicoAlvo || d.grupo || '-'}</span></div>
         </div>`;
     } else if (d.tipo === 'Convites') {
         let historicoHtml = '<div class="hist-container" style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.5); border-left:3px solid var(--sup-neon); border-radius:4px;"><span style="color:var(--text-sub); font-size:11px;"><i class="fas fa-spinner fa-spin"></i> Buscando histórico de 7 dias...</span></div>';
@@ -194,9 +198,9 @@ window.criarCardAtividade = function(d) {
     
     if (linkUrl && linkUrl.startsWith('http')) {
         if (d.tipo === 'Relatórios' || d.tipo === 'Grupos' || d.tipo === 'Soldados') {
-            btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
+            btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.abrirLinkIframe(this.getAttribute('data-url'))"><i class="fas fa-external-link-alt"></i> ABRIR LINK (PRINTS)</button>`;
         } else {
-            btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK</button>`;
+            btnLink = `<button class="btn-tech" style="padding: 6px 12px; font-size: 13px;" data-url="${linkUrl}" onclick="window.open(this.getAttribute('data-url'), '_blank')"><i class="fas fa-external-link-alt"></i> ABRIR LINK (PRINTS)</button>`;
         }
 
         // Auto Embeds for Premium Visuals
