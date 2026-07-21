@@ -27,6 +27,7 @@ window.dashboardEventosData = [];
 window.cargosMap = {};
 
 window.configAtividades = [];
+window.statusMetasSemanais = {};
 window.dashboardSponsorsData = []; // Array do novo Hub de Patrocinadores
 
 window.normalizeNick = function(str) {
@@ -102,6 +103,15 @@ window.mudarSemanaConsulta = function() {
 }
 
 window.escutarMetasDoFirebase = function() {
+    window.db.collection("sistema").doc("controle_metas_semanais").onSnapshot((doc) => {
+        if (doc.exists && doc.data().dados) {
+            try { window.statusMetasSemanais = JSON.parse(doc.data().dados); } catch(e){ window.statusMetasSemanais = {}; }
+            if (document.getElementById('tb-controle-metas') && document.getElementById('tb-controle-metas').style.display !== 'none') {
+                if(window.carregarControleMetas) window.carregarControleMetas();
+            }
+        }
+    });
+
     window.configurarSemanaInicial();
 
     window.db.collection("sistema").doc("cargos").onSnapshot((doc) => {
@@ -942,3 +952,378 @@ window.buscarHistoricoMetas = async function() {
 }
 
 document.addEventListener('DOMContentLoaded', () => { if(window.setSemanaAtual) window.setSemanaAtual(); });
+
+// ==========================================
+// ACERVO GERAL DE ATIVIDADES E PONTUACOES
+// ==========================================
+
+window.toggleAcervoGeral = function() {
+    let container = document.getElementById('acervo-geral-container');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        
+        // Controle de Acesso
+        let nivel = window.nivelUsuarioGlobal || '';
+        let tabs = document.querySelectorAll('.tab-acervo');
+        
+        if (nivel === 'AUXILIAR') {
+            tabs.forEach(t => {
+                if(t.id !== 'btn-tab-relatorios-auxiliares') t.style.display = 'none';
+            });
+            window.abrirAbaAcervo('Relatórios dos Auxiliares', document.getElementById('btn-tab-relatorios-auxiliares'));
+        } else {
+            tabs.forEach(t => t.style.display = 'block');
+            window.abrirAbaAcervo('Controle de Metas', document.getElementById('btn-tab-controle-metas'));
+        }
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+window.abrirAbaAcervo = function(abaNome, btnEl) {
+    document.querySelectorAll('.tab-acervo').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    
+    if (abaNome === 'Controle de Metas') {
+        document.getElementById('aba-Controle-de-Metas').style.display = 'block';
+        document.getElementById('aba-dinamica-container').style.display = 'none';
+        
+        if (!document.getElementById('acervo-semana-inicio').value) {
+            let today = new Date();
+            let day = today.getDay(); 
+            let diff = today.getDate() - day; 
+            let start = new Date(today.setDate(diff));
+            let end = new Date(today.setDate(start.getDate() + 6));
+            
+            let fmt = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            document.getElementById('acervo-semana-inicio').value = fmt(start);
+            document.getElementById('acervo-semana-fim').value = fmt(end);
+        }
+        window.carregarControleMetas();
+    } else {
+        document.getElementById('aba-Controle-de-Metas').style.display = 'none';
+        document.getElementById('aba-dinamica-container').style.display = 'block';
+        window.renderAcervoDinamico(abaNome);
+    }
+}
+
+window.renderAcervoDinamico = function(abaNome) {
+    let trHead = document.getElementById('tb-acervo-thead-tr');
+    let tbody = document.getElementById('tb-acervo-tbody');
+    trHead.innerHTML = '';
+    tbody.innerHTML = '';
+    
+    let docs = [];
+    if (abaNome === 'Avisos') {
+        docs = window.avisosValidosGeral || [];
+    } else {
+        let filtroTipo = abaNome === 'Relatórios dos Auxiliares' ? 'Relatórios' : abaNome;
+        docs = (window.atividadesCorrigidasGeral || []).filter(a => a.tipo === filtroTipo || a.aba === filtroTipo);
+    }
+    
+    if (docs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado.</td></tr>';
+        return;
+    }
+    
+    docs.sort((a,b) => {
+        let tA = a.dataPostagem ? window.parseQualquerData(a.dataPostagem).dateObj : (a.dataCriacao ? a.dataCriacao.toMillis() : 0);
+        let tB = b.dataPostagem ? window.parseQualquerData(b.dataPostagem).dateObj : (b.dataCriacao ? b.dataCriacao.toMillis() : 0);
+        return tB - tA;
+    });
+    
+    let excludeKeys = ['id', 'tipo', 'aba', 'data', 'timestamp', 'dataAprovacao', 'invalido', 'style', 'innerHTML', 'filter', 'includes', 'forEach', 'splice', 'push', 'split', '_dataObjParaSort'];
+    let allKeys = new Set();
+    
+    docs.forEach(d => {
+        Object.keys(d).forEach(k => {
+            if (!excludeKeys.includes(k) && typeof d[k] !== 'function' && typeof d[k] !== 'object') {
+                allKeys.add(k);
+            }
+        });
+    });
+    
+    let colunas = ['Data', 'Nick/Criador'];
+    let dynamicCols = Array.from(allKeys).filter(k => !['dataPostagem', 'dataCriacao', 'nick', 'criador', 'status', 'descontos', 'corretor', 'autor'].includes(k));
+    colunas = colunas.concat(dynamicCols);
+    if (allKeys.has('descontos')) colunas.push('Descontos');
+    colunas.push('Situação');
+    colunas.push('Corretor/Responsável');
+    
+    colunas.forEach(c => {
+        trHead.innerHTML += `<th>${c.toUpperCase()}</th>`;
+    });
+    
+    let formatLink = (val) => {
+        if (typeof val === 'string' && val.startsWith('http')) return `<a href="${val}" target="_blank" style="color:var(--sup-neon); text-decoration:underline;">Link</a>`;
+        return val;
+    };
+    
+    docs.forEach(d => {
+        let tr = document.createElement('tr');
+        
+        let dt = d.dataPostagem || (d.dataCriacao ? new Date(d.dataCriacao.toMillis()).toLocaleString('pt-BR') : 'N/A');
+        let nick = d.nick || d.criador || 'N/A';
+        let st = d.status || (d.invalido ? 'Inválido' : 'Válido');
+        let resp = d.corretor || d.autor || '-';
+        let desc = d.descontos || '0';
+        
+        let htmlRow = `<td>${dt}</td><td><b>${nick}</b></td>`;
+        
+        dynamicCols.forEach(c => {
+            htmlRow += `<td>${formatLink(d[c] || '-')}</td>`;
+        });
+        
+        if (allKeys.has('descontos')) htmlRow += `<td>${desc}</td>`;
+        
+        let color = st.toLowerCase().includes('inv') ? '#ef4444' : '#10b981';
+        htmlRow += `<td style="color:${color}; font-weight:bold;">${st}</td>`;
+        htmlRow += `<td>${resp}</td>`;
+        
+        tr.innerHTML = htmlRow;
+        tbody.appendChild(tr);
+    });
+}
+
+window.carregarControleMetas = function() {
+    let dI = document.getElementById('acervo-semana-inicio').value;
+    let dF = document.getElementById('acervo-semana-fim').value;
+    if(!dI || !dF) return;
+    
+    let dtI = new Date(dI + 'T00:00:00');
+    let dtF = new Date(dF + 'T23:59:59');
+    let semanaKey = dI + '_' + dF;
+    
+    let tbody = document.getElementById('tb-controle-metas').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    let savedStatus = window.statusMetasSemanais[semanaKey] || {};
+    
+    let supervisores = Object.values(window.admissoesGeral || {}).filter(m => m.cargo === 'Sp');
+    supervisores.sort((a,b) => window.normalizeNick(a.nickOriginal).localeCompare(window.normalizeNick(b.nickOriginal)));
+    
+    supervisores.forEach(m => {
+        let safeNick = window.normalizeNick(m.nickOriginal);
+        
+        // Calcular pontos naquela semana exata
+        let ptsSemana = 0;
+        let ativs = (window.atividadesCorrigidasGeral || []).filter(a => window.normalizeNick(a.nick) === safeNick);
+        ativs.forEach(a => {
+             let dp = window.parseQualquerData(a.dataPostagem).dateObj;
+             if (dp && dp >= dtI && dp <= dtF && (!a.status || !a.status.toLowerCase().includes('inv'))) {
+                 let val = parseFloat(a.nota || a.pontos || 0); // simplificado, o ideal eh recalcular, mas pra fins de tabela basica
+                 // O certo e usar configAtividades, refazendo o calculo exato (limites)
+                 // Como o limite semanal muda, a forma mais segura eh varrer e aplicar as configAtividades.
+             }
+        });
+        // RECALCULO EXATO COM LIMITES (usando lógica já existente, mas isolada pra semana)
+        let contagem = {};
+        let configMap = {};
+        window.configAtividades.forEach(cfg => { configMap[String(cfg.nome).toLowerCase().trim()] = cfg; contagem[cfg.nome] = 0; });
+        
+        let ativFiltradas = ativs.filter(a => {
+            let dtParsed = window.parseQualquerData(a.dataPostagem);
+            if (!dtParsed.dateObj) return false;
+            a._dt = dtParsed.dateObj;
+            return dtParsed.dateObj >= dtI && dtParsed.dateObj <= dtF && (!a.status || !String(a.status).toLowerCase().includes('inv'));
+        });
+        ativFiltradas.sort((a,b) => a._dt - b._dt);
+        
+        ativFiltradas.forEach(a => {
+            let tipoLower = String(a.tipo || "").toLowerCase().trim();
+            let cfg = configMap[tipoLower];
+            if (cfg) {
+                let p = parseFloat(cfg.pontos) || 0;
+                if (a.tipo === 'Grupos' || a.tipo === 'Soldados') { p = cfg.multiplica ? (p * (parseInt(a.incorrecoes)||0)) : p; }
+                else if (a.tipo === 'Convites' || a.tipo === 'PPP') { p = p - (parseFloat(a.descontos)||0); }
+                if (p < 0) p = 0;
+                contagem[cfg.nome]++;
+                let limite = parseInt(cfg.limite)||0;
+                if(limite === 0 || contagem[cfg.nome] <= limite) {
+                    ptsSemana += p;
+                }
+            }
+        });
+        
+        let avisos = (window.avisosValidosGeral || []).filter(av => !av.invalido && window.normalizeNick(av.criador) === safeNick);
+        avisos.forEach(av => {
+            let ts = av.dataConclusao ? av.dataConclusao.toMillis() : (av.dataCriacao ? av.dataCriacao.toMillis() : 0);
+            let dt = new Date(ts);
+            if (dt >= dtI && dt <= dtF) {
+                let cfg = configMap['avisos'];
+                if(cfg) {
+                    contagem['Avisos'] = (contagem['Avisos']||0)+1;
+                    let lim = parseInt(cfg.limite)||0;
+                    if(lim===0 || contagem['Avisos']<=lim) ptsSemana += (parseFloat(cfg.pontos)||0);
+                }
+            }
+        });
+        
+        // STATUS ATUAL
+        let autoStatus = "Não cumprida";
+        let metaC = window.metaSemanal || 5; 
+        if (ptsSemana >= metaC) autoStatus = "Cumprida";
+        
+        let currentStatus = savedStatus[safeNick] || autoStatus;
+        
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><b>${m.nickOriginal}</b></td>
+            <td>${m.patente || 'Sp: Supervisor'}</td>
+            <td><b>${window.formatarNumeroDecimal(ptsSemana)}</b></td>
+            <td>
+                <select class="form-input sel-status-meta" data-nick="${safeNick}" style="background:rgba(0,0,0,0.5); border:1px solid #555; color:#fff; padding:4px;">
+                    <option value="Cumprida" ${currentStatus==='Cumprida'?'selected':''}>Cumprida</option>
+                    <option value="Não cumprida" ${currentStatus==='Não cumprida'?'selected':''}>Não cumprida</option>
+                    <option value="Justificada" ${currentStatus==='Justificada'?'selected':''}>Justificada</option>
+                    <option value="Aval/Licença" ${currentStatus==='Aval/Licença'?'selected':''}>Aval/Licença</option>
+                    <option value="Isento" ${currentStatus==='Isento'?'selected':''}>Isento</option>
+                </select>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+window.salvarControleMetas = function(btn) {
+    let dI = document.getElementById('acervo-semana-inicio').value;
+    let dF = document.getElementById('acervo-semana-fim').value;
+    if(!dI || !dF) return;
+    let semanaKey = dI + '_' + dF;
+    
+    let selects = document.querySelectorAll('.sel-status-meta');
+    let mapToSave = window.statusMetasSemanais[semanaKey] || {};
+    
+    selects.forEach(sel => {
+        let nick = sel.getAttribute('data-nick');
+        mapToSave[nick] = sel.value;
+    });
+    
+    window.statusMetasSemanais[semanaKey] = mapToSave;
+    
+    if (!btn) return;
+    let htmlOld = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+    
+    window.db.collection("sistema").doc("controle_metas_semanais").set({
+        dados: JSON.stringify(window.statusMetasSemanais)
+    }, {merge: true}).then(() => {
+        btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
+        setTimeout(()=> { btn.innerHTML = htmlOld; }, 2000);
+    }).catch(e => {
+        btn.innerHTML = '<i class="fas fa-times"></i> Erro';
+        console.error(e);
+        setTimeout(()=> { btn.innerHTML = htmlOld; }, 2000);
+    });
+}
+
+window.abrirRelatorioSupervisores = function() {
+    document.getElementById('modal-relatorio-supervisores').style.display = 'flex';
+    
+    let out = "";
+    
+    let supervisores = Object.values(window.admissoesGeral || {}).filter(m => m.cargo === 'Sp');
+    supervisores.sort((a,b) => window.normalizeNick(a.nickOriginal).localeCompare(window.normalizeNick(b.nickOriginal)));
+    
+    // Configs pra recalculo rapido
+    let configMap = {};
+    window.configAtividades.forEach(cfg => { configMap[String(cfg.nome).toLowerCase().trim()] = cfg; });
+    let ativs = window.atividadesCorrigidasGeral || [];
+    let avisos = window.avisosValidosGeral || [];
+    
+    let hoje = new Date();
+    
+    supervisores.forEach(m => {
+        let nickFull = m.nickOriginal;
+        let safeNick = window.normalizeNick(nickFull);
+        let dAdmRaw = m.data; // ex: 08/06/2026
+        
+        out += `Supervisor ${nickFull}\n`;
+        out += `Data de admissão: ${dAdmRaw}\n`;
+        
+        let totalAcompanhamentos = 0;
+        let aMembro = ativs.filter(a => window.normalizeNick(a.nick) === safeNick && a.tipo === 'Acompanhamentos' && (!a.status || !String(a.status).toLowerCase().includes('inv')));
+        totalAcompanhamentos = aMembro.length; // Quantidade de requerimentos de acompanhamento
+        
+        let startObj = window.parseQualquerData(dAdmRaw).dateObj;
+        if (!startObj || isNaN(startObj)) {
+            out += `> Data de admissão inválida, ignorando semanas.\n`;
+        } else {
+            // Recuar para domingo
+            let day = startObj.getDay();
+            let dLoop = new Date(startObj);
+            dLoop.setDate(dLoop.getDate() - day);
+            
+            let fmt = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+            let fmtK = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            
+            while (dLoop <= hoje) {
+                let wStart = new Date(dLoop);
+                let wEnd = new Date(dLoop);
+                wEnd.setDate(wEnd.getDate() + 6);
+                
+                let sK = fmtK(wStart) + '_' + fmtK(wEnd);
+                
+                // Pts
+                let ptsSemana = 0;
+                let contagem = {};
+                window.configAtividades.forEach(cfg => contagem[cfg.nome] = 0);
+                
+                let wAtivs = ativs.filter(a => {
+                    if(window.normalizeNick(a.nick) !== safeNick) return false;
+                    let dp = window.parseQualquerData(a.dataPostagem).dateObj;
+                    return dp && dp >= wStart && dp <= new Date(wEnd.getTime() + 86399000) && (!a.status || !String(a.status).toLowerCase().includes('inv'));
+                });
+                wAtivs.sort((a,b) => window.parseQualquerData(a.dataPostagem).dateObj - window.parseQualquerData(b.dataPostagem).dateObj);
+                
+                wAtivs.forEach(a => {
+                    let cLower = String(a.tipo).toLowerCase().trim();
+                    let cfg = configMap[cLower];
+                    if (cfg) {
+                        let p = parseFloat(cfg.pontos) || 0;
+                        if (a.tipo === 'Grupos' || a.tipo === 'Soldados') p = cfg.multiplica ? (p * (parseInt(a.incorrecoes)||0)) : p;
+                        else if (a.tipo === 'Convites' || a.tipo === 'PPP') p = p - (parseFloat(a.descontos)||0);
+                        if (p < 0) p = 0;
+                        contagem[cfg.nome]++;
+                        let lim = parseInt(cfg.limite)||0;
+                        if(lim===0 || contagem[cfg.nome]<=lim) ptsSemana += p;
+                    }
+                });
+                
+                // Avisos
+                let wAvisos = avisos.filter(av => {
+                    if(av.invalido || window.normalizeNick(av.criador) !== safeNick) return false;
+                    let ts = av.dataConclusao ? av.dataConclusao.toMillis() : (av.dataCriacao ? av.dataCriacao.toMillis() : 0);
+                    let dt = new Date(ts);
+                    return dt >= wStart && dt <= new Date(wEnd.getTime() + 86399000);
+                });
+                wAvisos.forEach(av => {
+                    let cfg = configMap['avisos'];
+                    if (cfg) {
+                        contagem['Avisos'] = (contagem['Avisos']||0)+1;
+                        let lim = parseInt(cfg.limite)||0;
+                        if(lim===0 || contagem['Avisos']<=lim) ptsSemana += (parseFloat(cfg.pontos)||0);
+                    }
+                });
+                
+                let savedStatus = window.statusMetasSemanais[sK] || {};
+                let sts = savedStatus[safeNick] || (ptsSemana >= (window.metaSemanal||5) ? 'Cumprida' : 'Não cumprida');
+                
+                out += `${fmt(wStart)} a ${fmt(wEnd)} | ${window.formatarNumeroDecimal(ptsSemana)} | ${sts}\n`;
+                
+                // Advance 1 week
+                dLoop.setDate(dLoop.getDate() + 7);
+            }
+        }
+        out += `Acompanhamentos: ${totalAcompanhamentos}\n------------------------------------------\n\n`;
+    });
+    
+    document.getElementById('txt-relatorio-supervisores').value = out;
+}
+
+window.copiarRelatorioSupervisores = function() {
+    let txt = document.getElementById('txt-relatorio-supervisores');
+    txt.select();
+    document.execCommand('copy');
+    window.customAlert('Relatório copiado para a área de transferência!', 'Sucesso');
+}

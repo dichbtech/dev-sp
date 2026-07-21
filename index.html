@@ -326,158 +326,74 @@
 
 
 
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3);">
-
-              <h3 style="margin-bottom: 15px;"><i class="fas fa-search-plus"></i> Buscador de Histórico e Metas</h3>
-
-              <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
-
-                  <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
-
-                      <div style="flex:1; min-width:200px;">
-
-                          <label class="tech-label">Policial / Auxiliar</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="fas fa-user"></i>
-
-                              <input type="text" id="hist-input-membro" list="hist-nicks-list" placeholder="Digite o nick exato..." style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                           
-</div>
-
-
-             
-
-          </div>
-
           
-
-          
-
-          
-
-
-
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3);">
-
-              <h3 style="margin-bottom: 15px;"><i class="fas fa-search-plus"></i> Buscador de Histórico e Metas</h3>
-
-              <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
-
-                  <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
-
-                      <div style="flex:1; min-width:200px;">
-
-                          <label class="tech-label">Policial / Auxiliar</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="fas fa-user"></i>
-
-                              <input type="text" id="hist-input-membro" list="hist-nicks-list" placeholder="Digite o nick exato..." style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                              <datalist id="hist-nicks-list"></datalist>
-
-                          </div>
-
-                      </div>
-
-                      <div style="flex:1; min-width:180px;">
-
-                          <label class="tech-label">Tipo de Consulta</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="fas fa-filter"></i>
-
-                              <select id="hist-tipo-consulta" onchange="window.toggleFiltrosHistorico()" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                                  <option value="semanal">Semanal (Intervalo)</option>
-
-                                  <option value="mensal">Mensal</option>
-
-                              </select>
-
-                          </div>
-
-                      </div>
-
-                      <div style="flex:1; min-width:180px;" class="hist-filtro-semanal">
-
-                          <label class="tech-label">Data Início</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="far fa-calendar-alt"></i>
-
-                              <input type="date" id="hist-data-inicio" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                          </div>
-
-                      </div>
-
-                      <div style="flex:1; min-width:180px;" class="hist-filtro-semanal">
-
-                          <label class="tech-label">Data Fim</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="far fa-calendar-alt"></i>
-
-                              <input type="date" id="hist-data-fim" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                          </div>
-
-                      </div>
-
-                      <div style="flex:1; min-width:180px; display:none;" id="hist-filtro-mensal">
-
-                          <label class="tech-label">Mês/Ano</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="far fa-calendar-alt"></i>
-
-                              <input type="month" id="hist-mes" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                          </div>
-
-                      </div>
-
-                      <div style="flex:1; min-width:180px;">
-
-                          <label class="tech-label">Detalhamento</label>
-
-                          <div class="input-block" style="margin:0;">
-
-                              <i class="fas fa-list"></i>
-
-                              <select id="hist-detalhamento" style="width: 100%; border: none; background: transparent; color: #fff; outline: none; font-family: 'Rajdhani', sans-serif;">
-
-                                  <option value="resumo">Apenas Resumo Semanal</option>
-
-                                  <option value="completo">Resumo + Atividades</option>
-
-                              </select>
-
-                          </div>
-
-                      </div>
-
-                      <button class="btn-tech" onclick="window.buscarHistoricoMetas()" style="padding:15px; width:100%; margin-top:10px;">
-
-                          <i class="fas fa-search"></i> Buscar Histórico
-
-                      </button>
-
-                  </div>
-
+          <!-- ACERVO GERAL -->
+          <div id="acervo-geral-container" style="display:none; margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(251,191,36,0.3);">
+              <h3 style="margin-bottom: 15px;"><i class="fas fa-archive"></i> Acervo Geral de Atividades e Pontuações</h3>
+              
+              <div class="tabs-container" style="display:flex; gap:10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+                  <button class="btn-tech tab-acervo active" onclick="window.abrirAbaAcervo('Controle de Metas', this)" id="btn-tab-controle-metas">Controle de Metas</button>
+                  <button class="btn-tech tab-acervo" onclick="window.abrirAbaAcervo('Soldados', this)">Soldados</button>
+                  <button class="btn-tech tab-acervo" onclick="window.abrirAbaAcervo('Grupos', this)">Grupos</button>
+                  <button class="btn-tech tab-acervo" onclick="window.abrirAbaAcervo('Convites', this)">Convites</button>
+                  <button class="btn-tech tab-acervo" onclick="window.abrirAbaAcervo('PPP', this)">PPP</button>
+                  <button class="btn-tech tab-acervo" onclick="window.abrirAbaAcervo('Avisos', this)">Avisos</button>
+                  <button class="btn-tech tab-acervo" onclick="window.abrirAbaAcervo('Relatórios dos Auxiliares', this)" id="btn-tab-relatorios-auxiliares">Relatórios dos Auxiliares</button>
               </div>
 
-              <div id="hist-resultados" style="display:none; background: rgba(0,0,0,0.5); padding: 25px; border-radius: 8px; border: 1px solid var(--glass-border); color: #fff; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; max-height: 500px; overflow-y: auto; line-height: 1.5;"></div>
-
+              <!-- CONTROLE DE METAS TAB -->
+              <div id="aba-Controle-de-Metas" class="conteudo-aba-acervo" style="display:block;">
+                  <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
+                      <div style="display:flex; gap:15px; align-items:flex-end;">
+                          <div class="input-block" style="margin:0; flex:1;">
+                              <label class="tech-label">Semana</label>
+                              <div style="display:flex; align-items:center; gap:10px;">
+                                  <input type="date" id="acervo-semana-inicio" onchange="window.carregarControleMetas()">
+                                  <span style="color:#fff;">até</span>
+                                  <input type="date" id="acervo-semana-fim" onchange="window.carregarControleMetas()">
+                              </div>
+                          </div>
+                          <button class="btn-tech" onclick="window.salvarControleMetas(this)"><i class="fas fa-save"></i> Salvar Status</button>
+                      </div>
+                  </div>
+                  <div class="admin-table-wrapper" style="overflow-x: auto;">
+                      <table class="admin-table" id="tb-controle-metas">
+                          <thead>
+                              <tr>
+                                  <th>Policial</th>
+                                  <th>Patente</th>
+                                  <th>Pontuação Total</th>
+                                  <th>Status da Semana</th>
+                              </tr>
+                          </thead>
+                          <tbody></tbody>
+                      </table>
+                  </div>
+              </div>
+              
+              <!-- DYNAMIC TABS -->
+              <div id="aba-dinamica-container" class="conteudo-aba-acervo" style="display:none;">
+                  <div class="admin-table-wrapper" style="overflow-x: auto;">
+                      <table class="admin-table" id="tb-acervo-dinamico">
+                          <thead>
+                              <tr id="tb-acervo-thead-tr"></tr>
+                          </thead>
+                          <tbody id="tb-acervo-tbody"></tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+          
+          <!-- MODAL RELATORIO DE SUPERVISORES -->
+          <div class="modal-overlay" id="modal-relatorio-supervisores" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 9999;">
+              <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--accent); border-radius: 12px; width: 90%; max-width: 600px; padding: 25px;">
+                  <h3 style="margin-top:0; color:var(--sup-neon);"><i class="fas fa-file-alt"></i> Relatório Consolidado de Supervisores</h3>
+                  <textarea id="txt-relatorio-supervisores" readonly style="width: 100%; height: 350px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px; font-family: monospace; resize: none; margin-bottom: 15px; outline:none; white-space: pre;"></textarea>
+                  <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                      <button class="btn-tech" onclick="document.getElementById('modal-relatorio-supervisores').style.display='none'" style="background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2);">Fechar</button>
+                      <button class="btn-tech" onclick="window.copiarRelatorioSupervisores()" style="background: #3b82f6; border-color: #3b82f6; color: #fff;"><i class="fas fa-copy"></i> Copiar</button>
+                  </div>
+              </div>
           </div>
 
         </main>
