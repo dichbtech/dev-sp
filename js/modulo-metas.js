@@ -184,11 +184,14 @@ window.processarPontuacoesSemanais = function() {
         let parsedAdm = window.parseQualquerData(info.data);
         let dAdm = parsedAdm.dateObj;
 
+        let dadosPatente = (window.dadosGeraisRH && window.dadosGeraisRH.patentes && window.dadosGeraisRH.patentes.get(nickLimpo)) || {};
+        let patenteMembro = dadosPatente['Posto/Grad'] || 'Sp: Supervisor';
+
         let stats = {
             nick: info.nickOriginal,
             total_base: 0, 
             status_base: 'Não cumprida', 
-            cargo: 'Sp: Supervisor',
+            cargo: patenteMembro,
             atividades_dinamicas: {},
             contagem_dinamicas: {}
         };
