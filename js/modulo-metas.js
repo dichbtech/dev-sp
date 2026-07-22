@@ -1023,94 +1023,108 @@ window.renderAcervoDinamico = function(abaNome) {
         return tB - tA;
     });
     
-    // TABELAS INTELIGENTES: Schema definitions per tab
-    let baseCols = ['Data', 'Supervisor', 'Patente'];
-    let specificCols = [];
+    let cols = [];
+    if (abaNome === 'Relatórios dos Auxiliares' || abaNome === 'Relatórios') cols = ['Postado em', 'Nick', 'Referente ao dia', 'Grupo', 'Link', 'Responsável', 'Nota'];
+    else if (abaNome === 'Grupos') cols = ['Postagem', 'Nick', 'Link', 'Quantidade', 'Status', 'Responsável'];
+    else if (abaNome === 'Soldados') cols = ['Postagem', 'Nick', 'Link', 'Quantidade', 'Status', 'Responsável'];
+    else if (abaNome === 'Convites') cols = ['Postagem', 'Nick', 'Data de Aplicação', 'Convidado', 'Início e fim', 'Prints', 'Resposta', 'Descontos', 'Status', 'Responsável'];
+    else if (abaNome === 'PPP') cols = ['Postagem', 'Nick', 'ID', 'Promotor', 'Promovido', 'Prints', 'Descontos', 'Status', 'Responsável'];
+    else if (abaNome === 'Avisos') cols = ['Postagem', 'Nick', 'Motivo', 'Observação', 'Status', 'Responsável'];
+    else cols = ['Postagem', 'Nick', 'Informações', 'Status', 'Responsável']; // Fallback
     
-    if (abaNome === 'Soldados') specificCols = ['Recruta(s)', 'Treinador', 'Link'];
-    else if (abaNome === 'Grupos') specificCols = ['Grupo(s)', 'Link'];
-    else if (abaNome === 'Convites') specificCols = ['Recruta(s)', 'Link'];
-    else if (abaNome === 'PPP') specificCols = ['Participante(s)', 'Resultado', 'Link'];
-    else if (abaNome === 'Avisos') specificCols = ['Motivo', 'Observação'];
-    else if (abaNome === 'Relatórios dos Auxiliares') specificCols = ['Relatório', 'Link'];
-    
-    // Auto-discover extra fields that are not in the standard schema but shouldn't be lost
-    let ignoreKeys = ['id','tipo','aba','data','timestamp','dataAprovacao','invalido','style','innerHTML','filter','includes','forEach','splice','push','split','_dataObjParaSort','descontos','status','corretor','autor','dataPostagem','dataCriacao','nick','criador'];
-    // Add variations of mapped keys to ignore list so we don't duplicate them
-    ignoreKeys.push('soldado','recruta','recrutas','participante','treinador','resultado','link','motivo','observacao','relatorio','relatorios','grupo','grupos');
-    
-    let extraColsSet = new Set();
-    docs.forEach(d => {
-        Object.keys(d).forEach(k => {
-            if (!ignoreKeys.includes(k) && typeof d[k] !== 'function' && typeof d[k] !== 'object') extraColsSet.add(k);
-        });
-    });
-    let extraCols = Array.from(extraColsSet);
-    
-    let finalCols = baseCols.concat(specificCols).concat(extraCols).concat(['Descontos', 'Status', 'Corretor']);
-    
-    finalCols.forEach(c => {
+    cols.forEach(c => {
         trHead.innerHTML += `<th>${c.toUpperCase()}</th>`;
     });
     
     let formatLink = (val) => {
-        if (!val) return '-';
-        if (typeof val === 'string' && val.startsWith('http')) return `<a href="${val}" target="_blank" style="color:var(--sup-neon); text-decoration:underline;">Link</a>`;
+        if (!val || val === '-' || val === 'undefined') return '-';
+        if (typeof val === 'string' && val.startsWith('http')) return `<a href="${val}" target="_blank" style="color:var(--sup-neon); text-decoration:underline;">Visualizar</a>`;
         return val;
+    };
+    
+    let safeGet = (obj, keys) => {
+        for (let k of keys) {
+            if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
+        }
+        return '-';
     };
     
     docs.forEach(d => {
         let dt = d.dataPostagem || (d.dataCriacao ? new Date(d.dataCriacao.toMillis()).toLocaleString('pt-BR') : 'N/A');
         let nickFull = d.nick || d.criador || 'N/A';
         let safeNick = window.normalizeNick(nickFull);
+        
         let patente = window.getPatenteReal(safeNick);
+        if (patente === 'Desconhecida') patente = 'Sp'; // Fallback visual
+        let nickComPatente = `<b>${nickFull}</b> <span style="color:#aaa; font-size:11px;">(${patente})</span>`;
         
-        let htmlRow = `<td>${dt}</td><td><b>${nickFull}</b></td><td>${patente}</td>`;
+        let corretor = d.corretor || d.autor || '-';
+        let statusOriginal = d.status || (d.invalido ? 'Inválido' : 'Válido');
+        let corStatus = statusOriginal.toLowerCase().includes('inv') ? '#ef4444' : '#10b981';
+        let statusFormatado = `<span style="color:${corStatus}; font-weight:bold;">${statusOriginal}</span>`;
         
-        // Specific mapping
-        if (abaNome === 'Soldados') {
-            htmlRow += `<td>${formatLink(d.soldado || d.recruta || d.recrutas || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.treinador || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.link || '-')}</td>`;
+        let htmlRow = '';
+        
+        if (abaNome === 'Relatórios dos Auxiliares' || abaNome === 'Relatórios') {
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td>`;
+            htmlRow += `<td>${safeGet(d, ['referente', 'referente_dia', 'dia', 'data'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['grupo'])}</td>`;
+            htmlRow += `<td>${formatLink(safeGet(d, ['link', 'relatorio']))}</td>`;
+            htmlRow += `<td>${corretor}</td>`;
+            htmlRow += `<td>${statusFormatado}</td>`; // Using status space for Note/Status
         }
         else if (abaNome === 'Grupos') {
-            htmlRow += `<td>${formatLink(d.grupo || d.grupos || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.link || '-')}</td>`;
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td>`;
+            htmlRow += `<td>${formatLink(safeGet(d, ['link']))}</td>`;
+            htmlRow += `<td>${safeGet(d, ['incorrecoes', 'quantidade'])}</td>`;
+            htmlRow += `<td>${statusFormatado}</td>`;
+            htmlRow += `<td>${corretor}</td>`;
+        }
+        else if (abaNome === 'Soldados') {
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td>`;
+            htmlRow += `<td>${formatLink(safeGet(d, ['link']))}</td>`;
+            htmlRow += `<td>${safeGet(d, ['incorrecoes', 'quantidade'])}</td>`;
+            htmlRow += `<td>${statusFormatado}</td>`;
+            htmlRow += `<td>${corretor}</td>`;
         }
         else if (abaNome === 'Convites') {
-            htmlRow += `<td>${formatLink(d.recruta || d.recrutas || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.link || '-')}</td>`;
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td>`;
+            htmlRow += `<td>${safeGet(d, ['dataAplicacao', 'data_aplicacao', 'data'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['convidado', 'recruta', 'recrutas'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['inicioFim', 'horario'])}</td>`;
+            htmlRow += `<td>${formatLink(safeGet(d, ['prints', 'link']))}</td>`;
+            htmlRow += `<td>${safeGet(d, ['resposta'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['descontos'])}</td>`;
+            htmlRow += `<td>${statusFormatado}</td>`;
+            htmlRow += `<td>${corretor}</td>`;
         }
         else if (abaNome === 'PPP') {
-            htmlRow += `<td>${formatLink(d.participante || d.recruta || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.resultado || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.link || '-')}</td>`;
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td>`;
+            htmlRow += `<td>${safeGet(d, ['id', 'id_acao'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['promotor'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['promovido', 'participante', 'recruta'])}</td>`;
+            htmlRow += `<td>${formatLink(safeGet(d, ['prints', 'link']))}</td>`;
+            htmlRow += `<td>${safeGet(d, ['descontos'])}</td>`;
+            htmlRow += `<td>${statusFormatado}</td>`;
+            htmlRow += `<td>${corretor}</td>`;
         }
         else if (abaNome === 'Avisos') {
-            htmlRow += `<td>${formatLink(d.motivo || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.observacao || d.obs || '-')}</td>`;
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td>`;
+            htmlRow += `<td>${safeGet(d, ['motivo'])}</td>`;
+            htmlRow += `<td>${safeGet(d, ['observacao', 'obs'])}</td>`;
+            htmlRow += `<td>${statusFormatado}</td>`;
+            htmlRow += `<td>${corretor}</td>`;
         }
-        else if (abaNome === 'Relatórios dos Auxiliares') {
-            htmlRow += `<td>${formatLink(d.relatorio || '-')}</td>`;
-            htmlRow += `<td>${formatLink(d.link || '-')}</td>`;
+        else {
+            htmlRow += `<td>${dt}</td><td>${nickComPatente}</td><td>...</td><td>${statusFormatado}</td><td>${corretor}</td>`;
         }
-        
-        // Extra cols
-        extraCols.forEach(ec => { htmlRow += `<td>${formatLink(d[ec] || '-')}</td>`; });
-        
-        // Fixed End
-        htmlRow += `<td>${d.descontos || '0'}</td>`;
-        
-        let st = d.status || (d.invalido ? 'Inválido' : 'Válido');
-        let color = st.toLowerCase().includes('inv') ? '#ef4444' : '#10b981';
-        htmlRow += `<td style="color:${color}; font-weight:bold;">${st}</td>`;
-        htmlRow += `<td>${d.corretor || d.autor || '-'}</td>`;
         
         let tr = document.createElement('tr');
         tr.innerHTML = htmlRow;
         tbody.appendChild(tr);
     });
 }
+
 
 // ------------------------------------------
 // CONTROLE DE METAS (TIMELINE VERTICAL)
