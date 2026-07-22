@@ -348,32 +348,7 @@
 
               <!-- CONTROLE DE METAS TAB -->
               <div id="aba-Controle-de-Metas" class="conteudo-aba-acervo" style="display:block;">
-                  <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 20px;">
-                      <div style="display:flex; gap:15px; align-items:flex-end;">
-                          <div class="input-block" style="margin:0; flex:1;">
-                              <label class="tech-label">Semana</label>
-                              <div style="display:flex; align-items:center; gap:10px;">
-                                  <input type="date" id="acervo-semana-inicio" onchange="window.carregarControleMetas()">
-                                  <span style="color:#fff;">até</span>
-                                  <input type="date" id="acervo-semana-fim" onchange="window.carregarControleMetas()">
-                              </div>
-                          </div>
-                          <button class="btn-tech" onclick="window.salvarControleMetas(this)"><i class="fas fa-save"></i> Salvar Status</button>
-                      </div>
-                  </div>
-                  <div class="admin-table-wrapper" style="overflow-x: auto;">
-                      <table class="admin-table" id="tb-controle-metas">
-                          <thead>
-                              <tr>
-                                  <th>Policial</th>
-                                  <th>Patente</th>
-                                  <th>Pontuação Total</th>
-                                  <th>Status da Semana</th>
-                              </tr>
-                          </thead>
-                          <tbody></tbody>
-                      </table>
-                  </div>
+                  <!-- Conteúdo gerado dinamicamente via carregarControleMetas -->
               </div>
               
               <!-- DYNAMIC TABS -->
